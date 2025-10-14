@@ -4,6 +4,7 @@
     <aura:attribute name="isLoading" type="Boolean" default="false" />
     
     <lightning:navigation aura:id="navService"/>
+    <aura:import library="lightning:confirm" property="LightningConfirm" />
 
 	<aura:handler name="init" action="{!c.init}" value="{!this}" />
     

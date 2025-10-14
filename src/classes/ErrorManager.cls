@@ -13,10 +13,44 @@ public class ErrorManager {
                 //AuthManager.updateAccessTokenFuture();
                 throw new ErrorManagerException('Unauthorized');
             } else {
+                //ErrorLogger.logError((String) response.getBody(), 'API_ERROR');
                 throw new ErrorManagerException((String) response.getBody());
             }
         }
     } 
+    
+    public static tsanet_connect__TSANetError__c[] collectErrors(List<Database.UpsertResult> results, List<SObject> records, SObjectField externalIdField) {
+        tsanet_connect__TSANetError__c[] errors = new tsanet_connect__TSANetError__c[]{};
+
+        if (results == null || results.isEmpty()) return errors;
+
+        for (Integer i = 0; i < results.size(); i++) {
+            Database.UpsertResult ur = results[i];
+            if (ur == null) continue;
+
+            if (!ur.isSuccess()) {
+                String extIdValue = null;
+                try {
+                    if (records != null && i < records.size()) {
+                        extIdValue = String.valueOf(records[i].get(externalIdField));
+                    }
+                } catch (Exception ignore) {}
+
+                for (Database.Error e : ur.getErrors()) {
+                    String errMsg = 
+                        'Upsert failed [' + (extIdValue == null ? '(no externalId)' : extIdValue) + ']' +
+                        ' | Status: ' + e.getStatusCode() +
+                        ' | Message: ' + e.getMessage() +
+                        (e.getFields().isEmpty() ? '' : ' | Fields: ' + String.join(e.getFields(), ','));
+                    
+                    tsanet_connect__TSANetError__c errorLog = ErrorLogger.getLogError(errMsg, 'UPSERT_ERROR_LOG');
+                    
+                    errors.add(errorLog);
+                }
+            }
+        }
+        return errors;
+    }
     
     public static Boolean isUnautorized(String body){
         return body.contains('The authorization token provided was invalid');

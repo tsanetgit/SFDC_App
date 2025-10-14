@@ -24,7 +24,7 @@
         <offset>0</offset>
         <storeOutputAutomatically>true</storeOutputAutomatically>
     </actionCalls>
-    <apiVersion>63.0</apiVersion>
+    <apiVersion>61.0</apiVersion>
     <areMetricsLoggedToDataCloud>false</areMetricsLoggedToDataCloud>
     <assignments>
         <name>AssignCaseRequestData</name>
@@ -90,7 +90,7 @@
                 <leftValueReference>$Record.tsanet_connect__SubmittedCompanyId__c</leftValueReference>
                 <operator>NotEqualTo</operator>
                 <rightValue>
-                    <elementReference>$Setup.tsanet_connect__TSANetConfiguration__c.tsanet_connect__companyId__c</elementReference>
+                    <elementReference>$Setup.TSANetConfiguration__c.companyId__c</elementReference>
                 </rightValue>
             </conditions>
             <connector>

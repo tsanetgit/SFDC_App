@@ -1,0 +1,64 @@
+<!-- lvcLookup.html -->
+<template>
+  <div class="lookup">
+    <label class="slds-form-element__label">{label}</label>
+
+    <template if:false={selectedUser}>
+        <div style="margin-top: -20px;">
+            <lightning-input
+                type="search"
+                value={searchTerm}
+                placeholder={placeholder}
+                onchange={onInputChange}
+                onfocus={onFocus}
+                onblur={onBlur}>
+            </lightning-input>
+
+            <template if:true={showDropdown}>
+                <div class="dropdown">
+                <template if:true={isLoading}>
+                    <lightning-spinner size="small"></lightning-spinner>
+                </template>
+
+                <template if:true={results.length}>
+                    <ul class="result-list" role="listbox">
+                    <template for:each={results} for:item="u">
+                        <li key={u.id} role="option" class="result-item" onclick={handleSelect} data-id={u.id}>
+                        <img class="avatar" src={u.smallPhotoUrl} alt="avatar"/>
+                        <div class="meta">
+                            <div class="name">{u.name}</div>
+                            <div class="sub">{u.email}</div>
+                        </div>
+                        </li>
+                    </template>
+                    </ul>
+                </template>
+
+                <template if:false={results.length} if:true={notLoading}>
+                    <div class="empty">Not found!</div>
+                </template>
+                </div>
+            </template>
+      </div>
+    </template>
+
+    <template if:true={selectedUser}>
+      <div class="slds-pill_container">
+        <span class="slds-pill">
+          <span class="slds-avatar slds-avatar_x-small">
+            <img alt="avatar" src={selectedUser.smallPhotoUrl}/>
+          </span>
+          <span class="slds-pill__label">{selectedUser.name}</span>
+          <button class="slds-button slds-button_icon slds-pill__remove"
+                  title="Clear" onclick={clearSelection}>
+            <lightning-icon icon-name="utility:close" size="x-small"></lightning-icon>
+          </button>
+        </span>
+      </div>
+    </template>
+
+    <template if:true={message}>
+      <div class="slds-text-color_error slds-m-top_xx-small">{message}</div>
+    </template>
+  </div>
+</template>

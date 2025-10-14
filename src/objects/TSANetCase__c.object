@@ -176,6 +176,20 @@
         <visibleLines>3</visibleLines>
     </fields>
     <fields>
+        <fullName>CaseToken__c</fullName>
+        <caseSensitive>true</caseSensitive>
+        <deprecated>false</deprecated>
+        <externalId>true</externalId>
+        <label>Case Token</label>
+        <length>255</length>
+        <required>true</required>
+        <trackFeedHistory>false</trackFeedHistory>
+        <trackHistory>false</trackHistory>
+        <trackTrending>false</trackTrending>
+        <type>Text</type>
+        <unique>true</unique>
+    </fields>
+    <fields>
         <fullName>Case__c</fullName>
         <deleteConstraint>SetNull</deleteConstraint>
         <deprecated>false</deprecated>
@@ -199,6 +213,32 @@
         <trackTrending>false</trackTrending>
         <type>LongTextArea</type>
         <visibleLines>3</visibleLines>
+    </fields>
+    <fields>
+        <fullName>Direction__c</fullName>
+        <deprecated>false</deprecated>
+        <label>Direction</label>
+        <required>false</required>
+        <trackFeedHistory>false</trackFeedHistory>
+        <trackHistory>false</trackHistory>
+        <trackTrending>false</trackTrending>
+        <type>Picklist</type>
+        <valueSet>
+            <restricted>true</restricted>
+            <valueSetDefinition>
+                <sorted>false</sorted>
+                <value>
+                    <fullName>INBOUND</fullName>
+                    <default>false</default>
+                    <label>Inbound</label>
+                </value>
+                <value>
+                    <fullName>OUTBOUND</fullName>
+                    <default>false</default>
+                    <label>Outbound</label>
+                </value>
+            </valueSetDefinition>
+        </valueSet>
     </fields>
     <fields>
         <fullName>Email__c</fullName>
@@ -498,6 +538,19 @@
         <unique>false</unique>
     </fields>
     <fields>
+        <fullName>SubmitterCaseNumber__c</fullName>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <label>Submitter Case Number</label>
+        <length>255</length>
+        <required>false</required>
+        <trackFeedHistory>false</trackFeedHistory>
+        <trackHistory>false</trackHistory>
+        <trackTrending>false</trackTrending>
+        <type>Text</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
         <fullName>Summary__c</fullName>
         <deprecated>false</deprecated>
         <externalId>false</externalId>
@@ -543,7 +596,7 @@
         <externalId>false</externalId>
         <label>Token</label>
         <length>255</length>
-        <required>false</required>
+        <required>true</required>
         <trackFeedHistory>false</trackFeedHistory>
         <trackHistory>false</trackHistory>
         <trackTrending>false</trackTrending>
@@ -554,7 +607,9 @@
         <fullName>Type__c</fullName>
         <deprecated>false</deprecated>
         <externalId>false</externalId>
-        <formula>IF(receivedCompanyId__c ==  $Setup.TSANetConfiguration__c.companyId__c , &apos;Inbound&apos;, &apos;Outbound&apos;)</formula>
+        <formula>CASE(Direction__c, &apos;INBOUND&apos;, &apos;Inbound&apos;, &apos;OUTBOUND&apos;, &apos;Outbound&apos;,
+IF(receivedCompanyId__c ==  $Setup.TSANetConfiguration__c.companyId__c , &apos;Inbound&apos;, &apos;Outbound&apos;)
+)</formula>
         <formulaTreatBlanksAs>BlankAsZero</formulaTreatBlanksAs>
         <label>Type</label>
         <required>false</required>
@@ -562,6 +617,16 @@
         <trackTrending>false</trackTrending>
         <type>Text</type>
         <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>UpdatedAt__c</fullName>
+        <deprecated>false</deprecated>
+        <label>Updated At</label>
+        <required>false</required>
+        <trackFeedHistory>false</trackFeedHistory>
+        <trackHistory>false</trackHistory>
+        <trackTrending>false</trackTrending>
+        <type>DateTime</type>
     </fields>
     <fields>
         <fullName>customFields__c</fullName>

@@ -53,17 +53,17 @@
             </value>
         </assignmentItems>
         <assignmentItems>
-            <assignToReference>NoteForm.subbmitedBy.firstName</assignToReference>
+            <assignToReference>NoteForm.submittedBy.firstName</assignToReference>
             <operator>Assign</operator>
             <value>
-                <stringValue>Orest</stringValue>
+                <stringValue>Engenieer</stringValue>
             </value>
         </assignmentItems>
         <assignmentItems>
-            <assignToReference>NoteForm.subbmitedBy.lastName</assignToReference>
+            <assignToReference>NoteForm.submittedBy.lastName</assignToReference>
             <operator>Assign</operator>
             <value>
-                <stringValue>Vasylenko</stringValue>
+                <stringValue>Name</stringValue>
             </value>
         </assignmentItems>
         <connector>

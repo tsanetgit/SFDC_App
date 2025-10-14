@@ -300,6 +300,14 @@
         <unique>true</unique>
     </fields>
     <fields>
+        <fullName>UpdatedAt__c</fullName>
+        <deprecated>false</deprecated>
+        <label>Updated At</label>
+        <required>false</required>
+        <trackTrending>false</trackTrending>
+        <type>DateTime</type>
+    </fields>
+    <fields>
         <fullName>isApiNote__c</fullName>
         <defaultValue>false</defaultValue>
         <deprecated>false</deprecated>

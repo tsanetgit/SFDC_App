@@ -2,41 +2,32 @@ public class TSANetNoteTriggerHelper {
 
     public static tsanet_connect__TSANet_Credentials__c credential = CredentialManager.getCredentials();
     
-    public static void handleBeforeInsert(tsanet_connect__TSANetNote__c[] notes){
-        findRelationships(notes);
-    }
-    
-    public static void handleAfterInsert(tsanet_connect__TSANetNote__c[] notes){
-        createFeedItems(notes);
-    }
-    
-    public static void handleAfterUpdate(tsanet_connect__TSANetNote__c[] notes, Map<Id, tsanet_connect__TSANetNote__c> oldNotes){
-        createFeedItems(notes);
-    }
-    
     public static void findRelationships(tsanet_connect__TSANetNote__c[] notes){
-        String[] tsaNetExternalCaseIds = new String[]{};
+        try {
+            String[] tsaNetExternalCaseIds = new String[]{};
+                
+                for(tsanet_connect__TSANetNote__c note : notes){
+                    tsaNetExternalCaseIds.add(note.tsanet_connect__CaseId__c);
+                }
             
-        for(tsanet_connect__TSANetNote__c note : notes){
-            tsaNetExternalCaseIds.add(note.tsanet_connect__CaseId__c);
-        }
-        System.debug('tsaNetExternalCaseIds : ' + tsaNetExternalCaseIds);
-        if(tsaNetExternalCaseIds.size() == 0){ return; }
-
-        tsanet_connect__TSANetCase__c[] tsaNetCases = [SELECT Id, Name, tsanet_connect__Case__c, tsanet_connect__tsaNetCaseId__c, tsanet_connect__Partner__c FROM tsanet_connect__TSANetCase__c WHERE tsanet_connect__tsaNetCaseId__c IN:tsaNetExternalCaseIds];
-		System.debug('tsaNetCases : ' + tsaNetCases);
-        Map<String, tsanet_connect__TSANetCase__c> externalIdToCase = new Map<String, tsanet_connect__TSANetCase__c>();
-        for(tsanet_connect__TSANetCase__c tsaNetCase : tsaNetCases){
-            externalIdToCase.put(tsaNetCase.tsanet_connect__tsaNetCaseId__c, tsaNetCase);
-        }
-        System.debug('externalIdToCase : ' + externalIdToCase);
-        for(tsanet_connect__TSANetNote__c note : notes){
-            if(externalIdToCase.containsKey(note.tsanet_connect__CaseId__c)){
-                tsanet_connect__TSANetCase__c tsaNetCase = externalIdToCase.get(note.tsanet_connect__CaseId__c);
-                note.tsanet_connect__TSANetCase__c = tsaNetCase.Id;
-                System.debug('note.tsanet_connect__TSANetCase__c : ' + note.tsanet_connect__TSANetCase__c);
+            if(tsaNetExternalCaseIds.size() == 0){ return; }
+            
+            tsanet_connect__TSANetCase__c[] tsaNetCases = [SELECT Id, Name, tsanet_connect__Case__c, tsanet_connect__tsaNetCaseId__c, tsanet_connect__Partner__c FROM tsanet_connect__TSANetCase__c WHERE tsanet_connect__tsaNetCaseId__c IN:tsaNetExternalCaseIds];
+            
+            Map<String, tsanet_connect__TSANetCase__c> externalIdToCase = new Map<String, tsanet_connect__TSANetCase__c>();
+            for(tsanet_connect__TSANetCase__c tsaNetCase : tsaNetCases){
+                externalIdToCase.put(tsaNetCase.tsanet_connect__tsaNetCaseId__c, tsaNetCase);
             }
-        }        
+            
+            for(tsanet_connect__TSANetNote__c note : notes){
+                if(externalIdToCase.containsKey(note.tsanet_connect__CaseId__c)){
+                    tsanet_connect__TSANetCase__c tsaNetCase = externalIdToCase.get(note.tsanet_connect__CaseId__c);
+                    note.tsanet_connect__TSANetCase__c = tsaNetCase.Id;
+                }
+            }  
+        } catch(Exception e){
+            ErrorLogger.logError(e, 'TSANET_NOTE_FIND_RELATIONSHIPS_ERROR');
+        }
     }
     
     public static void createFeedItems(tsanet_connect__TSANetNote__c[] notes){
@@ -123,9 +114,8 @@ public class TSANetNoteTriggerHelper {
         for (Integer i = 0; i < results.size(); i++) {
             if (!results[i].isSuccess()) {
                 FeedItem failedItem = feedItems[i];
-                System.debug('Failed FeedItem: ' + failedItem);
                 for (Database.Error err : results[i].getErrors()) {
-                    System.debug('Error: ' + err.getMessage());
+                    ErrorLogger.logError(err.getMessage(), 'TSANET_NOTE_FEED_ITEM_MAPPING_ERROR');
                 }
             }
         }

@@ -142,7 +142,10 @@
                                 
                                 <div class="slds-col slds-size_1-of-2">
                                     <div class="slds-m-around_xx-small">
-                                        <c-lookup-view icon-name="standard:user" label="Case Owner" value={caseRecord.Owner.Name}></c-lookup-view>
+                                        <!--c-lookup-view icon-name="standard:user" label="Case Owner" value={caseRecord.Owner.Name}></c-lookup-view-->
+
+                                        <c-user-lookup label="Case Owner" value={caseRecord.OwnerId} required onselect={handleSelectUser} onclear={handleClearUser}></c-user-lookup>
+
                                         <c-lookup-view icon-name="standard:case" label="Member Case #" value={caseRecord.CaseNumber}></c-lookup-view>
                                     </div>
                                 </div>

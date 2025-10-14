@@ -1,5 +1,6 @@
 import { LightningElement, api, track } from 'lwc'
-import { NavigationMixin } from "lightning/navigation"
+import { NavigationMixin } from 'lightning/navigation'
+import LightningConfirm from 'lightning/confirm';
 
 import TSANetLogo from '@salesforce/resourceUrl/TSANetLogo'
 
@@ -157,8 +158,21 @@ export default class RelatedList extends NavigationMixin(LightningElement) {
         } else if(selectedItemValue == 'attachment'){
             this.isAttachmentMode = true
         } else if(selectedItemValue == 'close'){
+            this.closeCase()
+        }
+    }
+
+    async closeCase(){
+        const result = await LightningConfirm.open({
+            message: 'Do you really want to close this case? This action cannot be undone.',
+            variant: 'header',
+            theme: 'warning',
+            label: 'Close Case Confirmation'
+        });
+
+        if(result){
             this.isLoading = true
-            closeTSANetCase({ tsaNetCaseId: record.Id }).then(response => {
+            closeTSANetCase({ tsaNetCaseId: this.record?.Id }).then(response => {
                 this.isLoading = false
                 try {
                     let data = JSON.parse(response)
@@ -171,34 +185,8 @@ export default class RelatedList extends NavigationMixin(LightningElement) {
                     this.dispatchEvent(new CustomEvent('refesh'))
                 }
             }).catch(error => {
-                if(error?.body?.message == 'Unauthorized'){
-                    getNewAccessToken().then(response => {
-                        if(response){
-                            closeTSANetCase({ tsaNetCaseId: record.Id }).then(response => {
-                                this.isLoading = false
-                                try {
-                                    let data = JSON.parse(response)
-                                    if(data?.status == 'CLOSED'){
-                                        toast(this, 'Success', 'success', 'Case has been closed successfully!')
-                                    }
-                                    this.dispatchEvent(new CustomEvent('refesh'))
-                                } catch(e){
-                                    toast(this, 'Error', 'error', response)
-                                    this.dispatchEvent(new CustomEvent('refesh'))
-                                }
-                            })
-                        } else {
-                            console.log(error)
-                            toast(this, 'Error', 'error', error?.body?.message)
-                        }
-                    }).catch(err => {
-                        console.log(err)
-                        toast(this, 'Error', 'error', err?.body?.message)
-                    })
-                } else {
-                    console.log(error)
-                    toast(this, 'Error', 'error', error?.body?.message)
-                }
+                console.log(error)
+                toast(this, 'Error', 'error', error?.body?.message)
                 
                 getRelatedTSANetCases(undefined)
             })

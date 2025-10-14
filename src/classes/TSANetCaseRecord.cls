@@ -1,4 +1,5 @@
 public class TSANetCaseRecord {
+    
     public Integer id;
     public String submitCompanyName;
     public Integer submitCompanyId;
@@ -52,6 +53,7 @@ public class TSANetCaseRecord {
         public String creatorUsername;
         public String creatorEmail;
         public String creatorName;
+        public String companyName;
         public String summary;
         public String description;
         public String priority;
@@ -70,5 +72,13 @@ public class TSANetCaseRecord {
         public String engineerEmail;
         public String nextSteps;
         public Datetime createdAt;
+    }
+    
+    public static TSANetCaseRecord[] parse(String json){
+        return (TSANetCaseRecord[]) System.JSON.deserialize(json, TSANetCaseRecord[].class);
+    }
+    
+    public static TSANetCaseRecord parseOne(String json){
+        return (TSANetCaseRecord) System.JSON.deserialize(json, TSANetCaseRecord.class);
     }
 }

@@ -46,7 +46,7 @@ public class TSANetQueueableJob implements Queueable, Database.AllowsCallouts {
                 }
 
                 for(tsanet_connect__TSANetCase__c caseRecord : data.cases){
-                    this.cases.put(caseRecord.tsanet_connect__tsaNetCaseId__c, caseRecord);
+                    this.cases.put(caseRecord.tsanet_connect__CaseToken__c, caseRecord);
                 }
                 for(tsanet_connect__TSANetResponse__c response : data.responses){
                     this.responses.put(response.tsanet_connect__tsaNetResponseId__c, response);
@@ -54,9 +54,6 @@ public class TSANetQueueableJob implements Queueable, Database.AllowsCallouts {
                 for(tsanet_connect__TSANetNote__c note : data.notes){
                     this.notes.put(note.tsanet_connect__Token__c, note);
                 }
-                //this.cases.addAll(data.cases);
-                //this.responses.addAll(data.responses);
-                //this.notes.addAll(data.notes);
 
                 currentPage++;
                 count++;
@@ -78,15 +75,20 @@ public class TSANetQueueableJob implements Queueable, Database.AllowsCallouts {
             System.debug('RESPONSES: ' + responses.values().size());
             System.debug('NOTES: ' + notes.values().size());
             
-            upsert cases.values() tsanet_connect__tsaNetCaseId__c;
-            upsert responses.values() tsanet_connect__tsaNetResponseId__c;
-            upsert notes.values() tsanet_connect__Token__c;
+            Database.UpsertResult[] tsaNetCaseResult = Database.upsert(cases.values(), tsanet_connect__TSANetCase__c.tsanet_connect__CaseToken__c, false);
+            Database.UpsertResult[] tsaNetResponseResult = Database.upsert(responses.values(), tsanet_connect__TSANetResponse__c.tsanet_connect__tsaNetResponseId__c, false);
+            Database.UpsertResult[] tsaNetNoteResult = Database.upsert(notes.values(), tsanet_connect__TSANetNote__c.tsanet_connect__Token__c, false);
             
-            if(CONFIG.tsanet_connect__IntegrationUser__c != NULL){
-                User user = new User(Id = CONFIG.tsanet_connect__IntegrationUser__c, 
-                                     tsanet_connect__tsaNetAccessToken__c = token);
-                Boolean result = Database.update(user).isSuccess();
-                System.debug('result : ' + result);
+            tsanet_connect__TSANetError__c[] errors = new tsanet_connect__TSANetError__c[]{};
+    
+            errors.addAll(ErrorManager.collectErrors(tsaNetCaseResult, cases.values(), tsanet_connect__TSANetCase__c.tsanet_connect__CaseToken__c));
+            errors.addAll(ErrorManager.collectErrors(tsaNetNoteResult, notes.values(), tsanet_connect__TSANetNote__c.tsanet_connect__Token__c));
+            errors.addAll(ErrorManager.collectErrors(tsaNetResponseResult, responses.values(), tsanet_connect__TSANetResponse__c.tsanet_connect__tsaNetResponseId__c));
+            
+            ErrorLogger.logErrors(errors);
+            
+            if(token != NULL){
+                CredentialManager.updateToken(token);
             }
         }
     }

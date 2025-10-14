@@ -41,6 +41,8 @@ export default class PartnerCollaborationCaseForm extends NavigationMixin(Lightn
 
     typingTimer
 
+    submitterDetails
+
     _state
 
     @api
@@ -54,12 +56,27 @@ export default class PartnerCollaborationCaseForm extends NavigationMixin(Lightn
         console.log('value  : ', JSON.stringify(value))
 
         this.config = value?.config
-        this.caseRecord = value?.caseRecord
-        this.subject = value?.caseRecord?.Subject
+        //this.caseRecord = value?.caseRecord
+        
     }
 
     handleClose(){
         this.handleCloseWindow(this.isDone)
+    }
+
+    connectedCallback(){
+        getCaseInfo(this.recordId)
+        .then(data => {
+            this.config = data?.config
+            console.log('connectedCallback data: ', data)
+            this.caseRecord = data?.caseRecord
+            this.submitterDetails = {
+                name: data?.caseRecord?.Owner?.Name,
+                email: data?.caseRecord?.Owner?.Email,
+                phone: data?.caseRecord?.Owner?.MobilePhone
+            }
+            this.subject = data?.caseRecord?.Subject
+        })
     }
 
     handleCloseWindow(isRefresh){
@@ -284,11 +301,14 @@ export default class PartnerCollaborationCaseForm extends NavigationMixin(Lightn
 
             console.log('res : ', res)
 
-            toast(this, 'Success', 'success', 'The case have been submitted successfully!')
+            if(res?.message){
+                toast(this, 'Error', 'error', res?.message)
+            } else {
+                toast(this, 'Success', 'success', 'The case have been submitted successfully!')
 
-            this.tsaResponse = res
-            this.isDone = true
-
+                this.tsaResponse = res
+                this.isDone = true
+            }
         }).catch(error => {
             let errorResponse = error?.body?.message
             console.log('ERROR : ', errorResponse)
@@ -319,7 +339,10 @@ export default class PartnerCollaborationCaseForm extends NavigationMixin(Lightn
                     object[key] = this.caseRecord.CaseNumber
                 } else if(key == 'recieverInternalCaseNumber'){
                     object[key] = this.parentCase
-                } else if(key == 'customFields'){ //customerData
+                } else if(key == 'submitterContactDetails'){
+                    object[key] = this.submitterDetails
+                }
+                 else if(key == 'customFields'){ //customerData
                     let clonnedValue = JSON.parse(JSON.stringify(value))
 
                     console.log('clonnedValue: ', JSON.stringify(clonnedValue))
@@ -432,6 +455,19 @@ export default class PartnerCollaborationCaseForm extends NavigationMixin(Lightn
         })
 
     }
+
+    handleSelectUser(e){
+        const { value, user } = e.detail;
+        console.log('value', value)
+        console.log('user', user)
+        this.submitterDetails = {
+            name: user?.name,
+            email: user?.email,
+            phone: user?.phone
+        }
+    }
+
+    handleClearUser() {}
 
     clearState(){
         this._state = undefined

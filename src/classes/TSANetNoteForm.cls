@@ -8,6 +8,9 @@ global class TSANetNoteForm {
     global String priority { get; set; }
     
     @AuraEnabled 
+    global TSANetSubmittedBy submittedBy { get; set; }
+    
+    // Deprecated
     global TSANetSubmittedBy subbmitedBy { get; set; }
 
 }

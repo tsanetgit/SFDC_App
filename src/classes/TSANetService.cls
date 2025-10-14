@@ -122,10 +122,23 @@ public class TSANetService {
         }  
         
         TSANetData data = ParserManager.parseTSANetCases(res.getBody(), caseId);
-        upsert data.cases tsanet_connect__tsaNetCaseId__c;
-        upsert data.responses tsanet_connect__tsaNetResponseId__c;
-        upsert data.notes tsanet_connect__Token__c;
+        
+        System.debug('data.cases : ' + data.cases);
+        System.debug('data.cases : ' + data.notes);
+        System.debug('data.cases : ' + data.responses);
+        
+        Database.UpsertResult[] tsaNetCaseResult = Database.upsert(data.cases, tsanet_connect__TSANetCase__c.tsanet_connect__CaseToken__c, false);
+        Database.UpsertResult[] tsaNetNoteResult = Database.upsert(data.notes, tsanet_connect__TSANetNote__c.tsanet_connect__Token__c, false);
+        Database.UpsertResult[] tsaNetResponseResult = Database.upsert(data.responses, tsanet_connect__TSANetResponse__c.tsanet_connect__tsaNetResponseId__c, false);
+        
+        tsanet_connect__TSANetError__c[] errors = new tsanet_connect__TSANetError__c[]{};
 
+        errors.addAll(ErrorManager.collectErrors(tsaNetCaseResult, data.cases, tsanet_connect__TSANetCase__c.tsanet_connect__CaseToken__c));
+        errors.addAll(ErrorManager.collectErrors(tsaNetNoteResult, data.notes, tsanet_connect__TSANetNote__c.tsanet_connect__Token__c));
+        errors.addAll(ErrorManager.collectErrors(tsaNetResponseResult, data.responses, tsanet_connect__TSANetResponse__c.tsanet_connect__tsaNetResponseId__c));
+        
+        ErrorLogger.logErrors(errors);
+        
         return [SELECT Id, Name, tsanet_connect__Name__c, tsanet_connect__customFields__c, tsanet_connect__TSANetContact__c, tsanet_connect__FirstName__c, tsanet_connect__LastName__c, tsanet_connect__Phone__c, tsanet_connect__EngineerName__c, tsanet_connect__EngineerEmail__c, tsanet_connect__TSANetEmail__c, tsanet_connect__EngineerPhone__c, tsanet_connect__Email__c, tsanet_connect__Case__c, tsanet_connect__Case__r.CaseNumber, Partner__c, tsanet_connect__SubmittedCompanyName__c, tsanet_connect__SubmittedCompanyId__c, tsanet_connect__receivedCompanyName__c, tsanet_connect__receivedCompanyId__c, tsanet_connect__FullSummary__c, tsanet_connect__Description__c, tsanet_connect__Status__c, tsanet_connect__Token__c, tsanet_connect__Responded__c, tsanet_connect__FeedbackRequested__c, tsanet_connect__ReminderSent__c, tsanet_connect__Priority__c, tsanet_connect__tsaNetCaseId__c, tsanet_connect__RequestDate__c, tsanet_connect__ResponseDate__c, tsanet_connect__PriorityNote__c, tsanet_connect__Type__c,
                     (SELECT Id, Name, tsanet_connect__TSANetCase__c, tsanet_connect__Type__c, tsanet_connect__EngineerName__c, tsanet_connect__EngineerPhone__c, tsanet_connect__EngineerEmail__c, tsanet_connect__Note__c, tsanet_connect__tsaNetCaseId__c, tsanet_connect__tsaNetResponseId__c FROM tsanet_connect__TSANetResponses__r ORDER BY tsanet_connect__CreatedAt__c DESC)
                     FROM tsanet_connect__TSANetCase__c 
@@ -219,11 +232,11 @@ public class TSANetService {
                 ErrorManager.handleResponseErrors(res);
             }
         }
-        
+                
         if(!Test.isRunningTest()){
-            System.enqueueJob(new TSANetQueueableJob(0, null, null, null, null));
+            getRelatedCollaborationCases(caseId, token);
 		}
-        
+
         Map<String, Object> response = (Map<String, Object>) System.JSON.deserializeUntyped(res.getBody());
         TSANetHelper.createCaseFeedItem(caseId, response);
              
@@ -575,5 +588,43 @@ public class TSANetService {
         insert links;
         
         return res.getBody();
+    }
+    
+    @future(callout=true)
+    public static void changeTSANetOwner(Id caseId, String token){
+        tsanet_connect__TSANetCase__c caseRecord = [SELECT Id, tsanet_connect__Case__c, tsanet_connect__Token__c FROM tsanet_connect__TSANetCase__c WHERE Id =:caseId];
+        
+        String accessToken = token != NULL ? ( 'Bearer ' + token ) : AuthManager.getBearerToken();
+        String noteEndpoint = EndpointManager.getEndpointWithToken(EndpointManager.updateCase, caseRecord.tsanet_connect__Token__c);
+
+        Case sfCase = [SELECT Id, CaseNumber, OwnerId, Owner.Name, Owner.Phone, Owner.Email FROM Case WHERE Id =:caseRecord.tsanet_connect__Case__c];
+
+        String json = '{"internalCaseNumber": "' + sfCase.CaseNumber + '","submitterContactDetails": {"name": "' + sfCase.Owner.Name + '","email": "' + sfCase.Owner.Email + '","phone": "' + sfCase.Owner.Phone + '"}}';
+        
+        HttpRequest req = new HttpRequest();
+        req.setEndpoint(noteEndpoint);
+        req.setHeader('Authorization', accessToken);
+        req.setMethod('POST');
+        req.setHeader('Content-Type', 'application/json');
+        req.setTimeout(10000);
+        req.setBody(json);
+        
+        Http http = new Http();
+        HTTPResponse res = http.send(req);
+        System.debug(res.getBody());
+        
+        if(res.getStatusCode() != 200){
+            if(ErrorManager.isUnautorized(res.getBody())){
+                String newAccessToken = TSANetService.getTSANetAccessToken();
+                changeTSANetOwner(caseId, newAccessToken);
+                CredentialManager.updateToken(newAccessToken);
+            } else {
+                ErrorManager.handleResponseErrors(res);
+            }
+        }  
+        
+        if(!Test.isRunningTest()){
+            TSANetService.getRelatedCollaborationCases(null, token);
+        }
     }
 }

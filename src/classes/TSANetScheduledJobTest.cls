@@ -31,7 +31,7 @@ public class TSANetScheduledJobTest {
         
         insert caseRecord;
         
-        TSANetCase__c tsaNetCase = new TSANetCase__c(tsanet_connect__Token__c = 'test-token', tsanet_connect__Case__c = caseRecord.Id);
+        TSANetCase__c tsaNetCase = new TSANetCase__c(tsanet_connect__Token__c = 'test-token', tsanet_connect__CaseToken__c = 'test-token', tsanet_connect__Case__c = caseRecord.Id);
         insert tsaNetCase;
 	}
     

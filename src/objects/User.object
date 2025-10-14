@@ -6,6 +6,7 @@
         <label>tsaNetAccessToken</label>
         <length>1000</length>
         <trackFeedHistory>false</trackFeedHistory>
+        <trackHistory>false</trackHistory>
         <type>LongTextArea</type>
         <visibleLines>3</visibleLines>
     </fields>

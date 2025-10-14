@@ -384,6 +384,9 @@
                         <valueListItems>
                             <value>Description__c</value>
                         </valueListItems>
+                        <valueListItems>
+                            <value>CreatorUserName__c</value>
+                        </valueListItems>
                     </valueList>
                 </componentInstanceProperties>
                 <componentInstanceProperties>

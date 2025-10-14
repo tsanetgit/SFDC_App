@@ -30,7 +30,7 @@ public class TSANetInvocableApproveRequestServiceTest {
         
         insert caseRecord;
         
-        tsanet_connect__TSANetCase__c tsaNetCase = new tsanet_connect__TSANetCase__c(tsanet_connect__Token__c = 'test-token', tsanet_connect__Case__c = caseRecord.Id);
+        tsanet_connect__TSANetCase__c tsaNetCase = new tsanet_connect__TSANetCase__c(tsanet_connect__Token__c = 'test-token', tsanet_connect__CaseToken__c='test-token', tsanet_connect__Case__c = caseRecord.Id);
         insert tsaNetCase;
 	}
     
@@ -55,7 +55,7 @@ public class TSANetInvocableApproveRequestServiceTest {
         String body = '{ "accessToken": "test.eyJpc3MiOiJodHRwOi8vY29ubmVjdDEucmVub2xhYi51cy9hcGkvYXV0aC9sb2dpbiIsImlhdCI6MTcyMDc3ODk0MiwiZXhwIjoxNzIwNzgyNTQyLCJuYmYiOjE3MjA3Nzg5NDIsImp0aSI6ImJrcDBGZ0k4T2ViNXdxU28iLCJzdWIiOiI4NzA1IiwicHJ2IjoiODdlMGFmMWVmOWZkMTU4MTJmZGVjOTcxNTNhMTRlMGIwNDc1NDZhYSJ9.YbmRLRwdzcua0lh3mCawfb7dvx5LQqJwrboZG4wGFEo", "tokenType": "bearer", "expiresIn": 3600 }';
         Test.setMock(HttpCalloutMock.class, new MockHttpResponseGenerator(200, body, null));        
         Test.startTest();
-            tsanet_connect__TSANetCase__c caseRecord = [SELECT Id, Name, tsanet_connect__Token__c FROM tsanet_connect__TSANetCase__c LIMIT 1];
+            tsanet_connect__TSANetCase__c caseRecord = [SELECT Id, Name, tsanet_connect__Token__c, tsanet_connect__CaseToken__c FROM tsanet_connect__TSANetCase__c LIMIT 1];
             TSANetInvocableApproveRequestService.TSANetInput input = new TSANetInvocableApproveRequestService.TSANetInput();
             input.caseRecord = caseRecord;
             input.request = new TSANetCaseRequest();

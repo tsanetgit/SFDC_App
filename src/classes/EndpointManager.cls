@@ -9,6 +9,7 @@ public with sharing class EndpointManager {
     public static String get_form_department_path = '/v1/forms/department/';
     public static String approve = '/v1/collaboration-requests/{token}/approval';
     public static String reject = '/v1/collaboration-requests/{token}/rejection';
+    public static String updateCase = '/v1/collaboration-requests/{token}';
     public static String informationRequest = '/v1/collaboration-requests/{token}/information-request';
     public static String informationResponse = '/v1/collaboration-requests/{token}/information-response';
     public static String close = '/v1/collaboration-requests/{token}/closure';

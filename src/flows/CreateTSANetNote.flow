@@ -32,7 +32,7 @@
     <assignments>
         <name>AssignNoteJSON</name>
         <label>Assign Note JSON</label>
-        <locationX>571</locationX>
+        <locationX>570</locationX>
         <locationY>538</locationY>
         <assignmentItems>
             <assignToReference>TSANetNote.summary</assignToReference>
@@ -56,14 +56,14 @@
             </value>
         </assignmentItems>
         <assignmentItems>
-            <assignToReference>TSANetNote.subbmitedBy.firstName</assignToReference>
+            <assignToReference>TSANetNote.submittedBy.firstName</assignToReference>
             <operator>Assign</operator>
             <value>
                 <elementReference>CreatorFirstName</elementReference>
             </value>
         </assignmentItems>
         <assignmentItems>
-            <assignToReference>TSANetNote.subbmitedBy.lastName</assignToReference>
+            <assignToReference>TSANetNote.submittedBy.lastName</assignToReference>
             <operator>Assign</operator>
             <value>
                 <elementReference>CreatorLastName</elementReference>
@@ -77,12 +77,12 @@
     <formulas>
         <name>CreatorFirstName</name>
         <dataType>String</dataType>
-        <expression>IF({!TSANetCase.Case__r.OwnerId} != NULL, {!TSANetCase.Case__r.Owner:User.FirstName}, {!$User.FirstName})</expression>
+        <expression>{!$User.FirstName}</expression>
     </formulas>
     <formulas>
         <name>CreatorLastName</name>
         <dataType>String</dataType>
-        <expression>IF({!TSANetCase.Case__r.OwnerId} != NULL, {!TSANetCase.Case__r.Owner:User.LastName}, {!$User.LastName})</expression>
+        <expression>{!$User.LastName}</expression>
     </formulas>
     <interviewLabel>Create TSANet Note Flow {!$Flow.CurrentDateTime}</interviewLabel>
     <isTemplate>true</isTemplate>
