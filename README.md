@@ -3,13 +3,9 @@
 To use, contact membership@tsanet.org </br>
 Use Issues https://github.com/tsanetgit/SFDC/issues to log bugs and enhancements.
 
-<b>Install Guide:</b>  Download the install guide
+<b>Install Guide and Documentation:</b>  
 
-https://github.com/tsanetgit/SFDC/blob/main/Connect.2.0.SFDC.Package.Install.Guide.v3.0.4.docx
-
-<b>User Guide:</b>  Download the user guide  
-
-https://github.com/tsanetgit/SFDC/blob/main/TSANet%20Connect%20Salesforce%20User%20Guide.docx
+https://tsanet.gitbook.io/connect/documentation/salesforce-connector/demo
 
 <b>CURRENT PACKAGE VERSION:</b>
 View the latest release https://github.com/tsanetgit/SFDC/releases for the package link
