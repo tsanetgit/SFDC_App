@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Type__c</fullName>
+    <defaultValue>&apos;STRING&apos;</defaultValue>
+    <deprecated>false</deprecated>
+    <fieldManageability>DeveloperControlled</fieldManageability>
+    <label>Type</label>
+    <required>true</required>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>STRING</fullName>
+                <default>true</default>
+                <label>STRING</label>
+            </value>
+            <value>
+                <fullName>NUMBER</fullName>
+                <default>false</default>
+                <label>NUMBER</label>
+            </value>
+            <value>
+                <fullName>DATETIME</fullName>
+                <default>false</default>
+                <label>DATETIME</label>
+            </value>
+            <value>
+                <fullName>BOOLEAN</fullName>
+                <default>false</default>
+                <label>BOOLEAN</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

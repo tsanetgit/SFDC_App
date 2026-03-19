@@ -1,0 +1,80 @@
+<template>
+
+    <template lwc:if={errorMessage}>
+        <c-tsa-net-error-screen message={errorMessage}></c-tsa-net-error-screen>
+    </template>
+    <template lwc:else>
+        <template if:true={company}>
+            <div class="slds-form-element">
+                <div class="slds-form-element__control">
+                    <div class="slds-combobox_container slds-has-selection">
+                        <div class="slds-combobox slds-dropdown-trigger slds-dropdown-trigger_click">
+                            <div class="slds-combobox__form-element slds-input-has-icon slds-input-has-icon_left-right" role="none">
+                                <span class="slds-icon_container slds-combobox__input-entity-icon mt-6">
+                                    <img class="icon" src={tsaNetLogo} />
+                                </span>
+                                <div role="combobox" tabindex="0" class="slds-input_faux slds-combobox__input slds-combobox__input-value" aria-labelledby="combobox-label-id-32 combobox-id-5-selected-value" id="combobox-id-5-selected-value" aria-controls="listbox-id-5" aria-expanded="false" aria-haspopup="listbox">
+                                    <span class="slds-truncate" id="combobox-value-id-19">
+                                        {company.label}
+                                        <template if:true={company.tags.length}>
+                                            <template for:each={company.tags} for:item="t">
+                                                <lightning-badge style="margin-left: 20px;" key={t.tag} label={t.tag}></lightning-badge>
+                                            </template>
+                                        </template>
+                                    </span>
+                                    <button class="slds-button slds-button_icon slds-input__icon slds-input__icon_right" onclick={handleChangeCompany}>
+                                        <lightning-icon icon-name="utility:close" size="xx-small"></lightning-icon>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </template>
+        <template if:false={company}>
+            <div class="slds-card slds-p-around_medium">
+                <div class="slds-form-element">
+                    <div style={searchSectionStyle} class="slds-form-element__control search-section">
+                        <lightning-input
+                            name="enter-search"
+                            label="Search for Member"
+                            placeholder="Search for your company..."
+                            type="search"
+                            onchange={handleSearchKey}
+                        ></lightning-input>
+                        <template if:true={isLoading}>
+                            <div class="slds-align_absolute-center" style="height: 300px;">
+                                <lightning-spinner variant="brand" size="medium"> </lightning-spinner>
+                            </div>
+                        </template>
+                        <div if:true={companies.length} class="slds-dropdown slds-dropdown_length-5 slds-dropdown_fluid"
+                            role="listbox">
+                            <ul class="slds-listbox slds-listbox_vertical" role="presentation">
+                                <template for:each={companies} for:item="company">
+                                    <li key={company.label} data-value={company.companyId} data-department={company.departmentId} role="presentation"
+                                        onclick={selectCompany} class="slds-listbox__item">
+                                        <div class="slds-media slds-listbox__option slds-listbox__option_plain slds-media_small "
+                                            role="option">
+                                            <span class="slds-media__body">
+                                                <span class="slds-truncate company-row">
+                                                    <img class="small-icon slds-m-right_small" src={tsaNetLogo} />
+                                                    <div class="slds-text-title slds-m-left_xx-small">{company.label}</div>
+                                                    <template if:true={company.tags.length}>
+                                                        <template for:each={company.tags} for:item="t">
+                                                            <lightning-badge style="margin-left: 20px;" key={t.tag} label={t.tag}></lightning-badge>
+                                                        </template>
+                                                    </template>
+                                                </span>
+                                            </span>
+                                        </div>
+                                    </li>
+                                </template>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </template>
+    </template>
+</template>

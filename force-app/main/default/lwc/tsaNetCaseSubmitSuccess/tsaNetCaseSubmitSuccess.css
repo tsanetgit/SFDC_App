@@ -1,0 +1,25 @@
+/* Bigger + green success icon */
+.success-icon {
+    display: inline-flex;
+    padding: 0.65rem;
+    border-radius: 999px;
+    background: #dff6e7; /* light green */
+    border: 1px solid #2e844a;
+}
+
+.success-icon lightning-icon {
+    --slds-c-icon-color-foreground-default: #2e844a; /* green */
+}
+
+/* Status badge */
+.badge {
+    border-radius: 999px;
+}
+.badge-open {
+    background: #dff6e7;
+    color: #1f6f43;
+}
+.badge-closed {
+    background: #fde7e9;
+    color: #b60520;
+}

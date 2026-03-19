@@ -1,0 +1,49 @@
+:host {
+    display: block;
+}
+
+.success-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background-color: #e3fcef; /* light success green */
+    border: 2px solid #2e844a; /* Salesforce success green */
+}
+
+.error-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background-color: #fde7e9; /* light error red */
+    border: 2px solid #ba0517; /* Salesforce error red */
+}
+
+.warning-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background-color: #fff4ce; /* light warning yellow */
+    border: 2px solid #ffb75d; /* Salesforce warning orange */
+}
+
+.success-icon lightning-icon {
+    --slds-c-icon-color-foreground-default: #2e844a;
+}
+
+.slds-media__body h1 {
+    font-weight: 500;
+}
+
+.slds-text-color_weak {
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+}

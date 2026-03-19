@@ -1,0 +1,68 @@
+<template>
+    <template lwc:if={isQuickAction}>
+        <div class="qa-body slds-p-around_medium">
+            <lightning-spinner lwc:if={isLoading} variant="brand"></lightning-spinner>
+            <template lwc:if={isSearchMode}>
+                <c-company-selector
+                    company={company}
+                    onselect={handleSelectCompany}
+                ></c-company-selector>
+            </template>
+            <template lwc:else>
+                <template lwc:if={isDone}>
+                    <c-tsa-net-action-modal-submit-result 
+                        message={resultMessage}
+                        description={resultDescription}
+                    >
+                    </c-tsa-net-action-modal-submit-result>
+                </template>
+                <template lwc:else>
+                    <c-tsa-net-form 
+                        form={form}
+                        case-record={caseRecord}
+                    ></c-tsa-net-form>
+                </template>   
+            </template>
+        </div>
+        <div class="qa-footer">
+            <div class="slds-grid slds-grid_align-end slds-gutters_x-small slds-m-top_small slds-m-right_medium">
+                <lightning-button if:false={isSearchMode} variant="neutral" label={cancelButtonLabel} onclick={onCancel}></lightning-button>
+                <lightning-button lwc:if={showSubmitButton} class="slds-m-left_xx-small" variant="brand" label={submitButtonLabel} disabled={isNextDisabled} onclick={onSave}></lightning-button>
+            </div>
+        </div>
+    </template>
+    <template lwc:else>
+        <lightning-modal-header label={header}></lightning-modal-header>
+        <lightning-modal-body>
+            <div class="body slds-is-relative">
+                <lightning-spinner lwc:if={isLoading} variant="brand"></lightning-spinner>
+                <template lwc:if={isSearchMode}>
+                    <c-company-selector
+                        company={company}
+                        onselect={handleSelectCompany}
+                    ></c-company-selector>
+                </template>
+                <template lwc:else>
+                    <template lwc:if={isDone}>
+                        <c-tsa-net-action-modal-submit-result 
+                            message={resultMessage}
+                            description={resultDescription}
+                        >
+                        </c-tsa-net-action-modal-submit-result>
+                    </template>
+                    <template lwc:else>
+                        <c-tsa-net-form 
+                            form={form}
+                            case-record={caseRecord}
+                        ></c-tsa-net-form>
+                    </template>               
+                </template>
+            </div>
+        </lightning-modal-body>
+
+        <lightning-modal-footer>
+            <lightning-button variant={cancelButtonVariant} label={cancelButtonLabel} onclick={onCancel} disabled={isLoading}></lightning-button>
+            <lightning-button lwc:if={showSubmitButton} class="slds-m-left_xx-small" variant="brand" label={submitButtonLabel} disabled={isNextDisabled} onclick={onSave}></lightning-button>
+        </lightning-modal-footer>
+    </template>
+</template>

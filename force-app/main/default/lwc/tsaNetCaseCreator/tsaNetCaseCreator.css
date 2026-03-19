@@ -1,0 +1,11 @@
+.qa-body {
+  background: transparent;
+}
+
+:host {
+  display: block;
+}
+
+.qa-footer {
+  border-top: 1px solid var(--lwc-colorBorder, #dddbda);
+}

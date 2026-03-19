@@ -1,0 +1,110 @@
+<template>
+    <div class="slds-grid slds-wrap">
+        <template if:true={isDone}>
+            SUCCESS
+        </template>
+        <template if:false={isDone}>
+
+            <template if:false={salesforceCaseRecord}>
+
+                <lightning-record-edit-form
+                    object-api-name='tsanetconnect__TSANetCase__c'
+                >
+                    <lightning-input-field field-name='tsanetconnect__Case__c' onchange={handleChangeCase} required> </lightning-input-field>
+                </lightning-record-edit-form>
+            </template>
+
+
+            <template if:true={salesforceCaseRecord}>
+
+                <template if:true={form.adminNote}>
+                    <div class="slds-col slds-size_1-of-1">
+                        <div style="width: 97%; border-style: double; margin: 10px; display: flex; height: 40px; justify-content: center; align-items: center;">
+                            <lightning-formatted-rich-text value={form.adminNote}></lightning-formatted-rich-text>
+                        </div>
+                    </div>
+                </template>
+
+                <template if:true={form.internalNotes.length}>
+                    <div class="slds-col slds-size_1-of-1">
+                        <div style="width: 97%; border-style: double; margin: 10px; display: flex; height: 40px; justify-content: center; align-items: center;">
+                            <template for:each={form.internalNotes} for:item="n">
+                                <lightning-formatted-rich-text key={n.note} value={n.note}></lightning-formatted-rich-text>
+                            </template>
+                        </div>
+                    </div>
+                </template>
+                
+                <div class="slds-col slds-size_1-of-2">
+                    <div class="slds-m-around_xx-small">
+                        <div style="margin-top: -3px;">
+                            <c-user-lookup label="Case Owner" value={salesforceCaseRecord.OwnerId} required onselect={handleSelectUser} onclear={handleClearUser}></c-user-lookup>
+                        </div>
+                        <c-lookup-view icon-name="standard:case" label="Member Case #" record-id={salesforceCaseRecord.Id} value={salesforceCaseRecord.CaseNumber}></c-lookup-view>
+                    </div>
+                </div>
+                <div class="slds-col slds-size_1-of-2">
+                    <div class="slds-m-around_xx-small">
+                        <c-lookup-view icon-name="standard:account" label="Customer Account" record-id={salesforceCaseRecord.Account.Id} value={salesforceCaseRecord.Account.Name}></c-lookup-view>
+                        <c-lookup-view icon-name="standard:contact" label="Customer Contact" record-id={salesforceCaseRecord.Contact.Id} value={salesforceCaseRecord.Contact.Name}></c-lookup-view>
+                    </div>
+                </div>
+
+                <div class="slds-col slds-size_1-of-2">
+                    <lightning-input class="slds-m-around_xx-small" type="text" label="Subject" value={subjectValue} onchange={handleChangeSubject} required></lightning-input>
+                </div>
+                <div class="slds-col slds-size_1-of-2">
+                    <lightning-combobox
+                        class="slds-m-around_xx-small"
+                        label="Priority"
+                        value={priorityValue}
+                        placeholder="Choose a priority"
+                        options={priorities}
+                        onchange={handleChangePriority} 
+                        required></lightning-combobox>
+                </div>
+            </template>
+
+            <div class="slds-col slds-size_1-of-1">
+                <lightning-textarea 
+                    label="Description"
+                    class="slds-m-around_xx-small"
+                    value={description}
+                    onchange={handleDescription} 
+                    field-level-help="Enter description of problem and include product versions, troubleshooting steps and error message. Do share any Customer Data such as IP addresses, login IDs or other sensitive information."
+                    required
+                ></lightning-textarea>
+            </div>
+
+            <div style="display: flex; width: 100%; flex-direction: column;">
+                <template if:true={customFields}>
+                    <template for:each={customFields} for:item="field">
+                        <div class="slds-col slds-size_1-of-1" key={field.id} style="width: 100%;">
+                            <template if:true={field.isSelect}>
+                                <lightning-combobox
+                                    class="slds-m-around_xx-small"
+                                    label={field.label}
+                                    value={field.value}
+                                    options={field.values}
+                                    required={field.required}
+                                    onchange={handleChangeCustomField} ></lightning-combobox>
+                            </template>
+                            <template if:true={field.isTierSelect}>
+                                <c-tier-select field={field} options={field.values} onselect={handleChangeTierPicklist}></c-tier-select>
+                            </template>
+                            <template if:true={field.isString}>
+                                <lightning-input class="slds-m-around_xx-small" type="text" label={field.label} value={field.value} onchange={handleChangeCustomField} required={field.required}></lightning-input>
+                            </template>
+                            <template if:true={field.isEmail}>
+                                <lightning-input class="slds-m-around_xx-small" type="email" label={field.label} value={field.value} onchange={handleChangeCustomField} required={field.required}></lightning-input>
+                            </template>
+                            <template if:true={field.isPhone}>
+                                <lightning-input class="slds-m-around_xx-small" type="phone" label={field.label} value={field.value} onchange={handleChangeCustomField} required={field.required}></lightning-input>
+                            </template>
+                        </div>
+                    </template>
+                </template>
+            </div>
+        </template>
+    </div>
+</template>

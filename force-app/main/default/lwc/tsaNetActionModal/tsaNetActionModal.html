@@ -1,0 +1,96 @@
+<template>
+
+    <template lwc:if={isQuickAction}>
+
+        <lightning-quick-action-panel header={header}>
+            <div class="body">
+                <template lwc:if={isCaseRequired}>
+                    <template if:true={isDone}>
+                        <c-tsa-net-action-modal-submit-result 
+                            message={resultMessage}
+                            description={resultDescription}
+                        >
+                        </c-tsa-net-action-modal-submit-result>
+                    </template>
+                    <template if:false={isDone}>
+                        <div class="slds-is-relative">
+                            <lightning-spinner lwc:if={isLoading} variant="brand"></lightning-spinner>
+                            <c-tsa-net-action-modal-form 
+                                mode={mode}
+                                record={record}
+                                state={state}
+                                onchangeform={handleChangeForm}
+                            ></c-tsa-net-action-modal-form>
+                        </div>
+                    </template>
+                </template>
+                <template lwc:else>
+                    <c-salesforce-case-not-found></c-salesforce-case-not-found>
+                </template>
+            </div>
+
+            <div class="footer">
+                <lightning-button 
+                    class="quick-action-button"
+                    lwc:if={showSubmitButton} 
+                    variant={submitButtonVariant} 
+                    label={submitButtonLabel} 
+                    disabled={isInvalid} 
+                    onclick={onSave}>
+                </lightning-button>
+            </div>
+        </lightning-quick-action-panel>
+    </template>
+
+    <template lwc:else>
+
+        <lightning-modal-header 
+            label={header}
+        ></lightning-modal-header>
+
+        <lightning-modal-body>
+            <template lwc:if={isCaseRequired}>
+                <template if:true={isDone}>
+                    <c-tsa-net-action-modal-submit-result 
+                        message={resultMessage}
+                        description={resultDescription}
+                    >
+                    </c-tsa-net-action-modal-submit-result>
+                </template>
+                <template if:false={isDone}>
+                    <div class="slds-p-around_medium slds-is-relative">
+                        <lightning-spinner lwc:if={isLoading} variant="brand"></lightning-spinner>
+                        <c-tsa-net-action-modal-form 
+                            mode={mode}
+                            record={record}
+                            state={state}
+                            onchangeform={handleChangeForm}
+                        ></c-tsa-net-action-modal-form>
+                    </div>
+                </template>
+            </template>
+            <template lwc:else>
+                <c-salesforce-case-not-found></c-salesforce-case-not-found>
+            </template>
+        </lightning-modal-body>
+
+        <lightning-modal-footer>
+            <lightning-button 
+                variant={closeButtonVariant}
+                label="Close" 
+                onclick={onCancel} 
+                disabled={isLoading}>
+            </lightning-button>
+            <lightning-button 
+                class="slds-m-left_xx-small"
+                lwc:if={showSubmitButton} 
+                variant={submitButtonVariant} 
+                label={submitButtonLabel} 
+                disabled={isInvalid} 
+                onclick={onSave}>
+            </lightning-button>
+        </lightning-modal-footer>
+
+    </template>
+    
+</template>

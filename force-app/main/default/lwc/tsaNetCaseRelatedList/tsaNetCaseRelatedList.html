@@ -1,0 +1,66 @@
+<template>
+
+    <div class="slds-card">
+        <!-- Header -->
+        <div class="slds-card__header slds-grid slds-grid_align-spread slds-grid_vertical-align-center">
+            <header class="slds-media slds-media_center slds-has-flexi-truncate">
+                <div class="slds-media__figure">
+                    <span class="slds-icon_container" title="TSANet">
+                        <img class="tsa-logo slds-m-right_small" src={tsaNetLogo} />
+                    </span>
+                </div>
+                <h1 class="slds-page-header__title slds-truncate title" title={title}>
+                    {title}
+                </h1>
+            </header>
+
+            <div class="slds-no-flex slds-grid slds-grid_vertical-align-center slds-gutters_x-small">
+                <template if:false={isLogin}>
+                    
+                    <template lwc:if={isLoading}>
+                        <div class="spinner-container slds-is-relative">
+                            <lightning-spinner variant="brand" size="small"> </lightning-spinner>
+                        </div>
+                    </template>
+                    <template lwc:else>
+                        <lightning-button-icon
+                            class="slds-m-right_x-small"
+                            icon-name="utility:refresh"
+                            variant="border-filled"
+                            title="Refresh"
+                            onclick={handleRefresh}
+                        ></lightning-button-icon>
+                    </template>
+
+                    <lightning-button
+                        label="New"
+                        variant="neutral"
+                        onclick={handleCreateNewCase}
+                    ></lightning-button>
+                </template>
+            </div>
+        </div>
+
+        <!-- Body -->
+        <div class="slds-card__body slds-card__body_inner">
+            <template if:true={records.length}>
+                <div class={relatedListClass}>
+                    <template for:each={records} for:item="record">
+                        <c-tsa-net-case-card 
+                            key={record.Id} 
+                            record={record}
+                            state={state}
+                            onrefresh={handleRefresh}
+                            onloading={handleOnLoading}
+                        ></c-tsa-net-case-card>
+                    </template>
+                </div>
+            </template>
+        </div>
+
+        <!-- Footer -->
+        <footer lwc:if={hasRecords} class="slds-card__footer">
+            <a class="slds-card__footer-action" onclick={handleRelatedListRedirect}>View All</a>
+        </footer>
+    </div>
+</template>

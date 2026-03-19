@@ -1,0 +1,19 @@
+<template>
+    <div class="slds-p-around_large">
+        <div class="slds-media slds-media_center slds-m-bottom_medium">
+            <div class="slds-media__figure slds-m-left_medium">
+                <span class={iconClass} title="Success">
+                    <lightning-icon icon-name={iconName} size="large"></lightning-icon>
+                </span>
+            </div>
+            <div class="slds-media__body slds-m-left_medium">
+                <h1 class="slds-text-heading_large slds-m-bottom_xx-small">
+                    {message}
+                </h1>
+                <p class="slds-text-color_weak">
+                    <i>{description}</i>
+                </p>
+            </div>
+        </div>
+    </div>
+</template>

@@ -1,0 +1,39 @@
+<template>
+    <div class="slds-card slds-p-around_none slds-m-around_none">
+        <div lwc:if={isLoading}>
+            <lightning-spinner variant="brand" size="medium"> </lightning-spinner>
+        </div>
+
+        <template lwc:if={isNotAccess}>
+            <div class="slds-align_absolute-center" style="height:10rem">
+                <c-tsa-net-action-modal-submit-result 
+                    class="slds-m-top_small"
+                    status="error"
+                    message="Access Denied"
+                    description="You don’t have the required permissions to access TSANet"
+                >
+                </c-tsa-net-action-modal-submit-result>
+            </div>
+        </template>
+        <template lwc:else>
+            <template lwc:if={isUnauthorized}>
+                <div class="slds-align_absolute-center" style="height:10rem">
+                    <c-tsa-net-action-modal-submit-result 
+                        class="slds-m-top_small"
+                        status="warning"
+                        message="Unauthorized!"
+                        description="Please contact your system administrator!"
+                    >
+                    </c-tsa-net-action-modal-submit-result>
+                </div>
+            </template>
+            <template lwc:else>
+                <c-tsa-net-case-related-list 
+                    record-id={recordId} 
+                    state={state}
+                    onrefresh={handleRefresh}>
+                </c-tsa-net-case-related-list>
+            </template>
+        </template>
+    </div>
+</template>

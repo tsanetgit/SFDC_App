@@ -1,0 +1,31 @@
+.fieldLabel { 
+    font-weight: 600;
+}
+
+.header-divider {
+    height: 1px;
+    background-color: var(--lwc-colorBorder, #dddbda);
+    margin: 0 var(--lwc-spacingMedium);
+}
+
+.info-icon {
+    margin-left: 7px;
+    margin-top: -5px;
+}
+
+.card-pill {
+    font-weight: 600;
+    letter-spacing: .01em;
+}
+
+.direction {
+    font-size: 9px;
+    font-weight: 500;
+}
+
+.ellipsis {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}

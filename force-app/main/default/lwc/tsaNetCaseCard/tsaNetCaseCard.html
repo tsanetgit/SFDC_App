@@ -1,0 +1,85 @@
+<template>
+
+    <div class="slds-p-around_medium slds-grid slds-grid_align-spread">
+        <div class="slds-grow">
+            <div class="slds-grid slds-grid_vertical-align-center slds-gutters_x-small">
+                <h3 class="slds-text-heading_small slds-truncate slds-m-left_x-small">
+                    <lightning-formatted-url value={record.link} label={record.Name}></lightning-formatted-url>
+                </h3>
+                <div class="info-icon">
+                    <lightning-helptext content={escalationInstructions}></lightning-helptext>
+                </div>
+                <!--div class="slds-text-title slds-text-title_caps slds-m-left_xx-small direction">{direction}</div-->
+            </div>
+        </div>
+        <div class="slds-no-flex slds-m-left_small">
+            <!--lightning-badge label={direction} class="slds-m-right_xx-small card-pill"></lightning-badge-->
+            <lightning-badge label={priority} class={priorityStyleClass}></lightning-badge>
+            <lightning-badge label={status} class={statusStyleClass}></lightning-badge>
+            <template if:false={isLoading}>
+                <lightning-button-menu lwc:if={record.isHideAction} icon-size="xx-small" menu-alignment="right" variant="bare" data-id={tsaNetCaseId} data-token={token} onselect={handleOnSelectAction}>
+                    <template if:true={record.isAcceptable}>
+                        <lightning-menu-item value={acceptMode} prefix-icon-name="utility:check" label="Accept"></lightning-menu-item>
+                    </template>
+                    <template if:true={record.isNoteable}>
+                        <lightning-menu-item value={createNoteMode} prefix-icon-name="utility:note" label="Create Note"></lightning-menu-item>
+                    </template>
+                    <template if:true={record.isRejectable}>
+                        <lightning-menu-item value={rejectMode} prefix-icon-name="utility:close" label="Reject"></lightning-menu-item>
+                    </template>
+                    <template if:true={record.isAttachmentable}>
+                        <lightning-menu-item value={sendAttachmentMode} prefix-icon-name="utility:upload" label="Send Attachment"></lightning-menu-item>
+                    </template>
+                    <template if:true={record.isRequestable}>
+                        <lightning-menu-item value={requestInfoMode} prefix-icon-name="utility:comments" label="Request Info"></lightning-menu-item>
+                    </template>
+                    <template if:true={record.isResponseable}>
+                        <lightning-menu-item value={sendInfoMode} prefix-icon-name="utility:info_alt" label="Send Information"></lightning-menu-item>
+                    </template>
+                    <template if:true={record.isCloseable}>
+                        <lightning-menu-item value={closeCaseMode} prefix-icon-name="utility:ban" label="Close"></lightning-menu-item>
+                    </template>
+                </lightning-button-menu>
+            </template>
+        </div>
+    </div>
+    <div class="header-divider"></div>
+    <div class="slds-p-horizontal_medium slds-grid slds-grid_align-spread">
+        <div class="slds-grow">
+            <div class="slds-grid slds-wrap slds-m-top_x-small slds-p-bottom_medium slds-border_bottom">
+                <div class="slds-col slds-size_1-of-2 slds-p-right_small">
+                    <div class="slds-text-color_weak slds-text-body_small fieldLabel">Member</div>
+                    <div class="slds-truncate">{member}</div>
+                </div>
+
+                <div class="slds-col slds-size_1-of-2">
+                    <div class="slds-text-color_weak slds-text-body_small fieldLabel">Request Date</div>
+                    <div class="slds-truncate"><lightning-formatted-date-time value={requestDate}></lightning-formatted-date-time></div>
+                </div>
+
+                <div class="slds-col slds-size_1-of-2 slds-p-right_small slds-m-top_x-small">
+                    <div class="slds-text-color_weak slds-text-body_small fieldLabel">Contact</div>
+                    <div class="slds-truncate">{contact}</div>
+                </div>
+
+                <div class="slds-col slds-size_1-of-2 slds-m-top_x-small">
+                    <div class="slds-text-color_weak slds-text-body_small fieldLabel">Email</div>
+                    <div class="slds-truncate">
+                        <lightning-formatted-email value={email}></lightning-formatted-email>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--div class="slds-p-horizontal_medium slds-p-bottom_medium slds-border_bottom slds-grid slds-grid_align-spread">
+        <div class="slds-col slds-size_1-of-2 slds-p-right_small slds-m-top_x-small">
+            <div class="slds-text-color_weak slds-text-body_small fieldLabel">Summary</div>
+            <div class="slds-truncate ellipsis" title={summary}>{summary}</div>
+        </div>
+
+        <div class="slds-col slds-size_1-of-2 slds-p-right_small slds-m-top_x-small">
+            <div class="slds-text-color_weak slds-text-body_small fieldLabel">Description</div>
+            <div class="slds-truncate ellipsis" title={description}>{description}</div>
+        </div>
+    </div-->
+</template>

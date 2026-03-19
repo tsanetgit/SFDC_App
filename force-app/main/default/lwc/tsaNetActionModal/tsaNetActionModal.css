@@ -1,0 +1,37 @@
+.fieldLabel { 
+    font-weight: 600;
+}
+
+:host {
+  display: block;
+}
+
+.body {
+  font-size: 0.875rem;
+  line-height: 1.5;
+  margin-top: -10px;
+}
+
+:host .slds-modal__content {
+  padding: 0 !important;
+}
+
+:host .slds-modal__content_footless {
+  padding-bottom: 0 !important;
+  min-height: auto !important;
+}
+
+.footer {
+  width: 96%;
+  display: flex;
+  justify-content: flex-end;
+}
+
+:host lightning-quick-action-panel {
+  box-shadow: none;
+  border-radius: 0;
+}
+
+.quick-action-button {
+    margin-top: 15px;
+}

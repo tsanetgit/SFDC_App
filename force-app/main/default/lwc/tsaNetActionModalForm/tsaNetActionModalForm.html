@@ -1,0 +1,30 @@
+<template>
+    <div lwc:if={isNoteMode} class="slds-m-horizontal_small">
+        <!-- Summary -->
+        <lightning-input 
+            type="text" 
+            label="Summary" 
+            name="summary" 
+            value={summaryValue} 
+            onchange={handleChangeSummary} 
+            required></lightning-input>
+        <!-- Description -->
+        <lightning-textarea
+            label="Description"
+            value={description}
+            onchange={handleChangeDescription}
+            required
+        ></lightning-textarea>
+    </div>
+
+    <div lwc:else>
+        <c-tsa-net-action-modal-view-form 
+            record={record}
+            state={state}
+        ></c-tsa-net-action-modal-view-form>
+        <c-tsa-net-action-modal-form-field
+            mode={mode}
+            onchange={handleChangeField}
+        ></c-tsa-net-action-modal-form-field>
+    </div>
+</template>

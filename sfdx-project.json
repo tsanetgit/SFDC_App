@@ -1,0 +1,31 @@
+{
+  "packageDirectories": [
+    {
+      "path": "force-app",
+      "default": true,
+      "package": "TSANet Connect",
+      "versionName": "Version 2.9.0",
+      "versionNumber": "2.9.0.NEXT",
+      "versionDescription": "TSANet Connect Spring 2026",
+      "ancestorId": "HIGHEST",
+      "apexTestAccess": {
+        "permissionSets": [
+          "TSANet_Connect_Permissions_Admin"
+        ],
+        "permissionSetLicenses": [
+          "SalesConsoleUser"
+        ]
+      }
+    }
+  ],
+  "name": "TSANet Connect",
+  "namespace": "tsanetconnect",
+  "sfdcLoginUrl": "https://login.salesforce.com",
+  "sourceApiVersion": "64.0",
+  "packageAliases": {
+    "TSANet Connect": "0HogL0000000tm5SAA",
+    "TSANet Connect@2.8.0-2-main": "04tgL000000CBJ3QAO",
+    "TSANet Connect@2.8.0-3-main": "04tgL000000C9YzQAK",
+    "TSANet Connect@2.9.0-1": "04tgL000000CN0rQAG"
+  }
+}

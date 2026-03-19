@@ -1,0 +1,44 @@
+<template>
+    <div class="slds-p-around_medium slds-grid slds-grid_align-spread">
+        <div class="slds-grow">
+            <div class="slds-grid slds-wrap slds-m-top_x-small">
+
+                <div class="slds-col slds-size_1-of-2">
+                    <div class="slds-text-color_weak slds-text-body_small fieldLabel">Case Number</div>
+                    <div class="slds-truncate">
+                        <lightning-formatted-url lwc:if={caseNumber} label={caseNumber} value={caseLink} target="_blank"></lightning-formatted-url>
+                    </div>
+                </div>
+
+                <div class="slds-col slds-size_1-of-2 slds-p-right_small slds-m-top_x-small">
+                    <div class="slds-text-color_weak slds-text-body_small fieldLabel">Owner</div>
+                    <div class="slds-truncate">
+                        <lightning-formatted-url lwc:if={ownerName} label={ownerName} value={ownerLink} target="_blank"></lightning-formatted-url>
+                    </div>
+                </div>
+
+                <div class="slds-col slds-size_1-of-2 slds-p-right_small">
+                    <div class="slds-text-color_weak slds-text-body_small fieldLabel">Company</div>
+                    <div class="slds-truncate" lwc:if={companyName}>{companyName}</div>
+                </div>
+
+                <div class="slds-col slds-size_1-of-2 slds-m-top_x-small">
+                    <div class="slds-text-color_weak slds-text-body_small fieldLabel">Email</div>
+                    <div class="slds-truncate">
+                        <lightning-formatted-email lwc:if={ownerEmail} value={ownerEmail}></lightning-formatted-email>
+                    </div>
+                </div>
+
+                <div lwc:if={ownerPhone} class="slds-col slds-size_1-of-2 slds-m-top_x-small"></div>
+
+                <div lwc:if={ownerPhone} class="slds-col slds-size_1-of-2 slds-m-top_x-small">
+                    <div class="slds-text-color_weak slds-text-body_small fieldLabel">Phone</div>
+                    <div class="slds-truncate">
+                        <lightning-formatted-phone value={ownerPhone}></lightning-formatted-phone>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</template>

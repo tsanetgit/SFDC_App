@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ListView xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Inbound_Open</fullName>
+    <columns>Case__c</columns>
+    <columns>NAME</columns>
+    <columns>Partner__c</columns>
+    <columns>RequestDate__c</columns>
+    <columns>ResponseDate__c</columns>
+    <columns>Status__c</columns>
+    <filterScope>Everything</filterScope>
+    <filters>
+        <field>Status__c</field>
+        <operation>equals</operation>
+        <value>OPEN</value>
+    </filters>
+    <label>Inbound ( Open )</label>
+</ListView>
