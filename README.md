@@ -1,4 +1,4 @@
-<b>SFDC Managed Package for TSANet Connect 2.0</b>
+<b>SFDC Managed Package for TSANet Connect</b>
 
 To use, contact membership@tsanet.org </br>
 Use Issues https://github.com/tsanetgit/SFDC/issues to log bugs and enhancements.
