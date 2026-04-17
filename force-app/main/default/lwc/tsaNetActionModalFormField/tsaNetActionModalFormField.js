@@ -1,11 +1,11 @@
 import { LightningElement, api, track } from 'lwc';
 
-import { ACTIONS, NOTE_STATE, TYPING_INTERVAL } from 'c/tsaNetConstants'
+import { TYPING_INTERVAL } from 'c/tsaNetConstants'
 
 import { getActionRequestParamLabel } from 'c/tsaNetHelper'
- 
+
 export default class TsaNetActionModalFormField extends LightningElement {
-    
+
     @api mode
 
     get label(){

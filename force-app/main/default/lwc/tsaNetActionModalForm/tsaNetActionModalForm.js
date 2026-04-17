@@ -1,7 +1,8 @@
 import { LightningElement, api, track } from 'lwc';
 
-import { 
+import {
     CASE_SUBJECT_FIELD,
+    CASE_NUMBER_FIELD,
     USER_NAME_FIELD,
     USER_FIRST_NAME_FIELD,
     USER_LAST_NAME_FIELD,
@@ -9,14 +10,14 @@ import {
     USER_PHONE_FIELD,
     USER_MOBILE_PHONE_FIELD,
 
-    ACTIONS, 
-    NOTE_STATE 
+    ACTIONS,
+    NOTE_STATE
 } from 'c/tsaNetConstants'
 
-import { 
+import {
     getActionRequestParam
 } from 'c/tsaNetHelper'
- 
+
 export default class TsaNetActionModalForm extends LightningElement {
 
     @api mode
@@ -29,7 +30,7 @@ export default class TsaNetActionModalForm extends LightningElement {
     @track description
 
     // Accept, Reject, Request Info, Send Info
-    @track form 
+    @track form
 
     @track value
 
@@ -47,7 +48,7 @@ export default class TsaNetActionModalForm extends LightningElement {
 
     generateNote(){
         this.note.summary = this.summaryValue
-        this.note.description = this.description 
+        this.note.description = this.description
         this.note.submittedBy.firstName = this.ownerFirstName || this.userFirstName
         this.note.submittedBy.lastName = this.ownerLastName || this.userLastName
     }
@@ -57,9 +58,9 @@ export default class TsaNetActionModalForm extends LightningElement {
         this.dispatchFieldChange(event)
     }
 
-    dispatchFieldChange(event){
-        let param = getActionRequestParam(this.mode)
-        let data = {
+    dispatchFieldChange(){
+        const param = getActionRequestParam(this.mode)
+        const data = {
             ...this.engineerData,
             [param]: this.value
         }
@@ -69,7 +70,7 @@ export default class TsaNetActionModalForm extends LightningElement {
     get summaryValue(){
         return this.summary ?? this.caseSubject
     }
-    
+
     get actionRequestParam(){
         return getActionRequestParam(this.mode)
     }
@@ -83,10 +84,15 @@ export default class TsaNetActionModalForm extends LightningElement {
     }
 
     // Engineer Data
+    get caseNumber() {
+        return this.caseRecord?.[CASE_NUMBER_FIELD.fieldApiName] ?? '';
+    }
+
     get engineerData(){
         return {
+            caseNumber: this.caseNumber,
             engineerName: this.ownerName || this.userName,
-            engineerEmail: 'test@appko.com',//this.ownerEmail || this.userEmail,
+            engineerEmail: this.ownerEmail || this.userEmail,
             engineerPhone: this.ownerPhone || this.userPhone
         }
     }
@@ -99,7 +105,7 @@ export default class TsaNetActionModalForm extends LightningElement {
     get ownerLastName() {
         return this.caseRecord?.Owner[USER_LAST_NAME_FIELD.fieldApiName] ?? '';
     }
-    
+
     get ownerName() {
         return this.caseRecord?.Owner[USER_NAME_FIELD.fieldApiName] ?? '';
     }
@@ -112,7 +118,7 @@ export default class TsaNetActionModalForm extends LightningElement {
         return this.caseRecord?.Owner[USER_PHONE_FIELD.fieldApiName] ?? '';
     }
 
-    // Current User Data 
+    // Current User Data
 
     get userFirstName() {
         return this.state?.user[USER_FIRST_NAME_FIELD.fieldApiName] ?? '';
@@ -137,7 +143,7 @@ export default class TsaNetActionModalForm extends LightningElement {
             ''
         );
     }
-    
+
     get isNoteMode(){
         return this.mode == ACTIONS.CREATE_NOTE
     }

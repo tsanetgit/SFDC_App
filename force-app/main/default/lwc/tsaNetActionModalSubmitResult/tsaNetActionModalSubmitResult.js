@@ -1,5 +1,5 @@
 import { LightningElement, api } from 'lwc';
- 
+
 export default class TsaNetActionModalSubmitResult extends LightningElement {
 
     @api message

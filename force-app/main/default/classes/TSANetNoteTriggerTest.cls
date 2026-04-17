@@ -1,7 +1,8 @@
-@isTest
+@IsTest
+
 public class TSANetNoteTriggerTest {
-    
-    @testSetup static void testSetup() {
+
+     @TestSetup static void testSetup() {
 		User user = TSANetDataFactory.createAdminUser();
         System.runAs(user){
             TSANetDataFactory.createCredentials();
@@ -12,11 +13,12 @@ public class TSANetNoteTriggerTest {
         }
 	}
 
-    @isTest
+
+    @IsTest
     public static void methodTest(){
-        
+
         TSANetNote__c note = new TSANetNote__c(tsanetconnect__Summary__c = 'Test');
-        
+
         insert note;
     }
 }

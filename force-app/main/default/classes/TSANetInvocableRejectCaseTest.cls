@@ -1,8 +1,8 @@
-@isTest
+@IsTest
 public class TSANetInvocableRejectCaseTest {
 
-    @testSetup static void testSetup() {
-        
+    @TestSetup static void testSetup() {
+
         User user = TSANetDataFactory.createAdminUser();
         System.runAs(user){
             TSANetDataFactory.createCredentials();
@@ -12,8 +12,8 @@ public class TSANetInvocableRejectCaseTest {
             TSANetDataFactory.createTSANetCase(caseRecord.Id);
         }
 	}
-    
-    @isTest
+
+    @IsTest
     public static void rejectCollaborationRequestTest(){
         String body = '{ "documentId": 2115, "internalCaseNumber": "", "optionalRecieverInternalCaseNumber": "", "problemSummary": "", "problemDescription": "", "casePriority": "", "readonlyAdminNote": "<p>test admin note (description)</p>", "readonlyEscalationInstructions": "<p>test escalation instructions</p>", "testSubmission": false, "customerData": [ { "id": 5558, "section": "COMMON_CUSTOMER_SECTION", "fieldName": "Customer Company", "value": null }, { "id": 5559, "section": "COMMON_CUSTOMER_SECTION", "fieldName": "Customer Name", "value": null }, { "id": 5560, "section": "COMMON_CUSTOMER_SECTION", "fieldName": "Customer Email", "value": null }, { "id": 5561, "section": "COMMON_CUSTOMER_SECTION", "fieldName": "Customer Phone Including Country Code", "value": null }, { "id": 5562, "section": "COMMON_CUSTOMER_SECTION", "fieldName": "Customer Case # with Connect2 Test 01 (Optional)", "value": null } ] }';
     	Test.setMock(HttpCalloutMock.class, new MockHttpResponseGenerator(200, body, null));
@@ -23,8 +23,8 @@ public class TSANetInvocableRejectCaseTest {
             input.caseRecord = caseRecord;
             input.form = new TSANetRejectForm();
             //TSANetInvocableRejectCollaborationCase.rejectCollaborationCase(new TSANetInvocableRejectCollaborationCase.TSANetInput[]{ input });
-            TSANetInvocableRejectCollaborationCase.TSANetRejectResult[] data = TSANetInvocableRejectCollaborationCase.rejectCollaborationCase(new TSANetInvocableRejectCollaborationCase.TSANetInput[]{ input });
+            TSANetInvocableRejectCollaborationCase.rejectCollaborationCase(new TSANetInvocableRejectCollaborationCase.TSANetInput[]{ input });
         Test.stopTest();
-        
+
     }
 }

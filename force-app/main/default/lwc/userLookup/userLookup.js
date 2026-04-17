@@ -69,7 +69,7 @@ export default class UserLookup extends LightningElement {
             this.results = res ?? [];
         } catch(err){
             this.message = 'Search Error';
-            
+
             console.error(err);
             this.results = [];
         } finally{

@@ -39,6 +39,7 @@
             <label>Asset Not Found</label>
         </rules>
     </decisions>
+    <description>Record-triggered flow that handles collaboration request lifecycle events for asset-related cases.</description>
     <environments>Default</environments>
     <formulas>
         <name>CasePriority</name>

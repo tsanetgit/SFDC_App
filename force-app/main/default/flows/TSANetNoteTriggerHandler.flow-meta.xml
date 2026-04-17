@@ -99,6 +99,7 @@
             <label>Is Replied</label>
         </rules>
     </decisions>
+    <description>Triggered flow responsible for automation logic related to note creation and updates.</description>
     <environments>Default</environments>
     <formulas>
         <name>Body</name>

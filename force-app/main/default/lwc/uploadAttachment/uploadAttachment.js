@@ -4,7 +4,7 @@ import { NavigationMixin } from "lightning/navigation"
 import getAllRelatedFiles from '@salesforce/apex/TSANetUtils.getAllRelatedFiles'
 import getAttachmentConfig from '@salesforce/apex/TSANetService.getAttachmentConfig'
 import sendAttachment from '@salesforce/apex/TSANetService.sendAttachment'
- 
+
 export default class UploadAttachment extends NavigationMixin(LightningElement) {
 
     @api recordId
@@ -23,7 +23,7 @@ export default class UploadAttachment extends NavigationMixin(LightningElement) 
         if(this.record?.tsanetconnect__Token__c){
             this.isLoading = true
             getAttachmentConfig({ token: this.record?.tsanetconnect__Token__c }).then(response => {
-                let config = JSON.parse(response)
+                const config = JSON.parse(response)
 
                 if(config?.receiver?.parameters?.password){
                     this.hasConfig = true
@@ -43,18 +43,18 @@ export default class UploadAttachment extends NavigationMixin(LightningElement) 
                 this.isLoading = false
             })
         }
-       
+
     }
 
     handleFileChange(event) {
-        let files = event.target.files;
+        const files = event.target.files;
 
-        for (const [key, file] of Object.entries(files)) {
+        for (const file of Object.values(files)) {
 
             if (file) {
                 const reader = new FileReader();
                 reader.onload = () => {
-                    let fileData = {
+                    const fileData = {
                         fileId: file.name + '-' + file?.size,
                         filename: file.name,
                         base64: reader.result.split(',')[1]
@@ -68,9 +68,9 @@ export default class UploadAttachment extends NavigationMixin(LightningElement) 
     }
 
     handleDeleteFile(event){
-        let fileId = event.currentTarget.dataset.fileId
+        const fileId = event.currentTarget.dataset.fileId
 
-        let found = this.files.find(file => ( file.fileId == fileId ))
+        const found = this.files.find(file => ( file.fileId == fileId ))
 
         if(found?.cvId){
             this.contentVersions.forEach(cv => {
@@ -90,7 +90,7 @@ export default class UploadAttachment extends NavigationMixin(LightningElement) 
 
             sendAttachment({ token: this.record?.tsanetconnect__Token__c, files: this.files }).then(response => {
 
-                let results = JSON.parse(response)
+                const results = JSON.parse(response)
 
                 results.forEach(result => {
                     this.files.forEach(file => {
@@ -108,12 +108,12 @@ export default class UploadAttachment extends NavigationMixin(LightningElement) 
                 console.error(error)
                 this.isLoading = false
             })
-            
+
         }
     }
 
     handleSelectContentVersion(event){
-        let cvId = event.currentTarget.dataset.id
+        const cvId = event.currentTarget.dataset.id
 
         this.contentVersions.forEach(cv => {
             if(cv.Id == cvId){
@@ -126,8 +126,8 @@ export default class UploadAttachment extends NavigationMixin(LightningElement) 
                         fileId: cv.Id,
                         cvId: cv.Id
                     })
-                } 
-                    
+                }
+
             }
         })
     }
@@ -167,7 +167,7 @@ export default class UploadAttachment extends NavigationMixin(LightningElement) 
             }))
         } else {
 
-            this[NavigationMixin.Navigate]({    
+            this[NavigationMixin.Navigate]({
                 type: "standard__recordPage",
                 attributes: {
                     recordId: this.recordId,

@@ -1,8 +1,9 @@
-@isTest
+@IsTest
+
 public class TSANetInvocableGetCompanyServiceTest {
-    
-    @testSetup static void testSetup() {
-        
+
+     @TestSetup static void testSetup() {
+
         User user = TSANetDataFactory.createAdminUser();
         System.runAs(user){
             TSANetDataFactory.createCredentials();
@@ -13,7 +14,8 @@ public class TSANetInvocableGetCompanyServiceTest {
         }
 	}
 
-    @isTest
+
+    @IsTest
     public static void getCompaniesTest(){
         String body = '[ { "label": "Demo - VMware", "companyId": 1072, "departmentId": null } ]';
         Test.setMock(HttpCalloutMock.class, new MockHttpResponseGenerator(200, body, null));

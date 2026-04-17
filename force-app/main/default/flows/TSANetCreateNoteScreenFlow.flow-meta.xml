@@ -30,6 +30,7 @@
             <label>isError</label>
         </rules>
     </decisions>
+    <description>Screen flow that allows users to create a note on a TSANet collaboration case.</description>
     <environments>Default</environments>
     <interviewLabel>TSANet - Create Note ( Screen Flow ) {!$Flow.CurrentDateTime}</interviewLabel>
     <isTemplate>true</isTemplate>

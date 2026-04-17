@@ -6,7 +6,10 @@
  */
 @IsTest
 public class TSANetDataFactory {
-    
+
+    /** Creates and inserts an admin User with TSANet permissions.
+     * @return the inserted User record
+     */
     public static User createAdminUser() {
         Profile adminProfile = [
             SELECT Id
@@ -27,21 +30,24 @@ public class TSANetDataFactory {
             LanguageLocaleKey = 'en_US'
         );
         insert u;
-        
+
         // Query with namespace prefix for 2GP compatibility
         List<PermissionSet> psList = [SELECT Id FROM PermissionSet WHERE Name = 'TSANet_Connect_Permissions_Admin' LIMIT 1];
         if (psList.isEmpty()) {
             // Try with namespace prefix (2GP scratch org)
             psList = [SELECT Id FROM PermissionSet WHERE Name = 'tsanetconnect__TSANet_Connect_Permissions_Admin' LIMIT 1];
         }
-        
+
         if (!psList.isEmpty()) {
             insert new PermissionSetAssignment(AssigneeId = u.Id, PermissionSetId = psList[0].Id);
         }
-        
+
         return u;
     }
 
+    /** Creates and inserts a default TSANet credentials record.
+     * @return the inserted credentials record
+     */
     public static tsanetconnect__TSANet_Credentials__c createCredentials() {
         tsanetconnect__TSANet_Credentials__c credentials = new tsanetconnect__TSANet_Credentials__c();
         credentials.tsanetconnect__UserName__c = 'username@gmail.com';
@@ -53,13 +59,20 @@ public class TSANetDataFactory {
         insert credentials;
         return credentials;
     }
-    
+
+    /** Creates and inserts a test Account.
+     * @return the inserted Account record
+     */
     public static Account createAccount() {
         Account a = new Account(Name = 'Test Account');
         insert a;
         return a;
     }
 
+    /** Creates and inserts a test Contact linked to the given Account.
+     * @param accountId the parent Account Id
+     * @return the inserted Contact record
+     */
     public static Contact createContact(Id accountId) {
         Contact c = new Contact(
             LastName  = 'Test Contact',
@@ -71,6 +84,11 @@ public class TSANetDataFactory {
         return c;
     }
 
+    /** Creates and inserts a test Case for the given Account and Contact.
+     * @param accountId the Account Id
+     * @param contactId the Contact Id
+     * @return the inserted Case record
+     */
     public static Case createCase(Id accountId, Id contactId) {
         Case cs = new Case(
             AccountId = accountId,
@@ -83,6 +101,10 @@ public class TSANetDataFactory {
         return cs;
     }
 
+    /** Creates and inserts a test TSANetCase linked to the given Case.
+     * @param caseId the parent Case Id
+     * @return the inserted TSANetCase record
+     */
     public static tsanetconnect__TSANetCase__c createTSANetCase(Id caseId) {
         tsanetconnect__TSANetCase__c t = new tsanetconnect__TSANetCase__c(
             tsanetconnect__Token__c = 'test-token',

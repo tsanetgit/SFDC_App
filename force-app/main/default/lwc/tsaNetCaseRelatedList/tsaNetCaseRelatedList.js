@@ -1,4 +1,4 @@
-import { LightningElement, api, track, wire } from 'lwc';
+import { LightningElement, api, track } from 'lwc';
 
 import { NavigationMixin } from 'lightning/navigation'
 
@@ -33,7 +33,7 @@ export default class TsaNetCaseRelatedList extends NavigationMixin(LightningElem
         this.records = value?.relatedCases ? value.relatedCases : []
     }
 
-    handleRefresh(event){
+    handleRefresh(){
         this.isLoading = true
         getRelatedTSANetCases(this.recordId).then(() => {
             this.dispatchEvent(new CustomEvent('refresh'))

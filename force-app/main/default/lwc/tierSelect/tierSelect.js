@@ -1,10 +1,10 @@
-import { LightningElement, api, track } from 'lwc';
- 
+import { LightningElement, api } from 'lwc';
+
 export default class TierSelect extends LightningElement {
 
     @api field
 
-    @api options 
+    @api options
 
     data = new Set()
     children = []
@@ -24,13 +24,13 @@ export default class TierSelect extends LightningElement {
             this.childCound = 0
         }
 
-        let found = this.options.find(o => ( o.value == this.value ))
-        this.data.add(found) 
+        const found = this.options.find(o => ( o.value == this.value ))
+        this.data.add(found)
         this.setResult()
 
         if(found && found?.children && found?.children.length){
-            let options = found?.children.map(c => ({ label: c.value, value: c.value, children: c.children }))
-            let child = {}
+            const options = found?.children.map(c => ({ label: c.value, value: c.value, children: c.children }))
+            const child = {}
             child['options'] = options
             child['parentValue'] = this.value
             this.childCound = 0
@@ -40,9 +40,9 @@ export default class TierSelect extends LightningElement {
     }
 
     handleChangeSelectChild(event){
-        let childValue = event.target.value
+        const childValue = event.target.value
 
-        let found = this.children[this.childCound].options.find(c => ( c.value == childValue ))
+        const found = this.children[this.childCound].options.find(c => ( c.value == childValue ))
 
         if(found){
 
@@ -50,15 +50,15 @@ export default class TierSelect extends LightningElement {
             const array = [...this.data];
             array.length = this.childCound  + 1
             this.data = new Set(array)
-            
-            this.data.add(found) 
+
+            this.data.add(found)
             this.setResult()
-    
+
             this.children[this.childCound].value = childValue
-    
+
             if(found && found?.children && found?.children.length){
-                let options = found?.children.map(c => ({ label: c.value, value: c.value, children: c.children }))
-                let child = {}
+                const options = found?.children.map(c => ({ label: c.value, value: c.value, children: c.children }))
+                const child = {}
                 child['options'] = options
                 child['parentValue'] = childValue
                 this.children = [...this.children, child]
@@ -81,15 +81,15 @@ export default class TierSelect extends LightningElement {
             array.length = splitNumber  + 1
             this.data = new Set(array)
 
-            let found2 = this.children[splitNumber].options.find(c => ( c.value == childValue ))
+            const found2 = this.children[splitNumber].options.find(c => ( c.value == childValue ))
 
 
-            this.data.add(found2) 
+            this.data.add(found2)
             this.setResult()
 
             if(found2 && found2?.children && found2?.children.length){
-                let options = found2?.children.map(c => ({ label: c.value, value: c.value, children: c.children }))
-                let child = {}
+                const options = found2?.children.map(c => ({ label: c.value, value: c.value, children: c.children }))
+                const child = {}
                 child['options'] = options
                 child['parentValue'] = childValue
                 this.children = [...this.children, child]

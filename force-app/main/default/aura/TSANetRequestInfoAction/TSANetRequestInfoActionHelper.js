@@ -10,11 +10,13 @@
                 break
                 case 'INCOMPLETE': console.log('INCOMPLETE')
                 break
-                case 'ERROR': const errors = response.getError()
-                errors 
-                ? reject(errors[0].message)
-                : console.error('Unknown error')
-                break
+                case 'ERROR': {
+                    const errors = response.getError()
+                    errors
+                    ? reject(errors[0].message)
+                    : console.error('Unknown error')
+                    break
+                }
                 default: console.log(state)
             }
                                })

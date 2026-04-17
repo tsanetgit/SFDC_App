@@ -27,6 +27,7 @@
     </actionCalls>
     <apiVersion>65.0</apiVersion>
     <areMetricsLoggedToDataCloud>false</areMetricsLoggedToDataCloud>
+    <description>Reusable subflow that finalizes and closes the collaboration process.</description>
     <environments>Default</environments>
     <interviewLabel>TSANet Close ( Automation ) {!$Flow.CurrentDateTime}</interviewLabel>
     <isTemplate>true</isTemplate>

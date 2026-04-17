@@ -1,12 +1,24 @@
+/** Controller for the user-lookup LWC component. */
 public with sharing class UserLookupController {
-    
+
+    /** Lightweight DTO exposing safe User fields to the client. */
     public class UserDTO {
+        /** Salesforce User Id. */
         @AuraEnabled public Id     id;
+        /** Full display name. */
         @AuraEnabled public String name;
+        /** User email address. */
         @AuraEnabled public String email;
+        /** User mobile phone number. */
         @AuraEnabled public String phone;
+        /** User job title. */
         @AuraEnabled public String title;
+        /** URL of the user's small profile photo. */
         @AuraEnabled public String smallPhotoUrl;
+        /**
+         * Constructs a UserDTO from a User record with FLS checks.
+         * @param u the source User record
+         */
         public UserDTO(User u){
             id = u.Id;
             name = u.Name;
@@ -17,9 +29,17 @@ public with sharing class UserLookupController {
         }
     }
 
+    /**
+     * Searches active users by name or email with FLS enforcement.
+     * @param searchTerm text to match against Name or Email
+     * @param limitSize maximum number of results (capped at 50)
+     * @return list of matching UserDTO records
+     */
     @AuraEnabled(cacheable=true)
     public static List<UserDTO> searchUsers(String searchTerm, Integer limitSize){
-        if (limitSize == null || limitSize <= 0 || limitSize > 50) limitSize = 10;
+        if (limitSize == null || limitSize <= 0 || limitSize > 50) {
+            limitSize = 10;
+        }
         String term = (searchTerm == null) ? '' : searchTerm.trim();
 
         if (!Schema.sObjectType.User.isAccessible()) {
@@ -48,10 +68,17 @@ public with sharing class UserLookupController {
         }
         return outp;
     }
-    
+
+    /**
+     * Returns a single UserDTO by Salesforce User Id.
+     * @param userId the User Id to look up
+     * @return UserDTO or null if not accessible
+     */
     @AuraEnabled(cacheable=true)
     public static UserDTO getUserById(Id userId){
-        if (userId == null || !Schema.sObjectType.User.isAccessible()) return null;
+        if (userId == null || !Schema.sObjectType.User.isAccessible()) {
+            return null;
+        }
         User u = [
             SELECT Id, Name, Email, Title, SmallPhotoUrl, MobilePhone
             FROM User

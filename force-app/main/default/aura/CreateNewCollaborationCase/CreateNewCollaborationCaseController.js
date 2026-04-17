@@ -7,9 +7,9 @@
             console.error(error)
         })
 	},
-            
-    close : function(cmp, event){
+
+    close : function(){
         $A.get("e.force:closeQuickAction").fire();
         $A.get('e.force:refreshView').fire();
-    }    
+    }
 })

@@ -1,5 +1,5 @@
 ({
-    
+
     handleClose : function(cmp, event, helper){
         this.LightningConfirm.open({
             message: 'Do you really want to close this case? This action cannot be undone.',
@@ -14,36 +14,38 @@
             }
         });
     },
-    
+
     close : function(cmp, event, helper){
         cmp.set('v.isLoading', true)
         helper.fetch(cmp, 'c.closeTSANetCase', { tsaNetCaseId: cmp.get('v.recordId') }).then(result => {
             cmp.set('v.isLoading', false)
             try {
-            	let record = JSON.parse(result)
-                if(record.hasOwnProperty('status') && record.status == 'CLOSED'){
+            	const record = JSON.parse(result)
+                if(Object.prototype.hasOwnProperty.call(record, 'status') && record.status == 'CLOSED'){
                 	helper.toast('Success', 'success', 'Case has been closed successfully!')
-                }            	
-            	helper.navigateToRecord(cmp, event, helper)
+                }
+            	helper.navigateToRecord(cmp)
             } catch(e){
+                console.debug(e)
                 helper.toast('Error', 'error', result)
-            	helper.navigateToRecord(cmp, event, helper)
+            	helper.navigateToRecord(cmp)
             }
         }).catch(error => {
             	if(error == 'Unauthorized'){
                     helper.fetch(cmp, 'c.getNewAccessToken', null).then(result => {
-                        if(response){
-                            helper.fetch(cmp, 'c.closeTSANetCase', { tsaNetCaseId: cmp.get('v.recordId') }).then(result => {
+                        if(result){
+                            helper.fetch(cmp, 'c.closeTSANetCase', { tsaNetCaseId: cmp.get('v.recordId') }).then(retryResult => {
                                 cmp.set('v.isLoading', false)
                                 try {
-                                    let record = JSON.parse(result)
-                                    if(record.hasOwnProperty('status') && record.status == 'CLOSED'){
+                                    const record = JSON.parse(retryResult)
+                                    if(Object.prototype.hasOwnProperty.call(record, 'status') && record.status == 'CLOSED'){
                                         helper.toast('Success', 'success', 'Case has been closed successfully!')
-                                    }            	
-                                    helper.navigateToRecord(cmp, event, helper)
+                                    }
+                                    helper.navigateToRecord(cmp)
                                 } catch(e){
-                                    helper.toast('Error', 'error', result)
-                                    helper.navigateToRecord(cmp, event, helper)
+                                    console.debug(e)
+                                    helper.toast('Error', 'error', retryResult)
+                                    helper.navigateToRecord(cmp)
                                 }
                             })
                         } else {
@@ -60,7 +62,7 @@
                 }
         })
     },
-    
+
 	fetch : function(cmp, method, params) {
         return new Promise($A.getCallback(function(resolve, reject) {
             cmp.set('v.isLoading', true)
@@ -74,22 +76,24 @@
                 break
                 case 'INCOMPLETE': console.log('INCOMPLETE')
                 break
-                case 'ERROR': const errors = response.getError()
-                errors 
-                ? reject(errors[0].message)
-                : console.error('Unknown error')
-                break
+                case 'ERROR': {
+                    const errors = response.getError()
+                    errors
+                    ? reject(errors[0].message)
+                    : console.error('Unknown error')
+                    break
+                }
                 default: console.log(state)
             }
                                })
             $A.enqueueAction(action)
         }))
     },
-    
-    navigateToRecord: function(cmp, event, helper) {
-        let navService = cmp.find("navService");
+
+    navigateToRecord: function(cmp) {
+        const navService = cmp.find("navService");
         if(navService){
-            let pageReference = {
+            const pageReference = {
                 type: 'standard__recordPage',
                 attributes: {
                     recordId: cmp.get("v.recordId"),
@@ -98,11 +102,11 @@
                 }
             }
             navService.navigate(pageReference)
-            
+
             $A.get('e.force:refreshView').fire()
         }
     },
-    
+
     toast : function(title, type, message) {
         $A.get("e.force:showToast").setParams({ title: title, type: type, message: message }).fire()
     }

@@ -1,6 +1,6 @@
 import { LightningElement, api } from 'lwc';
 
-import { 
+import {
     USER_NAME_FIELD,
     USER_FIRST_NAME_FIELD,
     USER_LAST_NAME_FIELD,
@@ -8,7 +8,7 @@ import {
     USER_PHONE_FIELD,
     USER_MOBILE_PHONE_FIELD,
 } from 'c/tsaNetConstants'
- 
+
 export default class TsaNetActionModalViewForm extends LightningElement {
 
     @api state

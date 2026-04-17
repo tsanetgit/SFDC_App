@@ -216,6 +216,7 @@
         <object xsi:nil="true"/>
         <valueField>value</valueField>
     </dynamicChoiceSets>
+    <description>Screen flow demonstrating how to create a collaboration case using core TSANet actions, customizable to business needs.</description>
     <environments>Default</environments>
     <formulas>
         <name>CustomerDataValue</name>

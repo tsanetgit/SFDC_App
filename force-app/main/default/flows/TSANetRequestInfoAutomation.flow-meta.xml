@@ -33,6 +33,7 @@
     </actionCalls>
     <apiVersion>65.0</apiVersion>
     <areMetricsLoggedToDataCloud>false</areMetricsLoggedToDataCloud>
+    <description>Reusable subflow that executes the &quot;request information&quot; action logic.</description>
     <environments>Default</environments>
     <interviewLabel>TSANet Request Info ( Automation ) {!$Flow.CurrentDateTime}</interviewLabel>
     <isTemplate>true</isTemplate>

@@ -30,6 +30,7 @@
             <label>isError</label>
         </rules>
     </decisions>
+    <description>Screen flow that prompts for confirmation before closing a TSANet collaboration case.</description>
     <environments>Default</environments>
     <interviewLabel>TSANet - Close ( Screen Flow ) {!$Flow.CurrentDateTime}</interviewLabel>
     <isTemplate>true</isTemplate>

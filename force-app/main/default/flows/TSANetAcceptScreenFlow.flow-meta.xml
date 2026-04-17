@@ -67,6 +67,7 @@
             <label>isError</label>
         </rules>
     </decisions>
+    <description>Screen flow that allows users to accept a TSANet collaboration request with a note.</description>
     <environments>Default</environments>
     <interviewLabel>TSANet - Accept ( Screen Flow ) {!$Flow.CurrentDateTime}</interviewLabel>
     <isTemplate>true</isTemplate>

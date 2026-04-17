@@ -43,6 +43,7 @@
             </value>
         </assignmentItems>
     </assignments>
+    <description>Autolaunched flow that prepares the note form data for API consumption.</description>
     <environments>Default</environments>
     <formulas>
         <name>Priority</name>

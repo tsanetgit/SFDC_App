@@ -1,8 +1,8 @@
-@isTest
+@IsTest
 public class TSANetInvocableNoteServiceTest {
 
-	@testSetup static void testSetup() {
-        
+	@TestSetup static void testSetup() {
+
         User user = TSANetDataFactory.createAdminUser();
         System.runAs(user){
             TSANetDataFactory.createCredentials();
@@ -13,7 +13,7 @@ public class TSANetInvocableNoteServiceTest {
         }
 	}
 
-    @isTest
+    @IsTest
     public static void createCollaborationCaseNoteTest(){
         String body = '{ "id": 185, "caseId": 2743, "creatorUsername": null, "creatorEmail": "sue.test@vmware.com", "creatorName": "Sue Test", "summary": "Note FROM VMWare 2", "description": "<p>Note FROM VMWare 2</p>", "priority": "LOW", "status": "ENTERED", "token": "5lUX0KtielPKn2ExCk", "createdAt": "2024-08-16T14:34:22Z", "updatedAt": "2024-09-12T19:31:52Z" }';
         Test.setMock(HttpCalloutMock.class, new MockHttpResponseGenerator(200, body, null));
@@ -23,8 +23,8 @@ public class TSANetInvocableNoteServiceTest {
             TSANetNoteForm note = new TSANetNoteForm();
             input.caseRecord = caseRecord;
             input.note = note;
-            
-            TSANetInvocableNoteService.TSANetNoteResult[] data = TSANetInvocableNoteService.createNote(new TSANetInvocableNoteService.TSANetInput[]{ input });
+
+            TSANetInvocableNoteService.createNote(new TSANetInvocableNoteService.TSANetInput[]{ input });
         Test.stopTest();
-    }    
+    }
 }

@@ -36,6 +36,7 @@
             </value>
         </assignmentItems>
     </assignments>
+    <description>Autolaunched flow that constructs the rejection form payload for API requests.</description>
     <environments>Default</environments>
     <interviewLabel>Get Reject Collaboration Request Form {!$Flow.CurrentDateTime}</interviewLabel>
     <isTemplate>true</isTemplate>

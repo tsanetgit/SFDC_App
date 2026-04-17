@@ -1,25 +1,36 @@
-global class TSANetCompanyForm {
-    
-    @AuraEnabled 
+/** Form data submitted when creating a TSANet collaboration case. */
+global inherited sharing class TSANetCompanyForm {
+
+    /** Document identifier for the form submission. */
+    @AuraEnabled
     global String documentId { get; set; }
-    @AuraEnabled 
+    /** Internal case number of the submitter. */
+    @AuraEnabled
     global String internalCaseNumber { get; set; }
-    @AuraEnabled 
+    /** Optional internal case number on the receiver side. */
+    @AuraEnabled
     global String optionalRecieverInternalCaseNumber { get; set; }
-    @AuraEnabled 
+    /** Summary of the problem being reported. */
+    @AuraEnabled
     global String problemSummary { get; set; }
-    @AuraEnabled 
+    /** Detailed description of the problem. */
+    @AuraEnabled
     global String problemDescription { get; set; }
-    @AuraEnabled 
+    /** Priority level of the case. */
+    @AuraEnabled
     global String casePriority { get; set; }
-    @AuraEnabled 
-    global String readonlyAdminNote { get; set; }    
-    @AuraEnabled 
+    /** Read-only administrative note. */
+    @AuraEnabled
+    global String readonlyAdminNote { get; set; }
+    /** Read-only escalation instructions. */
+    @AuraEnabled
     global String readonlyEscalationInstructions { get; set; }
-    @AuraEnabled 
+    /** Whether this is a test submission. */
+    @AuraEnabled
     global Boolean testSubmission { get; set; }
-    
-    @AuraEnabled 
+
+    /** Custom field data for the form. */
+    @AuraEnabled
     global TSANetCustomerData[] customFields { get; set; } //customerData
-   
+
 }

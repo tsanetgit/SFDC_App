@@ -1,7 +1,7 @@
 @IsTest
 public class ErrorManagerTest {
-    
-    @testSetup static void testSetup() {
+
+     @TestSetup static void testSetup() {
 		User user = TSANetDataFactory.createAdminUser();
         System.runAs(user){
             TSANetDataFactory.createCredentials();
@@ -21,7 +21,7 @@ public class ErrorManagerTest {
         credentials.tsanetconnect__Token__c = 'token';
         credentials.tsanetconnect__isPrimary__c = true;
         credentials.tsanetconnect__Environment__c = 'dev';
-        
+
         credentials.tsanetconnect__isPrimary__c = true;
         insert credentials;
         return credentials;
@@ -102,7 +102,7 @@ public class ErrorManagerTest {
         }
         Test.stopTest();
     }
-    
+
     @IsTest
     static void test_collectErrors_returnsLogs_forFailedUpserts() {
         // Make one valid and one invalid record to force an UpsertResult error
@@ -120,12 +120,12 @@ public class ErrorManagerTest {
 
         System.assert(logs.size() >= 1, 'Expected at least one error log');
     }
-    
+
     @IsTest
-    static void test_isUnautorized() {
+    static void test_isUnauthorized() {
         System.assertEquals(true,
-            ErrorManager.isUnautorized('xxx The authorization token provided was invalid yyy'));
+            ErrorManager.isUnauthorized('xxx The authorization token provided was invalid yyy'));
         System.assertEquals(false,
-            ErrorManager.isUnautorized('some other error'));
+            ErrorManager.isUnauthorized('some other error'));
     }
 }

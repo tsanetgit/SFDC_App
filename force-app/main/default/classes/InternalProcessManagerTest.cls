@@ -1,7 +1,8 @@
+/** Unit tests for InternalProcessManager. */
 @IsTest
 public class InternalProcessManagerTest {
 
-     @testSetup static void testSetup() {
+      @TestSetup static void testSetup() {
 		User user = TSANetDataFactory.createAdminUser();
         System.runAs(user){
             TSANetDataFactory.createCredentials();
@@ -11,8 +12,13 @@ public class InternalProcessManagerTest {
             TSANetDataFactory.createTSANetCase(caseRecord.Id);
         }
 	}
-    
+
+    /** Mock HTTP callout handler for InternalProcessManager tests. */
     private class TSANetHttpMock implements HttpCalloutMock {
+        /** Returns a mock HTTP response for the given request.
+         * @param req the HTTP request
+         * @return simulated HTTP response
+         */
         public HTTPResponse respond(HTTPRequest req) {
             HttpResponse res = new HttpResponse();
             res.setStatusCode(200);
@@ -74,7 +80,7 @@ public class InternalProcessManagerTest {
         Test.setMock(HttpCalloutMock.class, new TSANetHttpMock());
 
         Test.startTest();
-        	InternalProcessManager.syncAccount(cred.Id); 
+        	InternalProcessManager.syncAccount(cred.Id);
         Test.stopTest();
 
         tsanetconnect__TSANet_Credentials__c updated = [

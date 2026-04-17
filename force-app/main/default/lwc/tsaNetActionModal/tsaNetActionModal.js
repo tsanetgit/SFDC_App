@@ -1,29 +1,27 @@
-import { api, track, wire } from 'lwc';
+import { api, track } from 'lwc';
 import LightningModal from 'lightning/modal';
 
-import { CloseActionScreenEvent } from 'lightning/actions';
+import { ACTIONS } from 'c/tsaNetConstants'
 
-import { ACTIONS, NOTE_STATE } from 'c/tsaNetConstants'
-
-import { 
+import {
     approveRequest,
     rejectRequest,
     createTSANetCaseNote,
-    requestAdditionalInfo, 
+    requestAdditionalInfo,
     sendAdditionalInfo,
 
-    getActionHeader, 
-    getActionSubmitVariant, 
+    getActionHeader,
+    getActionSubmitVariant,
     getActionCloseVariant,
-    getActionSubmitButtonLabel, 
+    getActionSubmitButtonLabel,
     getActionResultMessage,
 
-    logError, 
-    toast 
+    logError,
+    toast
 } from 'c/tsaNetHelper'
- 
+
 export default class TsaNetActionModal extends LightningModal {
-    
+
     isLoading
 
     @api mode
@@ -47,33 +45,30 @@ export default class TsaNetActionModal extends LightningModal {
     }
 
     onSave = () => {
-        let body = this.form
-        this.validateRequestBody(body)
-
-        let json = JSON.stringify(body)
+        this.validateRequestBody()
         this.handleSubmit()
     }
 
     handleSubmit(){
         this.isLoading = true
 
-        let json = JSON.stringify(this.form)
+        const json = JSON.stringify(this.form)
 
         let action;
         switch (this.mode) {
-            case ACTIONS.ACCEPT: 
+            case ACTIONS.ACCEPT:
                 action = this.handleAcceptRequest(json)
                 break;
-            case ACTIONS.REJECT: 
+            case ACTIONS.REJECT:
                 action = this.handleRejectRequest(json)
                 break;
-            case ACTIONS.CREATE_NOTE: 
+            case ACTIONS.CREATE_NOTE:
                 action = this.handleCreateNote(json)
                 break;
-            case ACTIONS.REQUEST_INFO: 
+            case ACTIONS.REQUEST_INFO:
                 action = this.handleRequestInformation(json)
                 break;
-            case ACTIONS.SEND_INFO: 
+            case ACTIONS.SEND_INFO:
                 action = this.handleSendInformation(json)
                 break;
             default:
@@ -86,7 +81,7 @@ export default class TsaNetActionModal extends LightningModal {
             this.isQuickAction && setTimeout(() => this.onCancel(), 1000)
 
         }).catch(error => {
-            let errorMessage = error?.body?.message ? error?.body?.message : error
+            const errorMessage = error?.body?.message ? error?.body?.message : error
             toast(this, 'Error', 'error', errorMessage)
             logError({ message: errorMessage }, 'REQUEST_ADDITIONAL_INFO', { caseId: this.caseRecord?.Id, tsaNetCaseId: this.record?.Id  } )
         })
@@ -138,11 +133,11 @@ export default class TsaNetActionModal extends LightningModal {
         if(this.isInvalid){
             toast(this, 'Warning', 'warning', 'Please check if all the data has been filled out correctly!')
             return;
-        }  
+        }
     }
 
     handleChangeForm(event){
-        let form = JSON.parse(JSON.stringify(event?.detail?.form))
+        const form = JSON.parse(JSON.stringify(event?.detail?.form))
         console.log('form changed: ', form)
         this.form = form ? form : this.form
     }
@@ -152,7 +147,7 @@ export default class TsaNetActionModal extends LightningModal {
     get header(){
         return getActionHeader(this.mode)
     }
-    
+
     get token(){
         return this.record?.tsanetconnect__Token__c
     }
@@ -163,7 +158,7 @@ export default class TsaNetActionModal extends LightningModal {
 
     get isInvalid(){
         switch (this.mode) {
-            case ACTIONS.ACCEPT: return !this.form?.nextSteps 
+            case ACTIONS.ACCEPT: return !this.form?.nextSteps
             case ACTIONS.CREATE_NOTE: return !this.form?.summary || !this.form?.description
             case ACTIONS.REJECT: return !this.form?.engineerName && !this.form?.reason
             case ACTIONS.REQUEST_INFO:  return !this.form?.engineerName && !this.form?.requestedInformation
@@ -183,7 +178,7 @@ export default class TsaNetActionModal extends LightningModal {
     }
 
     get closeButtonVariant(){
-        let variant = getActionCloseVariant(this.mode)
+        const variant = getActionCloseVariant(this.mode)
         return variant ? variant : 'destructive-text'
     }
 
@@ -203,7 +198,7 @@ export default class TsaNetActionModal extends LightningModal {
         } else {
             return true
         }
-        
+
     }
 
     get resultMessage(){

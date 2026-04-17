@@ -1,9 +1,9 @@
 <aura:component controller="TSANetRefreshUtils" implements="force:appHostable,force:hasRecordId,force:lightningQuickActionWithoutHeader" access="global" >
-	
+
     <aura:attribute name="recordId" type="String" />
-    
+
     <lightning:navigation aura:id="navService"/>
-    
+
     <aura:handler name="init" value="{!this}" action="{!c.init}"/>
-    
+
 </aura:component>

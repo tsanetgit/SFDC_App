@@ -3,7 +3,7 @@ import { LightningElement, api, track } from 'lwc';
 import { NavigationMixin } from 'lightning/navigation';
 
 import getCases from '@salesforce/apex/TSANetUtils.getCases'
- 
+
 export default class CaseLookup extends NavigationMixin(LightningElement) {
 
     isLoading
@@ -65,5 +65,5 @@ export default class CaseLookup extends NavigationMixin(LightningElement) {
     get boxHeight(){
         return ( this.isLoading || this.cases.length ) ? 'height: 200px;' : ''
     }
-    
+
 }

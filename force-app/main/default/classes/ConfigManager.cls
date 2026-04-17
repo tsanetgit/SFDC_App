@@ -1,8 +1,13 @@
+/** Manages TSANet configuration and credential updates. */
 public with sharing class ConfigManager {
 
+    /**
+     * Fetches a new access token and company info, then updates stored credentials.
+     * @return true if the credentials were updated successfully
+     */
     @AuraEnabled
     public static Boolean updateTSANetCredentials(){
-        
+
         String token = TSANetService.getTSANetAccessToken();
         TSANetCompanyInfo info = TSANetService.getCompanyInformation(token);
 

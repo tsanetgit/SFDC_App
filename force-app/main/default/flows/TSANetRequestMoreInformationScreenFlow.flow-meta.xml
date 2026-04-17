@@ -30,6 +30,7 @@
             <label>isError</label>
         </rules>
     </decisions>
+    <description>Screen flow that allows users to request more information on a TSANet collaboration case.</description>
     <environments>Default</environments>
     <interviewLabel>TSANet - Request More Information ( Screen Flow ) {!$Flow.CurrentDateTime}</interviewLabel>
     <isTemplate>true</isTemplate>

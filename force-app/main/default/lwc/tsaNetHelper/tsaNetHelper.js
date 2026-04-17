@@ -1,6 +1,6 @@
 import { ShowToastEvent } from 'lightning/platformShowToastEvent'
 
-import { 
+import {
     TSANET_DIRECTION,
     SKIP_FORM_CUSTOM_FIELDS,
     TSANET_CASE_STATUSES,
@@ -94,7 +94,7 @@ export const getCompanies = (companyName) => {
 }
 
 const prepareCompaniesData = (json) => {
-    let companies = json && JSON.parse(json)
+    const companies = json && JSON.parse(json)
 
     companies.forEach(c => {
         c?.tags && c?.tags.length && c?.tags.forEach(tag => {
@@ -200,8 +200,8 @@ export const initializeForm = (form) => {
                 const raw = field?.options ?? '';
 
                 const normalized = raw
-                .replace(/\r\n/g, '\n')  
-                .replace(/\\n/g, '\n'); 
+                .replace(/\r\n/g, '\n')
+                .replace(/\\n/g, '\n');
 
                 const options = normalized
                 .split('\n')
@@ -212,8 +212,8 @@ export const initializeForm = (form) => {
             }
 
             if(field?.isTierSelect){
-                let values = field.selections
-                let mappedValues = values.map(o => ({ label: o.value, value: o.value, children: o.children }))
+                const values = field.selections
+                const mappedValues = values.map(o => ({ label: o.value, value: o.value, children: o.children }))
                 field['values'] = mappedValues
             }
         }

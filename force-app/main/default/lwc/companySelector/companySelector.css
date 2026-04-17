@@ -1,5 +1,25 @@
 .search-section {
+    position: relative;
     transition: max-height 2s ease;
+}
+
+/* Override SLDS combobox dropdown positioning so the panel stays in flow under lightning-input (full width, modal body scrolls above footer) */
+.company-results.slds-dropdown {
+    position: relative !important;
+    left: auto !important;
+    right: auto !important;
+    top: auto !important;
+    transform: none !important;
+    float: none !important;
+    width: 100%;
+    box-sizing: border-box;
+    margin-top: 0.25rem;
+    z-index: 1;
+}
+
+.company-results .slds-listbox {
+    max-height: 12.5rem;
+    overflow-y: auto;
 }
 
 .icon {

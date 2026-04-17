@@ -1,5 +1,10 @@
-public class TriggerDispatcher {
-    
+/** Dispatches trigger events to the appropriate ITriggerHandler methods. */
+public inherited sharing class TriggerDispatcher {
+
+    /**
+     * Routes the current trigger context to the correct handler method.
+     * @param handler ITriggerHandler implementation to invoke
+     */
     public static void run(ITriggerHandler handler){
         if (handler.isDisabled()) {
             return;

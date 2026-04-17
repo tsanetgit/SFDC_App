@@ -33,6 +33,7 @@
     </actionCalls>
     <apiVersion>65.0</apiVersion>
     <areMetricsLoggedToDataCloud>false</areMetricsLoggedToDataCloud>
+    <description>Reusable subflow that creates notes and links them to relevant records.</description>
     <environments>Default</environments>
     <interviewLabel>TSANet Create Note ( Automation ) {!$Flow.CurrentDateTime}</interviewLabel>
     <isTemplate>true</isTemplate>

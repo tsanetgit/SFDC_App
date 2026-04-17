@@ -33,6 +33,7 @@
     </actionCalls>
     <apiVersion>65.0</apiVersion>
     <areMetricsLoggedToDataCloud>false</areMetricsLoggedToDataCloud>
+    <description>Reusable subflow that handles acceptance logic and related updates.</description>
     <environments>Default</environments>
     <interviewLabel>TSANet Accept ( Automation ) {!$Flow.CurrentDateTime}</interviewLabel>
     <isTemplate>true</isTemplate>

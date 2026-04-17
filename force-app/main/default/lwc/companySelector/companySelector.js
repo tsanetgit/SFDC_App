@@ -2,7 +2,7 @@ import { LightningElement, api, track } from 'lwc';
 
 import TSANetLogo from '@salesforce/resourceUrl/TSANetLogo'
 
-import { 
+import {
     TSANET_EXCEPTION_TYPES,
     TYPING_INTERVAL,
     YOU_ARE_NOT_ABLE_TO_INTERACT_WITH_THE_REFERENCED_COMPANY
@@ -11,7 +11,7 @@ import {
 import { getCompanyId, getMode, initializeForm, getSelectedCompany,
     getCompanies, getCompanyForm, toast, logError
 } from 'c/tsaNetHelper'
- 
+
 export default class CompanySelector extends LightningElement {
 
     tsaNetLogo = TSANetLogo
@@ -62,19 +62,19 @@ export default class CompanySelector extends LightningElement {
     selectCompany(event){
 
         this.company = getSelectedCompany(event, this)
-       
+
         if(this.company){
             this.isLoading = true
 
-            let companyId = getCompanyId(this.company);
-            let mode = getMode(this.company)
+            const companyId = getCompanyId(this.company);
+            const mode = getMode(this.company)
 
             getCompanyForm(companyId, mode).then(response => {
                 if(response == YOU_ARE_NOT_ABLE_TO_INTERACT_WITH_THE_REFERENCED_COMPANY){
                     toast(this, 'Warning', 'warning', response)
-                    return 
+                    return
                 }
-                let companyForm = response && JSON.parse(response)
+                const companyForm = response && JSON.parse(response)
                 this.form = initializeForm(companyForm);
                 this.dispatchSelect()
                 this.isLoading = false
@@ -98,15 +98,9 @@ export default class CompanySelector extends LightningElement {
     }
 
     dispatchSelect(){
-        this.dispatchEvent(new CustomEvent('select', { detail : { 
+        this.dispatchEvent(new CustomEvent('select', { detail : {
             form: this.form,
             company: this.company
         }}))
-    }
-
-    // Getters
-
-    get searchSectionStyle() {
-        return this.companies?.length > 0 ? 'height: 270px;' : 'height: 70px;';
     }
 }

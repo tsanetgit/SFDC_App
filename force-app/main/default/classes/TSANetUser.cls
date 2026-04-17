@@ -1,20 +1,30 @@
-global class TSANetUser {
-    @AuraEnabled 
+/** DTO representing a TSANet user profile. */
+global inherited sharing class TSANetUser {
+    /** TSANet user identifier. */
+    @AuraEnabled
     global Integer id { get; set; }
-    @AuraEnabled 
+    /** TSANet username. */
+    @AuraEnabled
     global String username { get; set; }
-    @AuraEnabled 
+    /** First name of the user. */
+    @AuraEnabled
     global String firstName { get; set; }
-    @AuraEnabled 
+    /** Last name of the user. */
+    @AuraEnabled
     global String lastName { get; set; }
-    @AuraEnabled 
+    /** Email address of the user. */
+    @AuraEnabled
     global String email { get; set; }
-    @AuraEnabled 
+    /** Phone number of the user. */
+    @AuraEnabled
     global String phone { get; set; }
-    @AuraEnabled 
+    /** ISO country code for the user's phone number. */
+    @AuraEnabled
     global String phoneCountryCode { get; set; }
-    @AuraEnabled 
+    /** Free-text description of the user. */
+    @AuraEnabled
     global String description { get; set; }
-    @AuraEnabled 
+    /** City where the user is located. */
+    @AuraEnabled
     global String city { get; set; }
 }

@@ -1,30 +1,42 @@
-global class TSANetInvocableSendMoreInformation {
+/** Invocable service that sends additional information for a TSANet collaboration case. */
+global with sharing class TSANetInvocableSendMoreInformation {
 
+    /** Input wrapper containing the TSANet case and additional-info form. */
     global class TSANetInput {
-        @InvocableVariable 
+        /** The TSANet case record to send additional information for. */
+        @InvocableVariable
         global tsanetconnect__TSANetCase__c caseRecord;
-        @InvocableVariable 
+        /** The form containing the additional information to send. */
+        @InvocableVariable
         global TSANetRequestInfoForm form;
     }
-    
+
+    /** Result wrapper returned by the send-more-information invocable action. */
     global class TSANetSendInfoResult {
-        @InvocableVariable 
+        /** Indicates whether the send operation succeeded. */
+        @InvocableVariable
         global Boolean isSuccess;
-        @InvocableVariable 
+        /** Descriptive message about the outcome. */
+        @InvocableVariable
         global String message;
     }
 
+    /**
+     * Sends additional information for the specified TSANet collaboration case.
+     * @param data list of TSANetInput containing the case and info form
+     * @return list of TSANetSendInfoResult with success flag and message
+     */
     @InvocableMethod(label='Send More Information' description='Returns: isSuccess: boolean, message: string' category='TSANet')
     global static TSANetSendInfoResult[] sendMoreInformation(TSANetInput[] data) {
-        
+
         TSANetSendInfoResult result = new TSANetSendInfoResult();
-        
-        
+
+
         TSANetInput input = data[0];
         String json = JSON.serialize(input.form);
-        
+
         try {
-            String responseBody = TSANetService.sendAdditionalInformation(input.caseRecord.Id, json, null);
+            TSANetService.sendAdditionalInformation(input.caseRecord.Id, json, null);
             result.message = 'The additional information has been sent successfully';
             result.isSuccess = true;
             return new TSANetSendInfoResult[]{ result };

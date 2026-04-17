@@ -1,7 +1,8 @@
+/** Unit tests for ConfigManager. */
 @IsTest
 public class ConfigManagerTest {
-    
-    @testSetup static void testSetup() {
+
+     @TestSetup static void testSetup() {
         User user = TSANetDataFactory.createAdminUser();
         System.runAs(user){
             TSANetDataFactory.createCredentials();
@@ -12,7 +13,12 @@ public class ConfigManagerTest {
         }
 	}
 
+    /** Mock HTTP callout handler for ConfigManager tests. */
     private class TSANetHttpMock implements HttpCalloutMock {
+        /** Returns a mock HTTP response for the given request.
+         * @param req the HTTP request
+         * @return simulated HTTP response
+         */
         public HTTPResponse respond(HTTPRequest req) {
             HttpResponse res = new HttpResponse();
             res.setStatusCode(200);

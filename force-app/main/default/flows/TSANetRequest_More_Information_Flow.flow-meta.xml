@@ -26,8 +26,10 @@
     </actionCalls>
     <apiVersion>65.0</apiVersion>
     <areMetricsLoggedToDataCloud>false</areMetricsLoggedToDataCloud>
+    <description>Record-triggered flow that starts the &quot;request more information&quot; process when conditions are met.</description>
     <environments>Default</environments>
     <interviewLabel>Request More Information Flow {!$Flow.CurrentDateTime}</interviewLabel>
+    <isTemplate>true</isTemplate>
     <label>TSANet Request More Information Flow</label>
     <processMetadataValues>
         <name>BuilderType</name>
@@ -73,7 +75,7 @@
         <recordTriggerType>Create</recordTriggerType>
         <triggerType>RecordAfterSave</triggerType>
     </start>
-    <status>Obsolete</status>
+    <status>Draft</status>
     <subflows>
         <name>GetRequestInformationForm</name>
         <label>Get Request Information Form</label>

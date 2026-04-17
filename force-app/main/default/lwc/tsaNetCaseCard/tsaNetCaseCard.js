@@ -7,10 +7,10 @@ import tsaNetActionModal from 'c/tsaNetActionModal';
 import { ACTIONS  } from 'c/tsaNetConstants'
 
 
-import { 
-    closeRequest, toast, logError
+import {
+    closeRequest, toast
 } from 'c/tsaNetHelper'
- 
+
 export default class TsaNetCaseCard extends LightningElement {
 
     @track isLoading
@@ -20,7 +20,7 @@ export default class TsaNetCaseCard extends LightningElement {
     @api user
 
     handleOnSelectAction(event){
-        let selectedAction = event.detail.value;
+        const selectedAction = event.detail.value;
 
         switch (selectedAction) {
             case ACTIONS.CLOSE:
@@ -29,7 +29,7 @@ export default class TsaNetCaseCard extends LightningElement {
             case ACTIONS.SEND_ATTACHMENT:
                 //this.handleSendAttachment()
                 break;
-    
+
             default:
                 this.handleOpenActionModal(selectedAction)
                 break;
@@ -49,18 +49,6 @@ export default class TsaNetCaseCard extends LightningElement {
         }
     }
 
-
-    async handleApproveCase() {
-        const result = await tsaNetCaseApprover.open({
-            record: this.record,
-            state: this.state,
-            size: 'small'
-        });
-
-        if(result.success){
-            this.handleRefresh()
-        }
-    }
 
     handleRefresh(){
         this.dispatchEvent(new CustomEvent('refresh'))
@@ -84,12 +72,13 @@ export default class TsaNetCaseCard extends LightningElement {
             closeRequest(this.record?.Id).then(response => {
                 this.isLoading = false
                 try {
-                    let data = JSON.parse(response)
+                    const data = JSON.parse(response)
                     if(data?.status == 'CLOSED'){
                         toast(this, 'Success', 'success', 'Case has been closed successfully!')
                     }
                     this.handleRefresh()
                 } catch(e){
+                    console.debug(e)
                     toast(this, 'Error', 'error', response)
                 }
             }).catch(error => {
@@ -97,7 +86,7 @@ export default class TsaNetCaseCard extends LightningElement {
             })
         }
     }
- 
+
     get acceptMode(){
         return ACTIONS.ACCEPT
     }

@@ -1,8 +1,9 @@
-@isTest
+@IsTest
+
 public class CredentialManagerTest {
 
-    @testSetup static void testSetup() {
-        
+     @TestSetup static void testSetup() {
+
         User user = TSANetDataFactory.createAdminUser();
         System.runAs(user){
             TSANetDataFactory.createCredentials();
@@ -12,7 +13,7 @@ public class CredentialManagerTest {
             TSANetDataFactory.createTSANetCase(caseRecord.Id);
         }
 	}
-    
+
     @IsTest
     static void test_updateCredentials_and_updateToken() {
         User user = TSANetDataFactory.createAdminUser();
@@ -26,7 +27,9 @@ public class CredentialManagerTest {
             info.company.name = 'Acme Inc';
 
             String token = '';
-            for (Integer i = 0; i < 220; i++) token += 'A';
+            for (Integer i = 0; i < 220; i++) {
+                token += 'A';
+            }
 
             Test.startTest();
             CredentialManager.updateCredentials(info);

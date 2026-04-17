@@ -12,22 +12,24 @@
                 break
                 case 'INCOMPLETE': console.log('INCOMPLETE')
                 break
-                case 'ERROR': const errors = response.getError()
-                errors 
-                ? reject(errors[0].message)
-                : console.error('Unknown error')
-                break
+                case 'ERROR': {
+                    const errors = response.getError()
+                    errors
+                    ? reject(errors[0].message)
+                    : console.error('Unknown error')
+                    break
+                }
                 default: console.log(state)
             }
                                })
             $A.enqueueAction(action)
         }))
     },
-    
-    navigateToRecord: function(cmp, event, helper) {
-        let navService = cmp.find("navService");
+
+    navigateToRecord: function(cmp) {
+        const navService = cmp.find("navService");
         if(navService){
-            let pageReference = {
+            const pageReference = {
                 type: 'standard__recordPage',
                 attributes: {
                     recordId: cmp.get("v.recordId"),
@@ -38,9 +40,9 @@
             navService.navigate(pageReference);
         }
     },
-    
-    
-    
+
+
+
     toast : function(title, type, message) {
         $A.get("e.force:showToast").setParams({ title: title, type: type, message: message }).fire()
     }

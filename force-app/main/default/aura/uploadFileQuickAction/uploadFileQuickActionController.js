@@ -8,8 +8,8 @@
             cmp.set('v.isLoaded', true)
         })
 	},
-            
-    close : function(cmp, event){
+
+    close : function(){
         $A.get('e.force:refreshView').fire();
-    }   
+    }
 })

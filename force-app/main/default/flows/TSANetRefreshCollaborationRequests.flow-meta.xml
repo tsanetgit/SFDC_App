@@ -60,6 +60,7 @@
             <label>Is Error</label>
         </rules>
     </decisions>
+    <description>Screen flow example showing how to refresh and sync collaboration case data.</description>
     <environments>Default</environments>
     <interviewLabel>TSANet Refresh Collaboration Requests {!$Flow.CurrentDateTime}</interviewLabel>
     <isTemplate>true</isTemplate>

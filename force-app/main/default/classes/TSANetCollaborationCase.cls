@@ -1,66 +1,98 @@
-global class TSANetCollaborationCase {
-	@AuraEnabled 
+/** Data transfer object representing a TSANet collaboration case. */
+global inherited sharing class TSANetCollaborationCase {
+    /** Unique identifier of the collaboration case. */
+	@AuraEnabled
     global Integer id { get; set; }
-    @AuraEnabled 
+    /** Name of the submitting company. */
+    @AuraEnabled
     global String submitCompanyName { get; set; }
-    @AuraEnabled 
+    /** Id of the submitting company. */
+    @AuraEnabled
     global Integer submitCompanyId { get; set; }
-    @AuraEnabled 
+    /** Case number from the submitter side. */
+    @AuraEnabled
     global String submitterCaseNumber { get; set; }
-    @AuraEnabled 
+    /** Name of the receiving company. */
+    @AuraEnabled
     global String receiveCompanyName { get; set; }
-    @AuraEnabled 
+    /** Id of the receiving company. */
+    @AuraEnabled
     global Integer receiveCompanyId { get; set; }
-    @AuraEnabled 
+    /** Case number from the receiver side. */
+    @AuraEnabled
     global String receiverCaseNumber { get; set; }
-    @AuraEnabled 
+    /** Brief summary of the collaboration case. */
+    @AuraEnabled
     global String summary { get; set; }
-    @AuraEnabled 
+    /** Detailed description of the collaboration case. */
+    @AuraEnabled
     global String description { get; set; }
-    @AuraEnabled 
+    /** Priority level of the case. */
+    @AuraEnabled
     global String priority { get; set; }
-    @AuraEnabled 
+    /** Current status of the case. */
+    @AuraEnabled
     global String status { get; set; }
-    @AuraEnabled 
+    /** Security token for the case. */
+    @AuraEnabled
     global String token  { get; set; }
-    @AuraEnabled 
+    /** Timestamp when the case was created. */
+    @AuraEnabled
     global String createdAt { get; set; }
-    @AuraEnabled 
+    /** Timestamp when the case was last updated. */
+    @AuraEnabled
     global String updatedAt { get; set; }
-    @AuraEnabled 
+    /** Timestamp when the case was deleted, if applicable. */
+    @AuraEnabled
     global String deletedAt { get; set; }
-    @AuraEnabled 
+    /** Whether the case has been responded to. */
+    @AuraEnabled
     global Boolean responded { get; set; }
-    @AuraEnabled 
+    /** Deadline for responding to the case. */
+    @AuraEnabled
     global String respondBy { get; set; }
-    @AuraEnabled 
+    /** Whether feedback has been requested. */
+    @AuraEnabled
     global Boolean feedbackRequested { get; set; }
-    @AuraEnabled 
+    /** Whether a reminder has been sent. */
+    @AuraEnabled
     global Boolean reminderSent { get; set; }
-    @AuraEnabled 
+    /** Note explaining the priority level. */
+    @AuraEnabled
     global String priorityNote { get; set; }
-    @AuraEnabled 
+    /** Escalation instructions for the case. */
+    @AuraEnabled
     global String escalationInstructions { get; set; }
-    @AuraEnabled 
+    /** Whether this is a test case. */
+    @AuraEnabled
     global Boolean testCase { get; set; }
-    @AuraEnabled 
+    /** Custom field values associated with the case. */
+    @AuraEnabled
     global CustomFields[] customFields { get; set; }
+    /** Notes attached to the case. */
     @AuraEnabled
     global TSANetNote[] caseNotes { get; set; }
+    /** User who submitted the case. */
     @AuraEnabled
     global TSANetUser submittedBy { get; set; }
+    /** Responses to the collaboration case. */
     @AuraEnabled
     global TSANetCaseRequest[] caseResponses { get; set; }
-    
+
+    /** Wrapper for custom field data on a collaboration case. */
     global class CustomFields {
-        @AuraEnabled 
+        /** Unique identifier of the custom field. */
+        @AuraEnabled
         global String id { get; set; }
-        @AuraEnabled 
+        /** Section the custom field belongs to. */
+        @AuraEnabled
         global String section { get; set; }
-        @AuraEnabled 
+        /** Display name of the custom field. */
+        @AuraEnabled
         global String fieldName { get; set; }
-        @AuraEnabled 
+        /** Value of the custom field. */
+        @AuraEnabled
         global String value { get; set; }
     }
-        
+
 }

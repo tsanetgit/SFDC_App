@@ -54,6 +54,34 @@ public class ErrorLoggerTest {
     }
 
     @IsTest
+    static void test_stackTrace_truncated_to_field_length() {
+        List<String> parts = new List<String>();
+        for (Integer i = 0; i < 400; i++) {
+            parts.add('x');
+        }
+        String longStack = String.join(parts, '');
+
+        Map<String, Object> ex = new Map<String, Object>{
+            'message' => 'long trace',
+            'type' => 'UT',
+            'stackTrace' => longStack
+        };
+
+        Test.startTest();
+        ErrorLogger.logUIError(ex, 'UT_longStack', new Map<String, String>());
+        Test.stopTest();
+
+        tsanetconnect__TSANetError__c row = [
+            SELECT tsanetconnect__StackTrace__c
+            FROM tsanetconnect__TSANetError__c
+            WHERE tsanetconnect__Context__c = 'UT_longStack'
+            ORDER BY CreatedDate DESC
+            LIMIT 1
+        ];
+        System.assertEquals(255, row.tsanetconnect__StackTrace__c.length(), 'Stack trace must fit Text(255)');
+    }
+
+    @IsTest
     static void test_logUIError_insertsRow() {
         Case c = new Case(Subject = 'UT case ui', Status = 'New', Origin = 'Phone');
         insert c;

@@ -1,20 +1,20 @@
 <aura:component controller="TSANetUtils" implements="force:hasRecordId,force:lightningQuickActionWithoutHeader,lightning:actionOverride,lightning:isUrlAddressable" access="global" >
-	
+
     <aura:attribute name="recordId" type="String" />
     <aura:attribute name="isLoaded" type="Boolean" />
-    
+
     <aura:attribute name="pageReference" type="Object"/>
     <aura:attribute name="parentRecordId" type="String"/>
-    
+
     <aura:attribute name="record" type="Object" />
     <aura:attribute name="state" type="Object" />
-    
+
 	<aura:handler name="init" action="{!c.init}" value="{!this}" />
-    
+
     <aura:if isTrue="{!v.isLoaded}">
-        <c:tsaNetActionModal 
+        <c:tsaNetActionModal
         	mode="CREATE_NOTE"
-            record="{!v.record}" 
+            record="{!v.record}"
             state="{!v.state}"
             isQuickAction="false"
             onclose="{!c.close}"

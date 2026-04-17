@@ -2,15 +2,13 @@ import { api, track } from 'lwc';
 import LightningModal from 'lightning/modal';
 
 import { NavigationMixin } from 'lightning/navigation';
-     
-import { CloseActionScreenEvent } from 'lightning/actions';
 
-import { 
+import {
     createNewCollaborationCase, toast, logError
 } from 'c/tsaNetHelper'
 
 export default class TsaNetCaseCreator extends NavigationMixin(LightningModal) {
-    
+
     header = 'Create New Collaboration Request';
 
     @track caseId // Salesforce Case ID
@@ -25,10 +23,10 @@ export default class TsaNetCaseCreator extends NavigationMixin(LightningModal) {
     @track form
 
     @track submitResponse
-    
+
     resultMessage = 'Your case has been successfully submitted'
     resultDescription = 'The request was sent to TSANet and is now being processed'
-    
+
     onCancel = () => {
         if(this.isSearchMode || this.isDone){
             this.isQuickAction ? this.handleCancelQuickAction() : this.close({ success: this.isDone })
@@ -65,18 +63,18 @@ export default class TsaNetCaseCreator extends NavigationMixin(LightningModal) {
 
         this.caseId = data?.caseId
 
-        let object = data?.object
+        const object = data?.object
 
         this.isLoading = true
 
         createNewCollaborationCase(data?.caseId, JSON.stringify(object))
         .then(response => {
 
-            let res = JSON.parse(response)
+            const res = JSON.parse(response)
 
             if(res?.message){
                 toast(this, 'Error', 'error', res?.message)
-                logError(error?.body, 'CREATE_TSANET_COLLABORATION_REQUEST', { caseId: this.recordId } )
+                logError({ message: res?.message }, 'CREATE_TSANET_COLLABORATION_REQUEST', { caseId: this.caseId } )
             } else {
                 this.submitResponse = res
             }
@@ -111,7 +109,7 @@ export default class TsaNetCaseCreator extends NavigationMixin(LightningModal) {
     get isSearchMode(){
         return this.step == 1
     }
-    
+
     get cancelButtonLabel(){
         return this.isSearchMode || this.isDone ? 'Close': 'Back'
     }
@@ -127,7 +125,7 @@ export default class TsaNetCaseCreator extends NavigationMixin(LightningModal) {
     get isDone(){
         return !!this.submitResponse?.id
     }
- 
+
     get showSubmitButton(){
         return !this.isLoading && !this.isDone
     }

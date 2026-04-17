@@ -1,7 +1,8 @@
-@isTest
+@IsTest
+
 public class TSANetNoteTriggerHelperTest {
-    
-    @testSetup static void testSetup() {
+
+     @TestSetup static void testSetup() {
 		User user = TSANetDataFactory.createAdminUser();
         System.runAs(user){
             TSANetDataFactory.createCredentials();
@@ -12,9 +13,10 @@ public class TSANetNoteTriggerHelperTest {
         }
 	}
 
-    @isTest
+
+    @IsTest
     public static void createFeedItemsTest(){
-        
+
         String json = '{ "id": 2650, "caseId": 2793, "creatorUsername": null, "creatorEmail": "John.Smith@cisco.com", "creatorName": "Test User", "summary": "Note integration1", "description": "testing note 32", "priority": "LOW", "status": "ENTERED", "token": "UgchTc38fDLexCJ63F", "createdAt": "2024-11-25T14:32:06.244Z", "updatedAt": "2024-11-25T14:32:06.244Z" }';
         Test.setMock(HttpCalloutMock.class, new MockHttpResponseGenerator(200, json, null));
         Test.startTest();
@@ -25,7 +27,7 @@ public class TSANetNoteTriggerHelperTest {
             note.tsanetconnect__Description__c = '<strong>Description 1</strong>';
             note.tsanetconnect__Priority__c = 'LOW';
             note.tsanetconnect__Status__c = 'OPEN';
-            
+
             insert note;
         	update note;
         Test.stopTest();

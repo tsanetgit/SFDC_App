@@ -47,11 +47,11 @@ export default class TsaNetRecordPage extends LightningElement {
     directionField = DIRECTION_FIELD
     summaryField = SUMMARY_FIELD
     descriptionField = DESCRIPTION_FIELD
-    receiverCaseNumber = RECEIVER_CASE_NUMBER 
-    
+    receiverCaseNumber = RECEIVER_CASE_NUMBER
+
     externalCaseId = EXTERNAL_CASE_ID_FIELD
     statusField = STATUS_FIELD
-    priorityField = PRIORITY_FIELD 
+    priorityField = PRIORITY_FIELD
     requestDateField = REQUEST_DATE_FIELD
     responseDateField = RESPONSE_DATE_FIELD
     escalationInstructionsField = ESCALATION_INSTRUCTIONS_FIELD
@@ -91,17 +91,17 @@ export default class TsaNetRecordPage extends LightningElement {
 
             this.caseRecord = record?.tsanetconnect__Case__r
 
-            let customFields = [];
+            const customFields = [];
 
             if(record.tsanetconnect__customFields__c){
-                let fields = JSON.parse(record.tsanetconnect__customFields__c)
+                const fields = JSON.parse(record.tsanetconnect__customFields__c)
                 fields.forEach(field => {
                     if(!this.skipCustomFields.includes(field.fieldName)){
                         customFields.push(field);
                     }
                 })
             }
-            
+
             this.customFields.sort(function(a,b) {
                 return a.displayOrder - b.displayOrder
             })
@@ -112,7 +112,7 @@ export default class TsaNetRecordPage extends LightningElement {
 
     selectedCaseRecordId
     handleSelectNewCase(event){
-        let selectedCaseRecord = event.detail
+        const selectedCaseRecord = event.detail
         this.selectedCaseRecordId = selectedCaseRecord
     }
 
@@ -121,9 +121,8 @@ export default class TsaNetRecordPage extends LightningElement {
     }
 
     handleSubmit(){
-        let tsanetCase = { Id: this.recordId , tsanetconnect__Case__c: this.selectedCaseRecordId }
         this.isLoading = true
-        updateTSANetCase({ tsaNetCaseId: this.recordId, caseId: this.selectedCaseRecordId }).then(response => {
+        updateTSANetCase({ tsaNetCaseId: this.recordId, caseId: this.selectedCaseRecordId }).then(() => {
             this.isLoading = false
             this.toast('Success', 'success', 'The record have been assigned successfully!')
             this.isCaseMode = false

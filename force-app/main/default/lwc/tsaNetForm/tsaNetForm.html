@@ -20,7 +20,7 @@
                 <template if:true={form.adminNote}>
                     <div class="slds-col slds-size_1-of-1">
                         <div style="width: 97%; border-style: double; margin: 10px; display: flex; height: 40px; justify-content: center; align-items: center;">
-                            <lightning-formatted-rich-text value={form.adminNote}></lightning-formatted-rich-text>
+                            <lightning-formatted-text value={form.adminNote}></lightning-formatted-text>
                         </div>
                     </div>
                 </template>
@@ -29,7 +29,7 @@
                     <div class="slds-col slds-size_1-of-1">
                         <div style="width: 97%; border-style: double; margin: 10px; display: flex; height: 40px; justify-content: center; align-items: center;">
                             <template for:each={form.internalNotes} for:item="n">
-                                <lightning-formatted-rich-text key={n.note} value={n.note}></lightning-formatted-rich-text>
+                                <lightning-formatted-text key={n.note} value={n.note}></lightning-formatted-text>
                             </template>
                         </div>
                     </div>

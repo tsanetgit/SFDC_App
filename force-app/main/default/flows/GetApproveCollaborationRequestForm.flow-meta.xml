@@ -43,6 +43,7 @@
             </value>
         </assignmentItems>
     </assignments>
+    <description>Autolaunched flow that generates the approval form structure used in API requests.</description>
     <environments>Default</environments>
     <interviewLabel>Get Approve {!$Flow.CurrentDateTime}</interviewLabel>
     <isTemplate>true</isTemplate>

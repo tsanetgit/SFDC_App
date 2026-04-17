@@ -1,7 +1,7 @@
-@isTest
+@IsTest
 public class TSANetInvocableCloseCollaborationTest {
 
-    @testSetup static void testSetup() {
+    @TestSetup static void testSetup() {
         User user = TSANetDataFactory.createAdminUser();
         System.runAs(user){
             TSANetDataFactory.createCredentials();
@@ -12,7 +12,7 @@ public class TSANetInvocableCloseCollaborationTest {
         }
 	}
 
-    @isTest
+    @IsTest
     public static void closeRequestTest(){
         String body = '[ { "label": "Demo - VMware", "companyId": 1072, "departmentId": null } ]';
         Test.setMock(HttpCalloutMock.class, new MockHttpResponseGenerator(200, body, null));
@@ -20,16 +20,16 @@ public class TSANetInvocableCloseCollaborationTest {
         tsanetconnect__TSANetCase__c caseRecord = [SELECT Id FROM tsanetconnect__TSANetCase__c LIMIT 1];
         input.caseRecord = caseRecord;
         Test.startTest();
-        	TSANetInvocableCloseCollaborationRequest.TSANetCloseResult[] data = TSANetInvocableCloseCollaborationRequest.closeCollaborationCase(
+        	TSANetInvocableCloseCollaborationRequest.closeCollaborationCase(
                 new TSANetInvocableCloseCollaborationRequest.TSANetInput[]{ input }
             );
         Test.stopTest();
     }
-    
-    @isTest
+
+    @IsTest
     public static void closeRequestWithErrorTest(){
         String body = '[ { "label": "Demo - VMware", "companyId": 1072, "departmentId": null } ]';
-        
+
         tsanetconnect__TSANet_Credentials__c creds = [SELECT Id FROM tsanetconnect__TSANet_Credentials__c LIMIT 1];
         creds.isPrimary__c = false;
         update creds;
@@ -39,7 +39,7 @@ public class TSANetInvocableCloseCollaborationTest {
         tsanetconnect__TSANetCase__c caseRecord = [SELECT Id FROM tsanetconnect__TSANetCase__c LIMIT 1];
         input.caseRecord = caseRecord;
         Test.startTest();
-        	TSANetInvocableCloseCollaborationRequest.TSANetCloseResult[] data = TSANetInvocableCloseCollaborationRequest.closeCollaborationCase(
+        	TSANetInvocableCloseCollaborationRequest.closeCollaborationCase(
                 new TSANetInvocableCloseCollaborationRequest.TSANetInput[]{ input }
             );
         Test.stopTest();

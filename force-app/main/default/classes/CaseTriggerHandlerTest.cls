@@ -36,7 +36,7 @@ private class CaseTriggerHandlerTest {
         Map<Id, Case> oldMap = new Map<Id, Case>{
             c.Id => new Case(Id = c.Id, OwnerId = u1.Id)
         };
-            
+
         Test.startTest();
         	CaseTriggerHandler.handleAfterUpdate(new List<Case>{ cUpd }, oldMap);
         Test.stopTest();

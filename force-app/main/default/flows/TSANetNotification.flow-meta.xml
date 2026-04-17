@@ -59,6 +59,7 @@
             <targetReference>SendNotification</targetReference>
         </connector>
     </assignments>
+    <description>Autolaunched subflow that sends custom notifications to case owners for TSANet events.</description>
     <environments>Default</environments>
     <formulas>
         <name>recipientId</name>

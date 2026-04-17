@@ -1,13 +1,13 @@
 <aura:component controller="TSANetService" implements="force:hasRecordId,force:lightningQuickAction" access="global" >
-	
+
     <aura:attribute name="recordId" type="String" />
     <aura:attribute name="isLoading" type="Boolean" default="false" />
-    
+
     <lightning:navigation aura:id="navService"/>
     <aura:import library="lightning:confirm" property="LightningConfirm" />
 
 	<aura:handler name="init" action="{!c.init}" value="{!this}" />
-    
+
     <div>
          <aura:if isTrue="{!v.isLoading}">
             <div class="demo-only demo-only_viewport" style="height:200px;position:relative">
@@ -19,5 +19,5 @@
             </div>
         </aura:if>
     </div>
-    
+
 </aura:component>

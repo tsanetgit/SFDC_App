@@ -30,6 +30,7 @@
             <label>isError</label>
         </rules>
     </decisions>
+    <description>Screen flow that collects and sends requested information for a TSANet collaboration case.</description>
     <environments>Default</environments>
     <interviewLabel>TSANet - Send Information ( Screen Flow ) {!$Flow.CurrentDateTime}</interviewLabel>
     <isTemplate>true</isTemplate>

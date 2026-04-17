@@ -1,17 +1,17 @@
 <aura:component controller="TSANetUtils" implements="force:hasRecordId,force:lightningQuickActionWithoutHeader,lightning:actionOverride" access="global" >
-	
+
     <aura:attribute name="recordId" type="String" />
     <aura:attribute name="isLoaded" type="Boolean" />
-    
+
     <aura:attribute name="record" type="Object" />
     <aura:attribute name="state" type="Object" />
-    
+
 	<aura:handler name="init" action="{!c.init}" value="{!this}" />
-    
+
     <aura:if isTrue="{!v.isLoaded}">
-        <c:tsaNetActionModal 
+        <c:tsaNetActionModal
         	mode="ACCEPT"
-            record="{!v.record}" 
+            record="{!v.record}"
             state="{!v.state}"
             isQuickAction="true"
             onclose="{!c.close}"

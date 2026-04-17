@@ -1,6 +1,6 @@
 .tsa-logo {
-    width: 30px; 
-    height: 30px; 
+    width: 30px;
+    height: 30px;
     margin: 10px;
     border-radius: 0.5rem;
 }
@@ -12,8 +12,8 @@
 }
 
 .related-list-box {
-    display: flex; 
-    flex-direction: column; 
+    display: flex;
+    flex-direction: column;
     overflow-y: scroll;
     overflow-x: hidden;
 }

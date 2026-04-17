@@ -1,5 +1,10 @@
+/** Manages TSANet credential lifecycle including token retrieval and primary flag toggling. */
 public with sharing class TSANetCredentialsHelper {
-    
+
+    /**
+     * Triggers token retrieval for each primary credential record.
+     * @param credentials list of credential records to process
+     */
     public static void getToken(tsanetconnect__TSANet_Credentials__c[] credentials){
         for(tsanetconnect__TSANet_Credentials__c credential : credentials){
             if(credential.tsanetconnect__isPrimary__c == true){
@@ -10,6 +15,10 @@ public with sharing class TSANetCredentialsHelper {
         }
     }
 
+    /**
+     * Deactivates existing primary credentials when a new primary is inserted.
+     * @param newCredentials list of newly inserted credential records
+     */
     public static void turnOfPrimaryTSANetCredentials(tsanetconnect__TSANet_Credentials__c[] newCredentials){
         Boolean isPrimary = false;
         for(tsanetconnect__TSANet_Credentials__c newCredential : newCredentials){
@@ -20,9 +29,9 @@ public with sharing class TSANetCredentialsHelper {
                 }
             }
         }
-        
+
         if(isPrimary == TRUE){
-            tsanetconnect__TSANet_Credentials__c[] credentials = [SELECT Id, Name, tsanetconnect__UserName__c, tsanetconnect__Password__c, tsanetconnect__Environment__c, tsanetconnect__isPrimary__c FROM tsanetconnect__TSANet_Credentials__c WITH SECURITY_ENFORCED ];
+            tsanetconnect__TSANet_Credentials__c[] credentials = [SELECT Id, Name, tsanetconnect__UserName__c, tsanetconnect__Password__c, tsanetconnect__Environment__c, tsanetconnect__isPrimary__c FROM tsanetconnect__TSANet_Credentials__c WITH SECURITY_ENFORCED LIMIT 1000];
             tsanetconnect__TSANet_Credentials__c[] credentialsToUpdate = new tsanetconnect__TSANet_Credentials__c[]{};
             for(tsanetconnect__TSANet_Credentials__c credential : credentials){
                 if(credential.Id != NULL){
@@ -33,27 +42,28 @@ public with sharing class TSANetCredentialsHelper {
             Database.update(credentialsToUpdate, AccessLevel.USER_MODE);
         }
     }
-    
+
+    /**
+     * Deactivates other primary credentials when a credential is updated to primary.
+     * @param newCredentials list of updated credential records
+     * @param oldCredentials map of previous credential values by Id
+     */
     public static void turnOfPrimaryTSANetCredentialsOnUpdate(tsanetconnect__TSANet_Credentials__c[] newCredentials, Map<Id, tsanetconnect__TSANet_Credentials__c> oldCredentials){
         Boolean isPrimary = false;
         Id[] credentialIds = new Id[]{};
         for(tsanetconnect__TSANet_Credentials__c newCredential : newCredentials){
-            if(newCredential.tsanetconnect__isPrimary__c == true && 
+            if(newCredential.tsanetconnect__isPrimary__c == true &&
                ( oldCredentials.get(newCredential.Id).tsanetconnect__isPrimary__c != newCredential.tsanetconnect__isPrimary__c )){
-               	
+
                 isPrimary = true;
                	if(!Test.isRunningTest()){
                		InternalProcessManager.execute(newCredential);
                	}
                	credentialIds.add(newCredential.Id);
             }
-            
-            if(newCredential.tsanetconnect__isPrimary__c == false && 
-               ( oldCredentials.get(newCredential.Id).tsanetconnect__isPrimary__c != newCredential.tsanetconnect__isPrimary__c )){
 
-            }
         }
-        
+
         if(isPrimary == TRUE){
             tsanetconnect__TSANet_Credentials__c[] credentials = [SELECT Id, Name, tsanetconnect__UserName__c, tsanetconnect__Password__c, tsanetconnect__Environment__c, tsanetconnect__isPrimary__c FROM tsanetconnect__TSANet_Credentials__c WHERE Id NOT IN:credentialIds WITH SECURITY_ENFORCED ];
             for(tsanetconnect__TSANet_Credentials__c credential : credentials){
@@ -62,7 +72,12 @@ public with sharing class TSANetCredentialsHelper {
             Database.update(credentials, AccessLevel.USER_MODE);
         }
     }
-    
+
+    /**
+     * Detects changes to the integration user on credential records.
+     * @param newCredentials list of updated credential records
+     * @param oldCredentials map of previous credential values by Id
+     */
     public static void changePrimaryUser(tsanetconnect__TSANet_Credentials__c[] newCredentials, Map<Id, tsanetconnect__TSANet_Credentials__c> oldCredentials){
 		Id integrationUser;
         for(tsanetconnect__TSANet_Credentials__c newCredential : newCredentials){
@@ -72,7 +87,11 @@ public with sharing class TSANetCredentialsHelper {
             }
         }
     }
-    
+
+    /**
+     * Prevents deletion of primary credentials and aborts related jobs for non-primary ones.
+     * @param credentials list of credential records being deleted
+     */
     public static void checkPrimaryTSANetCredentialsOnDelete(tsanetconnect__TSANet_Credentials__c[] credentials){
         for(tsanetconnect__TSANet_Credentials__c credential : credentials){
             if(credential.tsanetconnect__isPrimary__c == TRUE){

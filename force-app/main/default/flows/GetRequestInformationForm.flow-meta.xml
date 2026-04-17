@@ -18,7 +18,7 @@
             <assignToReference>RequestInformationForm.engineerEmail</assignToReference>
             <operator>Assign</operator>
             <value>
-                <stringValue>dev@appko.com</stringValue>
+                <elementReference>SubmitterEmail</elementReference>
             </value>
         </assignmentItems>
         <assignmentItems>
@@ -36,6 +36,7 @@
             </value>
         </assignmentItems>
     </assignments>
+    <description>Autolaunched flow that builds and returns the &quot;Request More Information&quot; form payload for API requests.</description>
     <environments>Default</environments>
     <formulas>
         <name>SubmitterEmail</name>

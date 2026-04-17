@@ -1,18 +1,18 @@
 import { LightningElement, api, track } from 'lwc';
 
-import { 
+import {
     CASE_SUBJECT_FIELD,
     CASE_NUMBER_FIELD,
-    ACCOUNT_NAME_FIELD, 
-    CONTACT_NAME_FIELD, 
-    CONTACT_EMAIL_FIELD, 
+    ACCOUNT_NAME_FIELD,
+    CONTACT_NAME_FIELD,
+    CONTACT_EMAIL_FIELD,
     CONTACT_PHONE_FIELD,
 
     FORM_FIELDS,
     SKIP_FORM_FIELDS,
 
-    PRIORITY_OPTIONS, 
-    TSANET_CASE_PRIORITIES, 
+    PRIORITY_OPTIONS,
+    TSANET_CASE_PRIORITIES,
     REQUIRED_FIELDS_WARNING,
 
     ACCOUNT_REQUIRED_WARNING,
@@ -23,11 +23,11 @@ import {
 
 } from 'c/tsaNetConstants'
 
-import { 
+import {
     getCaseInfo,
     toast
 } from 'c/tsaNetHelper'
- 
+
 export default class TsaNetForm extends LightningElement {
 
     @api form
@@ -59,26 +59,26 @@ export default class TsaNetForm extends LightningElement {
     }
 
     handleChangeCustomField(event){
-        let fieldName = event.target.label
-        let value = event.target.value
+        const fieldName = event.target.label
+        const value = event.target.value
         this.customFieldMap.set(fieldName, value)
     }
 
     handleChangeTierPicklist(event){
-        let fieldName = event.detail.label
-        let value = event.detail.value
+        const fieldName = event.detail.label
+        const value = event.detail.value
         this.customFieldMap.set(fieldName, value)
     }
 
     handleChangeCase(event){
 
-        let recordId = event.target.value
+        const recordId = event.target.value
         getCaseInfo(recordId)
         .then(data => {
-            let isValid = this.validateCaseInfo(data)
+            const isValid = this.validateCaseInfo(data)
             this.selectedCaseRecord = isValid ? data?.caseRecord : undefined
         })
-        .catch(error => { 
+        .catch(error => {
             console.error('error', error)
         })
     }
@@ -96,7 +96,7 @@ export default class TsaNetForm extends LightningElement {
     }
 
     handleSelectUser(e){
-        const { value, user } = e.detail;
+        const { user } = e.detail;
         this.submitterDetails = {
             name: user?.name,
             email: user?.email,
@@ -223,7 +223,7 @@ export default class TsaNetForm extends LightningElement {
     // Getters
 
     get salesforceCaseRecord(){
-        return this.caseRecord ?? this.selectedCaseRecord 
+        return this.caseRecord ?? this.selectedCaseRecord
     }
 
     get caseNumber() {
