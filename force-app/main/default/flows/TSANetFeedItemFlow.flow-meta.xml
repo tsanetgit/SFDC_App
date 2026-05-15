@@ -29,11 +29,11 @@
     </actionCalls>
     <apiVersion>65.0</apiVersion>
     <areMetricsLoggedToDataCloud>false</areMetricsLoggedToDataCloud>
-    <description>Record-triggered flow that syncs Salesforce feed items as TSANet notes on related collaboration cases.</description>
+    <description>Record-triggered flow that syncs Salesforce Chatter feed items as outbound TSANet notes on related collaboration cases.</description>
     <environments>Default</environments>
     <interviewLabel>TSANet - Feed Item Flow {!$Flow.CurrentDateTime}</interviewLabel>
     <isTemplate>true</isTemplate>
-    <label>TSANet - Feed Item Flow</label>
+    <label>TSANet: Outbound: Feed Item to Note Sync</label>
     <loops>
         <name>TSANetCaseLoop</name>
         <label>TSANet Case Loop</label>

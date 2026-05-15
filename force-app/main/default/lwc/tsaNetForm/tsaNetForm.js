@@ -247,7 +247,7 @@ export default class TsaNetForm extends LightningElement {
     }
 
     get subjectValue(){
-        return this.subject ?? this.salesforceCaseRecord[CASE_SUBJECT_FIELD.fieldApiName]
+        return this.subject ?? this.salesforceCaseRecord?.[CASE_SUBJECT_FIELD.fieldApiName]
     }
 
     get priorityValue(){

@@ -82,4 +82,7 @@
             <div class="slds-truncate ellipsis" title={description}>{description}</div>
         </div>
     </div-->
+    <template if:true={showAttachment}>
+        <c-upload-attachment record={record} onclose={handleCloseAttachment}></c-upload-attachment>
+    </template>
 </template>

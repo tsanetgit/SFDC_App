@@ -11,6 +11,7 @@ public with sharing class TSANetCaseTriggerHandler {
 
     /**
      * Links incoming TSANetCase records to their parent Case by matching case numbers.
+     * Uses elevated context to query Case since trigger may fire from guest user (webhook).
      * @param cases list of TSANetCase records to link
      */
     public static void findRelationships(tsanetconnect__TSANetCase__c[] cases){
@@ -23,7 +24,7 @@ public with sharing class TSANetCaseTriggerHandler {
         }
         if(caseNumbers.size() == 0){ return; }
 
-        Case[] sfCases = CaseSelector.getByCaseNumbers(new Set<String>(caseNumbers));
+        Case[] sfCases = new SystemContext().getCasesByCaseNumbers(new Set<String>(caseNumbers));
         Map<String, Case> caseNumberToCase = new Map<String, Case>();
         for(Case sfCase : sfCases){
             caseNumberToCase.put(sfCase.CaseNumber, sfCase);
@@ -40,6 +41,17 @@ public with sharing class TSANetCaseTriggerHandler {
                     caseRecord.OwnerId = relatedCase.OwnerId;
                 }
             }
+        }
+    }
+
+    /** Runs Case queries in system context for trigger-level record linkage. */
+    private without sharing class SystemContext {
+        public Case[] getCasesByCaseNumbers(Set<String> caseNumbers) {
+            return [
+                SELECT Id, OwnerId, CaseNumber
+                FROM Case
+                WHERE CaseNumber IN :caseNumbers
+            ];
         }
     }
 }

@@ -13,7 +13,10 @@
     "prettier": "prettier --write \"**/*.{cls,cmp,component,css,html,js,json,md,page,trigger,xml,yaml,yml}\"",
     "prettier:verify": "prettier --check \"**/*.{cls,cmp,component,css,html,js,json,md,page,trigger,xml,yaml,yml}\"",
     "prepare": "husky || true",
-    "precommit": "lint-staged"
+    "precommit": "lint-staged",
+    "deploy:dev": "sf project deploy start --source-dir force-app --target-org tsanet_dev --ignore-conflicts",
+    "package:beta": "sf package version create --package \"TSANet Connect\" --installation-key-bypass --code-coverage --wait 30",
+    "package:promote": "sf package version promote --no-prompt"
   },
   "devDependencies": {
     "@lwc/eslint-plugin-lwc": "^3.1.0",

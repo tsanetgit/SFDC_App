@@ -27,11 +27,11 @@
     </actionCalls>
     <apiVersion>65.0</apiVersion>
     <areMetricsLoggedToDataCloud>false</areMetricsLoggedToDataCloud>
-    <description>Reusable subflow that finalizes and closes the collaboration process.</description>
+    <description>Reusable subflow that finalizes and closes a TSANet collaboration request.</description>
     <environments>Default</environments>
     <interviewLabel>TSANet Close ( Automation ) {!$Flow.CurrentDateTime}</interviewLabel>
     <isTemplate>true</isTemplate>
-    <label>TSANet Close ( Automation )</label>
+    <label>TSANet: Close Collaboration Request (Automation)</label>
     <processMetadataValues>
         <name>BuilderType</name>
         <value>

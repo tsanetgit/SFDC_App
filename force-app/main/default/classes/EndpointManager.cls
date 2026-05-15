@@ -30,6 +30,12 @@ public with sharing class EndpointManager {
     public static String notes = '/v1/collaboration-requests/{token}/notes';
     /** Current user info API path. */
     public static String me_path = '/v1/me';
+    /** Webhook subscriptions API path. */
+    public static String webhooks_path = '/v1/webhooks';
+    /** Webhook by ID template. */
+    public static String webhook_by_id = '/v1/webhooks/{id}';
+    /** Webhook delivery log template. */
+    public static String webhook_deliveries = '/v1/webhooks/{id}/deliveries';
 
     /**
      * Returns endpoint with the {token} placeholder replaced by the given token.
@@ -127,5 +133,26 @@ public with sharing class EndpointManager {
             path += ( '?internalCaseNumber=' + caseId );
         }
         return path;
+    }
+
+    /**
+     * Returns the full URL for the webhooks endpoint.
+     * @return webhook subscriptions endpoint URL
+     */
+    public static String getWebhooksPath(){
+        return domain + webhooks_path;
+    }
+
+    /**
+     * Returns the webhook endpoint with {id} replaced by the given webhookId.
+     * @param template endpoint template containing {id}
+     * @param webhookId webhook identifier to substitute
+     * @return resolved webhook endpoint URL
+     */
+    public static String getWebhookPathById(String template, Integer webhookId){
+        if(String.isBlank(template) || webhookId == null) {
+            return template;
+        }
+        return domain + template.replace('{id}', String.valueOf(webhookId));
     }
 }

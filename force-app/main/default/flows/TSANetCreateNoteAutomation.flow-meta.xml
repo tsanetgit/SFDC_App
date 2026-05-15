@@ -33,11 +33,11 @@
     </actionCalls>
     <apiVersion>65.0</apiVersion>
     <areMetricsLoggedToDataCloud>false</areMetricsLoggedToDataCloud>
-    <description>Reusable subflow that creates notes and links them to relevant records.</description>
+    <description>Reusable subflow that creates a TSANet note and links it to the relevant collaboration case.</description>
     <environments>Default</environments>
     <interviewLabel>TSANet Create Note ( Automation ) {!$Flow.CurrentDateTime}</interviewLabel>
     <isTemplate>true</isTemplate>
-    <label>TSANet Create Note ( Automation )</label>
+    <label>TSANet: Create Note (Automation)</label>
     <processMetadataValues>
         <name>BuilderType</name>
         <value>

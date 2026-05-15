@@ -99,7 +99,7 @@
             <label>Is Replied</label>
         </rules>
     </decisions>
-    <description>Triggered flow responsible for automation logic related to note creation and updates.</description>
+    <description>Record-triggered flow that handles automation logic when inbound TSANet notes are created.</description>
     <environments>Default</environments>
     <formulas>
         <name>Body</name>
@@ -115,7 +115,7 @@ IF({!$Record.tsanetconnect__TSANetCase__r.Owner:User.Id} != NULL, {!$Record.tsan
     </formulas>
     <interviewLabel>TSANet Note Trigger Handler {!$Flow.CurrentDateTime}</interviewLabel>
     <isTemplate>true</isTemplate>
-    <label>TSANet Note Trigger Handler</label>
+    <label>TSANet: Inbound: Note Trigger Handler</label>
     <processMetadataValues>
         <name>BuilderType</name>
         <value>

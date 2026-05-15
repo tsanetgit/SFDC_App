@@ -98,7 +98,21 @@ public with sharing class TSANetCredentialsHelper {
                 credential.addError('You can’t remove primary credentials. Please mark them as non-primary and try again!');
             } else {
                 InternalProcessManager.abortTSANetJobs(credential.Id);
+                //deleteChildWebhooks(credential.Id);
             }
+        }
+    }
+
+    /** Deletes child TSANetWebhook__c records; the webhook trigger handles API-side deletion. */
+    private static void deleteChildWebhooks(Id credentialId){
+        String sfWebhookSuffix = '%/services/apexrest/tsanetconnect/webhook';
+        tsanetconnect__TSANetWebhook__c[] webhooks = [
+            SELECT Id FROM tsanetconnect__TSANetWebhook__c
+            WHERE tsanetconnect__TSANetCredential__c = :credentialId
+            AND tsanetconnect__CallbackUrl__c LIKE :sfWebhookSuffix
+        ];
+        if(!webhooks.isEmpty()){
+            Database.delete(webhooks, false, AccessLevel.SYSTEM_MODE);
         }
     }
 }

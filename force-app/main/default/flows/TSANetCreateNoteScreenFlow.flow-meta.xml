@@ -34,7 +34,7 @@
     <environments>Default</environments>
     <interviewLabel>TSANet - Create Note ( Screen Flow ) {!$Flow.CurrentDateTime}</interviewLabel>
     <isTemplate>true</isTemplate>
-    <label>TSANet - Create Note ( Screen Flow )</label>
+    <label>TSANet: Outbound: Create Note (Screen Flow)</label>
     <processMetadataValues>
         <name>BuilderType</name>
         <value>

@@ -30,11 +30,11 @@
             <label>isError</label>
         </rules>
     </decisions>
-    <description>Screen flow that allows users to reject a TSANet collaboration request with an optional reason.</description>
+    <description>Screen flow that allows users to reject an inbound TSANet collaboration request with an optional reason.</description>
     <environments>Default</environments>
     <interviewLabel>TSANet - Reject ( Screen Flow ) {!$Flow.CurrentDateTime}</interviewLabel>
     <isTemplate>true</isTemplate>
-    <label>TSANet - Reject ( Screen Flow )</label>
+    <label>TSANet: Inbound: Reject Collaboration Request (Screen Flow)</label>
     <processMetadataValues>
         <name>BuilderType</name>
         <value>

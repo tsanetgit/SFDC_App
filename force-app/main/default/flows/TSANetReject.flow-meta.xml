@@ -33,11 +33,11 @@
     </actionCalls>
     <apiVersion>65.0</apiVersion>
     <areMetricsLoggedToDataCloud>false</areMetricsLoggedToDataCloud>
-    <description>Reusable subflow that performs rejection logic and can be invoked from other flows or quick actions.</description>
+    <description>Reusable subflow that performs the rejection logic for inbound TSANet collaboration requests.</description>
     <environments>Default</environments>
     <interviewLabel>TSANet Reject {!$Flow.CurrentDateTime}</interviewLabel>
     <isTemplate>true</isTemplate>
-    <label>TSANet Reject ( Automation )</label>
+    <label>TSANet: Inbound: Reject Collaboration Request (Automation)</label>
     <processMetadataValues>
         <name>BuilderType</name>
         <value>

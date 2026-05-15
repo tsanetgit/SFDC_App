@@ -463,17 +463,14 @@ public with sharing class TSANetService {
 
     /**
      * Shared upsert + error-collection for TSANet cases, notes, and responses.
+     * Uses UpsertExecutor to transparently recover from concurrent-insert DUPLICATE_VALUE
+     * races (the periodic sync, the LWC related-list refresh, and the inbound webhook
+     * can all touch the same external Id at the same time).
      * @param data parsed TSANet data containing cases, notes, and responses
      */
     public static void upsertTSANetData(TSANetData data){
-        Database.UpsertResult[] caseResult = Database.upsert(data.cases, tsanetconnect__TSANetCase__c.tsanetconnect__Token__c, false, AccessLevel.USER_MODE);
-        Database.UpsertResult[] noteResult = Database.upsert(data.notes, tsanetconnect__TSANetNote__c.tsanetconnect__Token__c, false, AccessLevel.USER_MODE);
-        Database.UpsertResult[] responseResult = Database.upsert(data.responses, tsanetconnect__TSANetResponse__c.tsanetconnect__tsaNetResponseId__c, false, AccessLevel.USER_MODE);
-
-        tsanetconnect__TSANetError__c[] errors = new tsanetconnect__TSANetError__c[]{};
-        errors.addAll(ErrorManager.collectErrors(caseResult, data.cases, tsanetconnect__TSANetCase__c.tsanetconnect__Token__c));
-        errors.addAll(ErrorManager.collectErrors(noteResult, data.notes, tsanetconnect__TSANetNote__c.tsanetconnect__Token__c));
-        errors.addAll(ErrorManager.collectErrors(responseResult, data.responses, tsanetconnect__TSANetResponse__c.tsanetconnect__tsaNetResponseId__c));
-        ErrorLogger.logErrors(errors);
+        UpsertExecutor.execute(data.cases, tsanetconnect__TSANetCase__c.tsanetconnect__Token__c, AccessLevel.USER_MODE);
+        UpsertExecutor.execute(data.notes, tsanetconnect__TSANetNote__c.tsanetconnect__Token__c, AccessLevel.USER_MODE);
+        UpsertExecutor.execute(data.responses, tsanetconnect__TSANetResponse__c.tsanetconnect__tsaNetResponseId__c, AccessLevel.USER_MODE);
     }
 }

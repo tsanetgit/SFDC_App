@@ -1,12 +1,18 @@
-<b>SFDC Managed Package for TSANet Connect</b>
+# Salesforce DX Project: Next Steps
 
-To use, contact membership@tsanet.org </br>
-Use Issues https://github.com/tsanetgit/SFDC/issues to log bugs and enhancements.
+Now that you’ve created a Salesforce DX project, what’s next? Here are some documentation resources to get you started.
 
-<b>Install Guide and Documentation:</b>  
+## How Do You Plan to Deploy Your Changes?
 
-https://tsanet.gitbook.io/connect/documentation/salesforce-connector/demo
+Do you want to deploy a set of changes, or create a self-contained application? Choose a [development model](https://developer.salesforce.com/tools/vscode/en/user-guide/development-models).
 
-<b>CURRENT PACKAGE VERSION:</b>
-View the latest release https://github.com/tsanetgit/SFDC/releases for the package link
+## Configure Your Salesforce DX Project
 
+The `sfdx-project.json` file contains useful configuration information for your project. See [Salesforce DX Project Configuration](https://developer.salesforce.com/docs/atlas.en-us.sfdx_dev.meta/sfdx_dev/sfdx_dev_ws_config.htm) in the _Salesforce DX Developer Guide_ for details about this file.
+
+## Read All About It
+
+- [Salesforce Extensions Documentation](https://developer.salesforce.com/tools/vscode/)
+- [Salesforce CLI Setup Guide](https://developer.salesforce.com/docs/atlas.en-us.sfdx_setup.meta/sfdx_setup/sfdx_setup_intro.htm)
+- [Salesforce DX Developer Guide](https://developer.salesforce.com/docs/atlas.en-us.sfdx_dev.meta/sfdx_dev/sfdx_dev_intro.htm)
+- [Salesforce CLI Command Reference](https://developer.salesforce.com/docs/atlas.en-us.sfdx_cli_reference.meta/sfdx_cli_reference/cli_reference.htm)

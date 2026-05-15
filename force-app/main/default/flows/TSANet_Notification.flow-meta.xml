@@ -2,7 +2,7 @@
 <Flow xmlns="http://soap.sforce.com/2006/04/metadata">
     <apiVersion>61.0</apiVersion>
     <areMetricsLoggedToDataCloud>false</areMetricsLoggedToDataCloud>
-    <description>Record-triggered flow that sends notifications when a related note is created.</description>
+    <description>Record-triggered flow that sends notifications to case owners when a new inbound TSANet note is created.</description>
     <environments>Default</environments>
     <formulas>
         <name>Body</name>
@@ -10,9 +10,36 @@
         <expression>&apos;You got a new note - &apos; + {!$Record.tsanetconnect__Summary__c} + &apos;. &apos; +
 {!$Record.tsanetconnect__DescriptionPlainText__c}</expression>
     </formulas>
+    <formulas>
+        <name>TodayStart</name>
+        <dataType>DateTime</dataType>
+        <expression>DATETIMEVALUE(TEXT(YEAR(TODAY())) + &apos;-&apos; + LPAD(TEXT(MONTH(TODAY())), 2, &apos;0&apos;) + &apos;-&apos; + LPAD(TEXT(DAY(TODAY())), 2, &apos;0&apos;) + &apos;T00:00:00Z&apos;)</expression>
+    </formulas>
+    <decisions>
+        <name>IsNewNote</name>
+        <label>Is New Note</label>
+        <locationX>656</locationX>
+        <locationY>240</locationY>
+        <defaultConnectorLabel>Old Note</defaultConnectorLabel>
+        <rules>
+            <name>IsCreatedToday</name>
+            <conditionLogic>and</conditionLogic>
+            <conditions>
+                <leftValueReference>$Record.tsanetconnect__CreatedAt__c</leftValueReference>
+                <operator>GreaterThanOrEqualTo</operator>
+                <rightValue>
+                    <elementReference>TodayStart</elementReference>
+                </rightValue>
+            </conditions>
+            <connector>
+                <targetReference>GetTSANetCase</targetReference>
+            </connector>
+            <label>Created Today</label>
+        </rules>
+    </decisions>
     <interviewLabel>TSANet Notification {!$Flow.CurrentDateTime}</interviewLabel>
     <isTemplate>true</isTemplate>
-    <label>TSANet Note Notification</label>
+    <label>TSANet: Inbound: Note Notification</label>
     <processMetadataValues>
         <name>BuilderType</name>
         <value>
@@ -70,7 +97,7 @@
         <locationX>530</locationX>
         <locationY>48</locationY>
         <connector>
-            <targetReference>GetTSANetCase</targetReference>
+            <targetReference>IsNewNote</targetReference>
         </connector>
         <filterLogic>and</filterLogic>
         <filters>

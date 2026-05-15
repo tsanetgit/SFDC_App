@@ -3,8 +3,8 @@
     <actionCalls>
         <name>ChangeOwner</name>
         <label>Change TSANet Owner</label>
-        <locationX>264</locationX>
-        <locationY>648</locationY>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
         <actionName>TSANetInvocableChangeOwnerService</actionName>
         <actionType>apex</actionType>
         <connector>
@@ -21,11 +21,13 @@
         <offset>0</offset>
         <storeOutputAutomatically>true</storeOutputAutomatically>
     </actionCalls>
+    <apiVersion>64.0</apiVersion>
+    <areMetricsLoggedToDataCloud>false</areMetricsLoggedToDataCloud>
     <decisions>
         <name>Should_Notify_TSANet</name>
         <label>Should Notify TSANet?</label>
-        <locationX>264</locationX>
-        <locationY>600</locationY>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
         <defaultConnector>
             <targetReference>TSANetCaseLoop</targetReference>
         </defaultConnector>
@@ -53,17 +55,16 @@
             <label>Notify</label>
         </rules>
     </decisions>
-    <apiVersion>64.0</apiVersion>
-    <areMetricsLoggedToDataCloud>false</areMetricsLoggedToDataCloud>
-    <description>Record-triggered flow that notifies TSANet when a Salesforce Case owner changes. Get TSANet Cases excludes CLOSED and REJECTED. Decision skips OPEN+INBOUND; OPEN+OUTBOUND still notifies.</description>
+    <description>Record-triggered flow that notifies TSANet when the owner of a linked Salesforce Case changes.</description>
     <environments>Default</environments>
     <interviewLabel>TSANet - Case Owner Change Handler {!$Flow.CurrentDateTime}</interviewLabel>
-    <label>TSANet - Case Owner Change Handler</label>
+    <isTemplate>true</isTemplate>
+    <label>TSANet: Case Owner Change Handler</label>
     <loops>
         <name>TSANetCaseLoop</name>
         <label>TSANet Case Loop</label>
-        <locationX>264</locationX>
-        <locationY>528</locationY>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
         <collectionReference>GetTSANetCases</collectionReference>
         <iterationOrder>Asc</iterationOrder>
         <nextValueConnector>
@@ -92,8 +93,8 @@
     <recordLookups>
         <name>GetTSANetCases</name>
         <label>Get TSANet Cases</label>
-        <locationX>264</locationX>
-        <locationY>276</locationY>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
         <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
         <connector>
             <targetReference>TSANetCaseLoop</targetReference>
@@ -125,8 +126,8 @@
         <storeOutputAutomatically>true</storeOutputAutomatically>
     </recordLookups>
     <start>
-        <locationX>138</locationX>
-        <locationY>48</locationY>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
         <connector>
             <targetReference>GetTSANetCases</targetReference>
         </connector>

@@ -4,8 +4,8 @@
       "path": "force-app",
       "default": true,
       "package": "TSANet Connect",
-      "versionName": "Version 2.10.0",
-      "versionNumber": "2.10.0.NEXT",
+      "versionName": "Version 2.12.0",
+      "versionNumber": "2.12.0.NEXT",
       "versionDescription": "TSANet Connect Spring 2026",
       "ancestorId": "HIGHEST",
       "apexTestAccess": {
@@ -31,6 +31,14 @@
     "TSANet Connect@2.10.0-2": "04tgL000000DIjtQAG",
     "TSANet Connect@2.10.0-3": "04tgL000000DJuTQAW",
     "TSANet Connect@2.10.0-4": "04tgL000000DPbhQAG",
-    "TSANet Connect@2.10.0-5": "04tgL000000DPobQAG"
+    "TSANet Connect@2.10.0-5": "04tgL000000DPobQAG",
+    "TSANet Connect@2.11.0-1": "04tgL000000EDBtQAO",
+    "TSANet Connect@2.11.0-2": "04tgL000000EDDVQA4",
+    "TSANet Connect@2.11.0-3": "04tgL000000EDOnQAO",
+    "TSANet Connect@2.11.0-4": "04tgL000000EDYTQA4",
+    "TSANet Connect@2.11.0-5": "04tgL000000EmZRQA0",
+    "TSANet Connect@2.11.0-6": "04tgL000000FNFdQAO",
+    "TSANet Connect@2.11.0-9": "04tgL000000FXV7QAO",
+    "TSANet Connect@2.12.0-1": "04tgL000000FXbZQAW"
   }
 }

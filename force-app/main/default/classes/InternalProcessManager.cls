@@ -29,7 +29,37 @@ public with sharing class InternalProcessManager {
         credential.tsanetconnect__AccessTokenPart1__c = splitResult.firstPart;
         credential.tsanetconnect__AccessTokenPart2__c = splitResult.restPart;
 
+        List<tsanetconnect__TSANetWebhook__c> webhookRecords = fetchWebhooks(credential.Id, token);
+
         Database.update(credential, AccessLevel.USER_MODE);
+        if(!webhookRecords.isEmpty()){
+            Database.upsert(webhookRecords, tsanetconnect__TSANetWebhook__c.tsanetconnect__WebhookId__c, false, AccessLevel.USER_MODE);
+        }
+    }
+
+    /** Fetches all webhooks from the TSANet API and returns them as TSANetWebhook__c records (no DML). */
+    private static List<tsanetconnect__TSANetWebhook__c> fetchWebhooks(Id credentialId, String token){
+        try {
+            String response = TSANetWebhookService.getWebhooks(token);
+            List<TSANetWebhookService.WebhookResponse> webhooks =
+                (List<TSANetWebhookService.WebhookResponse>) JSON.deserialize(response, List<TSANetWebhookService.WebhookResponse>.class);
+
+            List<tsanetconnect__TSANetWebhook__c> records = new List<tsanetconnect__TSANetWebhook__c>();
+            for(TSANetWebhookService.WebhookResponse wh : webhooks){
+                tsanetconnect__TSANetWebhook__c record = new tsanetconnect__TSANetWebhook__c();
+                record.tsanetconnect__WebhookId__c = wh.id;
+                record.tsanetconnect__CallbackUrl__c = wh.callbackUrl;
+                record.tsanetconnect__EventTypes__c = wh.eventTypes != null ? String.join(wh.eventTypes, ';') : '';
+                record.tsanetconnect__Secret__c = wh.secret;
+                record.tsanetconnect__Active__c = wh.active;
+                record.tsanetconnect__TSANetCredential__c = credentialId;
+                records.add(record);
+            }
+            return records;
+        } catch(Exception e){
+            ErrorLogger.logError(e, 'TSANET_WEBHOOK_SYNC');
+            return new List<tsanetconnect__TSANetWebhook__c>();
+        }
     }
 
     /**

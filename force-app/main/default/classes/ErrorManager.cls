@@ -30,6 +30,8 @@ public with sharing class ErrorManager {
 
     /**
      * Collects error log records from upsert results for failed rows.
+     * Each error captures: object name, row index, external Id, all field errors,
+     * the failing record JSON, and the calling Apex stack — everything needed to triage.
      * @param results the Database.UpsertResult list
      * @param records the SObject records that were upserted
      * @param externalIdField the external Id field used for upsert
@@ -42,35 +44,79 @@ public with sharing class ErrorManager {
             return errors;
         }
 
+        String objectName = (records != null && !records.isEmpty() && records[0] != null)
+            ? String.valueOf(records[0].getSObjectType())
+            : 'Unknown';
+        String externalIdName = (externalIdField != null) ? externalIdField.getDescribe().getName() : '(none)';
+        String callerStack = new DmlException().getStackTraceString();
+
         for (Integer i = 0; i < results.size(); i++) {
             Database.UpsertResult ur = results[i];
-            if (ur == null) {
+            if (ur == null || ur.isSuccess()) {
                 continue;
             }
 
-            if (!ur.isSuccess()) {
-                String extIdValue = null;
-                try {
-                    if (records != null && i < records.size()) {
-                        extIdValue = String.valueOf(records[i].get(externalIdField));
-                    }
-                } catch (Exception e) {
-                    System.debug(LoggingLevel.WARN, 'ErrorManager.collectErrors: ' + e.getMessage());
-                }
+            SObject record = (records != null && i < records.size()) ? records[i] : null;
+            String extIdValue = readExternalId(record, externalIdName);
+            String recordJson = serializeRecordSafe(record);
 
-                for (Database.Error e : ur.getErrors()) {
-                    String errMsg =
-                        'Upsert failed [' + (extIdValue == null ? '(no externalId)' : extIdValue) + ']' +
-                        ' | Status: ' + e.getStatusCode() +
-                        ' | Message: ' + e.getMessage() +
-                        (e.getFields().isEmpty() ? '' : ' | Fields: ' + String.join(e.getFields(), ','));
+            for (Database.Error e : ur.getErrors()) {
+                String fieldsJoined = (e.getFields() == null || e.getFields().isEmpty())
+                    ? '(none)'
+                    : String.join(e.getFields(), ',');
 
-                    tsanetconnect__TSANetError__c errorLog = ErrorLogger.getLogError(errMsg, 'UPSERT_ERROR_LOG');
-                    errors.add(errorLog);
-                }
+                // ErrorMessage__c is LongTextArea(10000) — pack the full diagnostic payload here
+                // since StackTrace__c is only Text(255).
+                String errMsg =
+                    'Upsert FAILED on ' + objectName + ' [row#' + i + ']' +
+                    ' | externalId(' + externalIdName + ')=' + (extIdValue == null ? '(null)' : extIdValue) +
+                    ' | StatusCode=' + e.getStatusCode() +
+                    ' | Fields=[' + fieldsJoined + ']' +
+                    ' | Message=' + e.getMessage() +
+                    '\n--- Failing record ---\n' + recordJson +
+                    '\n--- Caller stack ---\n' + callerStack;
+
+                tsanetconnect__TSANetError__c errorLog = ErrorLogger.getLogError(errMsg, 'UPSERT_ERROR_LOG');
+                errorLog.tsanetconnect__Type__c = 'Database.Error.' + String.valueOf(e.getStatusCode());
+                errorLog.tsanetconnect__StackTrace__c = truncate(callerStack, 255);
+                errors.add(errorLog);
             }
         }
         return errors;
+    }
+
+    /** Safely reads the external Id value from an SObject; returns null on any access error. */
+    private static String readExternalId(SObject record, String fieldName) {
+        if (record == null || String.isBlank(fieldName)) {
+            return null;
+        }
+        try {
+            Object value = record.get(fieldName);
+            return value == null ? null : String.valueOf(value);
+        } catch (Exception ex) {
+            System.debug(LoggingLevel.WARN, 'ErrorManager.readExternalId: ' + ex.getMessage());
+            return null;
+        }
+    }
+
+    /** Safely serializes an SObject to JSON; returns a placeholder string on failure. */
+    private static String serializeRecordSafe(SObject record) {
+        if (record == null) {
+            return '(null)';
+        }
+        try {
+            return JSON.serialize(record);
+        } catch (Exception ex) {
+            return '(serialize failed: ' + ex.getMessage() + ')';
+        }
+    }
+
+    /** Returns the first `maxLen` chars of `value`, or `value` if shorter; null-safe. */
+    private static String truncate(String value, Integer maxLen) {
+        if (String.isBlank(value) || value.length() <= maxLen) {
+            return value;
+        }
+        return value.substring(0, maxLen);
     }
 
     /**

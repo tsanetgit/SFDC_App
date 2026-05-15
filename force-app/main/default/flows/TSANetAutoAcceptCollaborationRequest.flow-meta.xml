@@ -6,7 +6,7 @@
     <environments>Default</environments>
     <interviewLabel>TSANet Auto Accept Collaboration Request {!$Flow.CurrentDateTime}</interviewLabel>
     <isTemplate>true</isTemplate>
-    <label>TSANet - Auto Accept Collaboration Request</label>
+    <label>TSANet: Inbound: Auto Accept Collaboration Request</label>
     <processMetadataValues>
         <name>BuilderType</name>
         <value>

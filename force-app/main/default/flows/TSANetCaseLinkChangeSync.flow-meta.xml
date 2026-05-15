@@ -3,8 +3,8 @@
     <actionCalls>
         <name>Notify_TSANet</name>
         <label>Notify TSANet</label>
-        <locationX>176</locationX>
-        <locationY>323</locationY>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
         <actionName>TSANetInvocableChangeOwnerService</actionName>
         <actionType>apex</actionType>
         <flowTransactionModel>Automatic</flowTransactionModel>
@@ -20,10 +20,11 @@
     </actionCalls>
     <apiVersion>64.0</apiVersion>
     <areMetricsLoggedToDataCloud>false</areMetricsLoggedToDataCloud>
-    <description>When a TSANet Case is linked or relinked to a Salesforce Case (Case__c changes), notifies TSANet when Status is not CLOSED/REJECTED, and not OPEN+INBOUND (OPEN+OUTBOUND is allowed). Inbound vs outbound API is handled inside TSANetInvocableChangeOwnerService.</description>
+    <description>Record-triggered flow that notifies TSANet when a collaboration case is linked or relinked to a Salesforce Case.</description>
     <environments>Default</environments>
     <interviewLabel>TSANet - Case Link Change Sync {!$Flow.CurrentDateTime}</interviewLabel>
-    <label>TSANet - Case Link Change Sync</label>
+    <isTemplate>true</isTemplate>
+    <label>TSANet: Case Link Change Sync</label>
     <processMetadataValues>
         <name>BuilderType</name>
         <value>
@@ -44,7 +45,7 @@
     </processMetadataValues>
     <processType>AutoLaunchedFlow</processType>
     <start>
-        <locationX>50</locationX>
+        <locationX>0</locationX>
         <locationY>0</locationY>
         <connector>
             <targetReference>Notify_TSANet</targetReference>

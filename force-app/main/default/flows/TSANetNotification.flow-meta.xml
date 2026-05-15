@@ -68,7 +68,7 @@
     </formulas>
     <interviewLabel>TSANet - Notification {!$Flow.CurrentDateTime}</interviewLabel>
     <isTemplate>true</isTemplate>
-    <label>TSANet - Send Notification</label>
+    <label>TSANet: Send Notification (Subflow)</label>
     <processMetadataValues>
         <name>BuilderType</name>
         <value>

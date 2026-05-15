@@ -148,8 +148,9 @@ public with sharing class ParserManager {
                     }
                 }
 
-                // Relations
-                tsaNetNotes.addAll(parseTSANetNotes(caseRecordFieldMap));
+                // Relations — stamp the parent TSANet case id on each child so the
+                // TSANetNote trigger (findRelationships) can link them to TSANetCase__c.
+                tsaNetNotes.addAll(parseTSANetNotes(tsaNetCaseId, caseRecordFieldMap));
                 tsaNetResponses.addAll(parseTSANetResponses(tsaNetCaseId, caseRecordFieldMap));
 
                 // Custom fields
@@ -177,10 +178,14 @@ public with sharing class ParserManager {
 
     /**
      * Parses case notes from a deserialized case record map.
+     * Stamps the parent TSANet case id on each note so the TSANetNote trigger can
+     * resolve the TSANetCase__c lookup (the per-note JSON often omits caseId when
+     * notes are nested under a case).
+     * @param caseId the parent TSANet case identifier
      * @param caseRecordFieldMap the deserialized case record field map
      * @return array of parsed TSANetNote records
      */
-    public static tsanetconnect__TSANetNote__c[] parseTSANetNotes(Map<String, Object> caseRecordFieldMap){
+    public static tsanetconnect__TSANetNote__c[] parseTSANetNotes(String caseId, Map<String, Object> caseRecordFieldMap){
         try {
             List<Object> caseNotes = (List<Object>) caseRecordFieldMap.get('caseNotes');
             tsanetconnect__TSANetNote__c[] sfNotes = new tsanetconnect__TSANetNote__c[]{};
@@ -189,6 +194,7 @@ public with sharing class ParserManager {
                 for(Object note : caseNotes){
 
                     tsanetconnect__TSANetNote__c sfNote = new tsanetconnect__TSANetNote__c();
+                    sfNote.tsanetconnect__CaseId__c = caseId;
 
                     Map<String, Object> noteRecordFieldMap = ( Map<String, Object> ) note;
 
@@ -361,7 +367,7 @@ public with sharing class ParserManager {
         try {
             if(datetimeString != null){
                 datetimeString = datetimeString.replace('Z', '');
-                DateTime dt = DateTime.valueOf(datetimeString.replace('T', ' '));
+                DateTime dt = DateTime.valueOfGmt(datetimeString.replace('T', ' '));
                 return dt;
             } else {
                 return null;

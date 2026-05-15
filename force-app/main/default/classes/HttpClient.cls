@@ -67,7 +67,7 @@ public with sharing class HttpClient {
         Http http = new Http();
         HttpResponse res = http.send(req);
 
-        if (res.getStatusCode() != TSANetConstants.SUCCESS_CODE) {
+        if (res.getStatusCode() != TSANetConstants.SUCCESS_CODE && res.getStatusCode() != 204) {
             if (ErrorManager.isUnauthorized(res.getBody())) {
                 String newToken = TSANetService.getTSANetAccessToken();
                 req = buildRequest(method, endpoint, newToken, body, timeout);
@@ -75,7 +75,7 @@ public with sharing class HttpClient {
                 CredentialManager.updateToken(newToken);
             }
 
-            if (res.getStatusCode() != TSANetConstants.SUCCESS_CODE) {
+            if (res.getStatusCode() != TSANetConstants.SUCCESS_CODE && res.getStatusCode() != 204) {
                 ErrorManager.handleResponseErrors(res);
             }
         }

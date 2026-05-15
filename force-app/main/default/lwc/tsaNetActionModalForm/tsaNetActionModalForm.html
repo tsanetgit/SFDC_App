@@ -9,12 +9,12 @@
             onchange={handleChangeSummary} 
             required></lightning-input>
         <!-- Description -->
-        <lightning-textarea
+        <lightning-input-rich-text
             label="Description"
             value={description}
             onchange={handleChangeDescription}
-            required
-        ></lightning-textarea>
+            formats={richTextFormats}
+        ></lightning-input-rich-text>
     </div>
 
     <div lwc:else>

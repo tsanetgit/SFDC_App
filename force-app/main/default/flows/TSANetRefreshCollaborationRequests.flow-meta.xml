@@ -60,11 +60,11 @@
             <label>Is Error</label>
         </rules>
     </decisions>
-    <description>Screen flow example showing how to refresh and sync collaboration case data.</description>
+    <description>Screen flow for refreshing and syncing TSANet collaboration case data.</description>
     <environments>Default</environments>
     <interviewLabel>TSANet Refresh Collaboration Requests {!$Flow.CurrentDateTime}</interviewLabel>
     <isTemplate>true</isTemplate>
-    <label>TSANet Refresh Collaboration Requests</label>
+    <label>TSANet: Refresh Collaboration Requests</label>
     <processMetadataValues>
         <name>BuilderType</name>
         <value>

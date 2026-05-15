@@ -36,7 +36,7 @@
             </value>
         </assignmentItems>
     </assignments>
-    <description>Autolaunched flow that builds and returns the &quot;Request More Information&quot; form payload for API requests.</description>
+    <description>Autolaunched subflow that builds the &quot;Request More Information&quot; form payload for TSANet API requests.</description>
     <environments>Default</environments>
     <formulas>
         <name>SubmitterEmail</name>
@@ -54,7 +54,8 @@
         <expression>IF({!TSANetCase.Owner:User.Phone} != &apos;&apos;, {!TSANetCase.Owner:User.Phone}, {!$User.Phone})</expression>
     </formulas>
     <interviewLabel>GetRequestInfoForm {!$Flow.CurrentDateTime}</interviewLabel>
-    <label>Get Request Information Form</label>
+    <isTemplate>true</isTemplate>
+    <label>TSANet: Get Request Information Form</label>
     <processMetadataValues>
         <name>BuilderType</name>
         <value>

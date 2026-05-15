@@ -33,11 +33,11 @@
     </actionCalls>
     <apiVersion>65.0</apiVersion>
     <areMetricsLoggedToDataCloud>false</areMetricsLoggedToDataCloud>
-    <description>Reusable subflow that handles acceptance logic and related updates.</description>
+    <description>Reusable subflow that handles the acceptance logic for inbound TSANet collaboration requests.</description>
     <environments>Default</environments>
     <interviewLabel>TSANet Accept ( Automation ) {!$Flow.CurrentDateTime}</interviewLabel>
     <isTemplate>true</isTemplate>
-    <label>TSANet Accept ( Automation )</label>
+    <label>TSANet: Inbound: Accept Collaboration Request (Automation)</label>
     <processMetadataValues>
         <name>BuilderType</name>
         <value>

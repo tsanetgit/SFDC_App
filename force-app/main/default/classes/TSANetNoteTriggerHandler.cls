@@ -1,5 +1,5 @@
 /** Trigger handler for TSANetNote__c records. */
-public inherited sharing class TSANetNoteTriggerHandler implements ITriggerHandler {
+public without sharing class TSANetNoteTriggerHandler implements ITriggerHandler {
     /** Finds relationships for new notes before insert.
      * @param newItems new note records being inserted
      */
@@ -7,12 +7,25 @@ public inherited sharing class TSANetNoteTriggerHandler implements ITriggerHandl
         tsanetconnect__TSANetNote__c[] notes = (tsanetconnect__TSANetNote__c[]) newItems;
         TSANetNoteTriggerHelper.findRelationships(notes);
     }
-    /** Not implemented — no pre-update logic required.
+    /**
+     * Self-heals notes whose parent TSANetCase__c lookup is still missing.
+     * Required because webhook upserts hit beforeUpdate (not beforeInsert) when the note
+     * already exists from an earlier sync, so any previously unlinked rows would otherwise
+     * stay broken forever.
      * @param newItems updated note records
      * @param oldItems previous versions of the records
      */
     public void beforeUpdate(Map<Id, SObject> newItems, Map<Id, SObject> oldItems) {
-        // Not implemented
+        List<tsanetconnect__TSANetNote__c> needsLink = new List<tsanetconnect__TSANetNote__c>();
+        for (SObject obj : newItems.values()) {
+            tsanetconnect__TSANetNote__c note = (tsanetconnect__TSANetNote__c) obj;
+            if (String.isNotBlank(note.tsanetconnect__CaseId__c)) {
+                needsLink.add(note);
+            }
+        }
+        if (!needsLink.isEmpty()) {
+            TSANetNoteTriggerHelper.findRelationships(needsLink);
+        }
     }
     /** Not implemented — no pre-delete logic required.
      * @param oldItems note records being deleted
@@ -27,15 +40,12 @@ public inherited sharing class TSANetNoteTriggerHandler implements ITriggerHandl
         Map<Id, tsanetconnect__TSANetNote__c> notes = (Map<Id, tsanetconnect__TSANetNote__c>) newItems;
         TSANetNoteTriggerHelper.createFeedItems(notes.values());
     }
-    /** Creates case feed items after note records are updated.
-     * @param newItems updated note records
-     * @param oldItems previous versions of the records
+    /** Not implemented — no post-update logic required.
+     * @param newItems updated note records (post-save state)
+     * @param oldItems previous versions of the records (pre-save state)
      */
     public void afterUpdate(Map<Id, SObject> newItems, Map<Id, SObject> oldItems){
-        Map<Id, tsanetconnect__TSANetNote__c> notes = (Map<Id, tsanetconnect__TSANetNote__c>) newItems;
-
-        TSANetNoteTriggerHelper.createFeedItems(notes.values());
-
+        // Not implemented
     }
     /** Not implemented — no post-delete logic required.
      * @param oldItems deleted note records

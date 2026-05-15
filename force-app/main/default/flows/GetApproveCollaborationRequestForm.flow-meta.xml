@@ -43,11 +43,11 @@
             </value>
         </assignmentItems>
     </assignments>
-    <description>Autolaunched flow that generates the approval form structure used in API requests.</description>
+    <description>Autolaunched subflow that generates the approval form payload for TSANet API requests.</description>
     <environments>Default</environments>
     <interviewLabel>Get Approve {!$Flow.CurrentDateTime}</interviewLabel>
     <isTemplate>true</isTemplate>
-    <label>Get Approve Collaboration Request Form</label>
+    <label>TSANet: Get Approve Collaboration Request Form</label>
     <processMetadataValues>
         <name>BuilderType</name>
         <value>

@@ -67,11 +67,11 @@
             <label>isError</label>
         </rules>
     </decisions>
-    <description>Screen flow that allows users to accept a TSANet collaboration request with a note.</description>
+    <description>Screen flow that allows users to accept an inbound TSANet collaboration request with a note.</description>
     <environments>Default</environments>
     <interviewLabel>TSANet - Accept ( Screen Flow ) {!$Flow.CurrentDateTime}</interviewLabel>
     <isTemplate>true</isTemplate>
-    <label>TSANet - Accept ( Screen Flow )</label>
+    <label>TSANet: Inbound: Accept Collaboration Request (Screen Flow)</label>
     <processMetadataValues>
         <name>BuilderType</name>
         <value>

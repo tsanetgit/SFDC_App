@@ -1,6 +1,7 @@
 import { LightningElement, api, track } from 'lwc';
 
 import { NavigationMixin } from 'lightning/navigation'
+import { RefreshEvent } from 'lightning/refresh'
 
 import TSANET_LOGO from '@salesforce/resourceUrl/TSANetLogo'
 
@@ -54,8 +55,11 @@ export default class TsaNetCaseRelatedList extends NavigationMixin(LightningElem
             size: 'small'
         });
 
-        if(result.success){
+        if(result?.success){
             this.handleRefresh()
+            // Fired at the page level so the Case record page and any other wired
+            // components (related lists, highlights panel, etc.) also re-render.
+            this.dispatchEvent(new RefreshEvent())
         }
     }
 

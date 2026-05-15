@@ -34,7 +34,7 @@
     <environments>Default</environments>
     <interviewLabel>TSANet - Close ( Screen Flow ) {!$Flow.CurrentDateTime}</interviewLabel>
     <isTemplate>true</isTemplate>
-    <label>TSANet - Close ( Screen Flow )</label>
+    <label>TSANet: Close Collaboration Request (Screen Flow)</label>
     <processMetadataValues>
         <name>BuilderType</name>
         <value>

@@ -46,6 +46,13 @@ export default class TsaNetActionModalForm extends LightningElement {
         this.dispatchEvent(new CustomEvent('changeform', { detail: { form: this.note }}))
     }
 
+    get richTextFormats() {
+        return [
+            'font', 'size', 'bold', 'italic', 'underline', 'strike',
+            'list', 'indent', 'align', 'link', 'clean', 'table', 'header'
+        ];
+    }
+
     generateNote(){
         this.note.summary = this.summaryValue
         this.note.description = this.description

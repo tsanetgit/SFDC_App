@@ -34,7 +34,7 @@
     <environments>Default</environments>
     <interviewLabel>TSANet - Request More Information ( Screen Flow ) {!$Flow.CurrentDateTime}</interviewLabel>
     <isTemplate>true</isTemplate>
-    <label>TSANet - Request More Information ( Screen Flow )</label>
+    <label>TSANet: Request More Information (Screen Flow)</label>
     <processMetadataValues>
         <name>BuilderType</name>
         <value>

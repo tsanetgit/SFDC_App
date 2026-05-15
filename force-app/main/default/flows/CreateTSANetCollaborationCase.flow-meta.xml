@@ -216,7 +216,7 @@
         <object xsi:nil="true"/>
         <valueField>value</valueField>
     </dynamicChoiceSets>
-    <description>Screen flow demonstrating how to create a collaboration case using core TSANet actions, customizable to business needs.</description>
+    <description>Screen flow for creating outbound TSANet collaboration cases from a Salesforce Case.</description>
     <environments>Default</environments>
     <formulas>
         <name>CustomerDataValue</name>
@@ -236,7 +236,7 @@
     </formulas>
     <interviewLabel>Create TSANet Collaboration Case {!$Flow.CurrentDateTime}</interviewLabel>
     <isTemplate>true</isTemplate>
-    <label>Create TSANet Collaboration Case</label>
+    <label>TSANet: Outbound: Create Collaboration Case</label>
     <loops>
         <name>LoopPopulateCustomerData</name>
         <label>Loop Populate Customer Data</label>

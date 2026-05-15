@@ -33,11 +33,11 @@
     </actionCalls>
     <apiVersion>65.0</apiVersion>
     <areMetricsLoggedToDataCloud>false</areMetricsLoggedToDataCloud>
-    <description>Reusable subflow responsible for sending information as part of the collaboration process.</description>
+    <description>Reusable subflow responsible for sending information as part of the TSANet collaboration process.</description>
     <environments>Default</environments>
     <interviewLabel>TSANet Send Info ( Automation ) {!$Flow.CurrentDateTime}</interviewLabel>
     <isTemplate>true</isTemplate>
-    <label>TSANet Send Info ( Automation )</label>
+    <label>TSANet: Send Information (Automation)</label>
     <processMetadataValues>
         <name>BuilderType</name>
         <value>

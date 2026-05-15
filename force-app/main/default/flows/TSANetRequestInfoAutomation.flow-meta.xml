@@ -33,11 +33,11 @@
     </actionCalls>
     <apiVersion>65.0</apiVersion>
     <areMetricsLoggedToDataCloud>false</areMetricsLoggedToDataCloud>
-    <description>Reusable subflow that executes the &quot;request information&quot; action logic.</description>
+    <description>Reusable subflow that executes the &quot;request information&quot; action on a TSANet collaboration case.</description>
     <environments>Default</environments>
     <interviewLabel>TSANet Request Info ( Automation ) {!$Flow.CurrentDateTime}</interviewLabel>
     <isTemplate>true</isTemplate>
-    <label>TSANet Request Info ( Automation )</label>
+    <label>TSANet: Request Information (Automation)</label>
     <processMetadataValues>
         <name>BuilderType</name>
         <value>

@@ -1,5 +1,4 @@
 @IsTest
-
 public class TSANetNoteTriggerHelperTest {
 
      @TestSetup static void testSetup() {
@@ -31,5 +30,45 @@ public class TSANetNoteTriggerHelperTest {
             insert note;
         	update note;
         Test.stopTest();
+    }
+
+    /**
+     * Guest path: when the trigger thinks the running user is a Site Guest,
+     * createFeedItems publishes a Platform Event instead of inserting the FeedItem inline.
+     * The subscriber then performs the insert when Test.stopTest delivers the event.
+     */
+    @IsTest
+    public static void createFeedItems_guestPath_publishesPlatformEvent(){
+        tsanetconnect__TSANetCase__c tsaNetCase = [
+            SELECT Id, tsanetconnect__Case__c
+            FROM tsanetconnect__TSANetCase__c
+            LIMIT 1
+        ];
+
+        tsanetconnect__TSANetNote__c note = new tsanetconnect__TSANetNote__c(
+            tsanetconnect__TSANetCase__c = tsaNetCase.Id,
+            tsanetconnect__Token__c = 'guest-path-token',
+            tsanetconnect__Summary__c = 'Summary',
+            tsanetconnect__Description__c = '<strong>Body</strong>',
+            tsanetconnect__CreatorName__c = 'Tester',
+            tsanetconnect__CreatedAt__c = DateTime.now(),
+            tsanetconnect__Priority__c = 'LOW',
+            tsanetconnect__Status__c = 'OPEN'
+        );
+
+        Test.startTest();
+        TSANetNoteTriggerHelper.treatAsGuestForTest = true;
+        insert note;
+        TSANetNoteTriggerHelper.treatAsGuestForTest = false;
+        Test.stopTest();
+
+        Integer feedItems = [
+            SELECT COUNT()
+            FROM FeedItem
+            WHERE ParentId = :tsaNetCase.tsanetconnect__Case__c
+              AND Title = 'TSANet Note - guest-path-token'
+        ];
+        System.assertEquals(1, feedItems,
+            'Guest publish + subscriber should have produced one FeedItem on the parent Case');
     }
 }

@@ -43,7 +43,7 @@
             </value>
         </assignmentItems>
     </assignments>
-    <description>Autolaunched flow that prepares the note form data for API consumption.</description>
+    <description>Autolaunched subflow that prepares the note form data for TSANet API consumption.</description>
     <environments>Default</environments>
     <formulas>
         <name>Priority</name>
@@ -52,7 +52,7 @@
     </formulas>
     <interviewLabel>Get TSANet Note Form {!$Flow.CurrentDateTime}</interviewLabel>
     <isTemplate>true</isTemplate>
-    <label>Get TSANet Note Form</label>
+    <label>TSANet: Get Note Form</label>
     <processMetadataValues>
         <name>BuilderType</name>
         <value>

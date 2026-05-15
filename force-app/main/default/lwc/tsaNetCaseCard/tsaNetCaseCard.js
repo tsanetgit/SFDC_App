@@ -14,6 +14,7 @@ import {
 export default class TsaNetCaseCard extends LightningElement {
 
     @track isLoading
+    @track showAttachment = false
 
     @api record
     @api state
@@ -27,9 +28,8 @@ export default class TsaNetCaseCard extends LightningElement {
                 this.handleCloseCase()
                 break;
             case ACTIONS.SEND_ATTACHMENT:
-                //this.handleSendAttachment()
+                this.showAttachment = true
                 break;
-
             default:
                 this.handleOpenActionModal(selectedAction)
                 break;
@@ -49,6 +49,13 @@ export default class TsaNetCaseCard extends LightningElement {
         }
     }
 
+
+    handleCloseAttachment(event){
+        this.showAttachment = false
+        if(event?.detail?.refresh){
+            this.handleRefresh()
+        }
+    }
 
     handleRefresh(){
         this.dispatchEvent(new CustomEvent('refresh'))

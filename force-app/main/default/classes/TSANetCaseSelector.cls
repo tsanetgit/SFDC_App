@@ -119,6 +119,11 @@ public inherited sharing class TSANetCaseSelector {
 
     /**
      * Trigger helper fields by external case IDs — superset for note/response triggers.
+     * Runs WITH SYSTEM_MODE because it is invoked from before-insert triggers that must
+     * resolve the parent TSANetCase__c regardless of the running user's FLS — e.g. the
+     * Site Guest User used by the inbound webhook does not have FLS on Engineer* fields,
+     * which would otherwise make WITH SECURITY_ENFORCED throw and the trigger silently
+     * skip the lookup.
      * @param externalIds set of external TSANet case Ids
      * @return list of matching TSANetCase records
      */
@@ -129,7 +134,7 @@ public inherited sharing class TSANetCaseSelector {
                    tsanetconnect__EngineerPhone__c, tsanetconnect__EngineerEmail__c
             FROM tsanetconnect__TSANetCase__c
             WHERE tsanetconnect__tsaNetCaseId__c IN :externalIds
-            WITH SECURITY_ENFORCED
+            WITH SYSTEM_MODE
         ];
     }
 
