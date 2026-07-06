@@ -1,0 +1,31 @@
+<template>
+    <template if:false={isLoading}>
+        <lightning-button-menu lwc:if={record.isHideAction} icon-size="xx-small" menu-alignment="right" variant="bare" data-id={tsaNetCaseId} data-token={token} onselect={handleOnSelectAction}>
+            <template if:true={record.isAcceptable}>
+                <lightning-menu-item value={acceptMode} prefix-icon-name="utility:check" label="Accept"></lightning-menu-item>
+            </template>
+            <template if:true={record.isNoteable}>
+                <lightning-menu-item value={createNoteMode} prefix-icon-name="utility:note" label="Create Note"></lightning-menu-item>
+            </template>
+            <template if:true={record.isRejectable}>
+                <lightning-menu-item value={rejectMode} prefix-icon-name="utility:close" label="Reject"></lightning-menu-item>
+            </template>
+            <template if:true={record.isAttachmentable}>
+                <lightning-menu-item value={sendAttachmentMode} prefix-icon-name="utility:upload" label="Send Attachment"></lightning-menu-item>
+            </template>
+            <template if:true={record.isRequestable}>
+                <lightning-menu-item value={requestInfoMode} prefix-icon-name="utility:comments" label="Request Info"></lightning-menu-item>
+            </template>
+            <template if:true={record.isResponseable}>
+                <lightning-menu-item value={sendInfoMode} prefix-icon-name="utility:info_alt" label="Send Information"></lightning-menu-item>
+            </template>
+            <template if:true={record.isCloseable}>
+                <lightning-menu-item value={closeCaseMode} prefix-icon-name="utility:ban" label="Close"></lightning-menu-item>
+            </template>
+        </lightning-button-menu>
+    </template>
+
+    <template if:true={showAttachment}>
+        <c-upload-attachment record={record} onclose={handleCloseAttachment}></c-upload-attachment>
+    </template>
+</template>

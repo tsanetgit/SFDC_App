@@ -1,0 +1,320 @@
+.notes {
+    margin-top: 0.5rem;
+}
+
+.notes__toggle {
+    cursor: pointer;
+    color: var(--lwc-colorTextWeak, #5c5c5c);
+    font-size: 0.8125rem;
+    font-weight: 600;
+}
+
+.notes__bell {
+    position: relative;
+    display: inline-flex;
+}
+
+/* Red notification badge, like a bell count */
+.notes__badge {
+    position: absolute;
+    top: -0.5rem;
+    right: -0.6rem;
+    min-width: 1rem;
+    height: 1rem;
+    padding: 0 0.25rem;
+    border-radius: 0.75rem;
+    background-color: #ea001e;
+    color: #fff;
+    font-size: 0.625rem;
+    line-height: 1rem;
+    font-weight: 700;
+    text-align: center;
+}
+
+.notes__panel {
+    background-color: var(--lwc-colorBackgroundAlt, #fafafa);
+}
+
+.notes__thread {
+    max-height: 18rem;
+    list-style: none;
+    margin: 0;
+    padding: 0.25rem;
+}
+
+.notes__item {
+    margin-bottom: 0.5rem;
+}
+
+.notes__item:last-child {
+    margin-bottom: 0;
+}
+
+/* Standard system note row */
+.note-system {
+    margin: 0.375rem 0;
+}
+
+.note-system__pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.125rem 0.5rem;
+    border-radius: 1rem;
+    color: #fff;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+}
+
+.note-system__time {
+    white-space: nowrap;
+}
+
+/* Conversation row: avatar next to the bubble */
+.note-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    max-width: 90%;
+}
+
+.note-row_inbound {
+    margin-right: auto;
+}
+
+.note-row_outbound {
+    margin-left: auto;
+    flex-direction: row-reverse;
+}
+
+.note-row__avatar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #1b96ff, #0b5cab);
+    color: #fff;
+    font-size: 0.8125rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    flex-shrink: 0;
+}
+
+.note-row_inbound .note-row__avatar {
+    background: linear-gradient(135deg, #c9c9c9, #939393);
+}
+
+.note-row__content {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+/* Timestamp sits at the bottom of the message */
+.note-row__time {
+    margin-top: 0.125rem;
+    white-space: nowrap;
+}
+
+.note-row_outbound .note-row__time {
+    text-align: right;
+}
+
+/* Optimistic send status ("Sending…" / "Not sent") */
+.note-row__status {
+    font-style: italic;
+}
+
+.note-row__status_failed {
+    color: #ea001e;
+    font-style: normal;
+    font-weight: 600;
+}
+
+/* Conversation bubbles */
+.note-bubble {
+    padding: 0.5rem 0.75rem;
+    border-radius: 1rem;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+.note-bubble_inbound {
+    background-color: #fff;
+    border: 1px solid var(--lwc-colorBorder, #e5e5e5);
+    border-top-left-radius: 0.25rem;
+}
+
+.note-bubble_outbound {
+    background-color: #e8f4fe;
+    border: 1px solid #c9e7fd;
+    border-top-right-radius: 0.25rem;
+}
+
+.note-bubble__sender {
+    display: block;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    color: var(--lwc-colorTextWeak, #5c5c5c);
+    margin-bottom: 0.125rem;
+    min-width: 0;
+}
+
+.note-bubble__summary {
+    font-weight: 700;
+    font-size: 0.8125rem;
+    margin-bottom: 0.125rem;
+}
+
+.note-bubble__body {
+    font-size: 0.8125rem;
+    color: var(--lwc-colorTextDefault, #181818);
+    word-break: break-word;
+}
+
+/* "Someone is typing..." indicator: shares the partner (right-side) bubble layout */
+.notes__typing-row {
+    margin-top: 0.25rem;
+}
+
+.notes__typing-bubble {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.625rem 0.875rem;
+}
+
+.notes__typing-dots {
+    display: inline-flex;
+    align-items: flex-end;
+    gap: 0.1875rem;
+}
+
+.notes__typing-dots span {
+    width: 0.375rem;
+    height: 0.375rem;
+    border-radius: 50%;
+    background-color: #969492;
+    animation: notes-typing 1.2s infinite ease-in-out;
+}
+
+.notes__typing-dots span:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.notes__typing-dots span:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes notes-typing {
+    0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+    30% { transform: translateY(-0.25rem); opacity: 1; }
+}
+
+/* Composer */
+.composer {
+    display: flex;
+    gap: 0.375rem;
+}
+
+/* Plain mode: unified rounded pill */
+.composer_plain {
+    align-items: center;
+    padding: 0.25rem 0.25rem 0.25rem 0.5rem;
+    background-color: #fff;
+    border: 1px solid var(--lwc-colorBorder, #dddbda);
+    border-radius: 1.75rem;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.composer_plain:focus-within {
+    border-color: #1b96ff;
+    box-shadow: 0 0 0 2px rgba(27, 150, 255, 0.25);
+}
+
+/* Rich mode: editor stacks; controls align to the bottom */
+.composer_rich {
+    align-items: flex-end;
+}
+
+.composer__field {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+/* Borderless single-line input that blends into the pill */
+.composer__input {
+    width: 100%;
+    border: none;
+    outline: none;
+    background: transparent;
+    font-size: 0.8125rem;
+    line-height: 1.5;
+    color: var(--lwc-colorTextDefault, #181818);
+    padding: 0.375rem 0.25rem;
+}
+
+.composer__input::placeholder {
+    color: var(--lwc-colorTextPlaceholder, #969492);
+}
+
+/* Ghost circular format toggle */
+.composer__format {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    flex-shrink: 0;
+    border: none;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--lwc-colorTextWeak, #5c5c5c);
+    cursor: pointer;
+    transition: background-color 0.15s ease-in-out;
+}
+
+.composer__format:hover:not(:disabled) {
+    background-color: var(--lwc-colorBackgroundRowHover, #f3f3f3);
+}
+
+.composer__format_active {
+    background-color: #d8edff;
+    color: #0176d3;
+}
+
+.composer__format:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+/* Rounded brand send button */
+.composer__send {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    flex-shrink: 0;
+    border: none;
+    border-radius: 50%;
+    background-color: #0176d3;
+    cursor: pointer;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    transition: background-color 0.15s ease-in-out, transform 0.1s ease-in-out;
+}
+
+.composer__send:hover:not(:disabled) {
+    background-color: #014486;
+}
+
+.composer__send:active:not(:disabled) {
+    transform: scale(0.92);
+}
+
+.composer__send:disabled {
+    background-color: #c9c9c9;
+    cursor: not-allowed;
+    box-shadow: none;
+}

@@ -15,6 +15,7 @@
  * the original upsert ran USER_MODE but the running user can't see the existing row
  * because of sharing/FLS.
  */
+@SuppressWarnings('PMD.ApexSharingViolations')
 public without sharing class UpsertExecutor {
 
     private static final String LOG_CONTEXT_RETRY = 'UPSERT_RETRY_ERROR_LOG';
@@ -84,6 +85,9 @@ public without sharing class UpsertExecutor {
         Map<String, Id> extIdToId = lookupExistingIds(objectName, fieldName, extIds);
         List<SObject> toUpdate = stampIds(records, fieldName, extIdToId);
         if (toUpdate.isEmpty()) { return; }
+
+        DescribeSObjectResult objectDescribe = records[0].getSObjectType().getDescribe();
+        if (!objectDescribe.isUpdateable()) { return; }
 
         Database.SaveResult[] saveResults = Database.update(toUpdate, false, AccessLevel.SYSTEM_MODE);
         logRetryFailures(saveResults, toUpdate, fieldName, objectName);

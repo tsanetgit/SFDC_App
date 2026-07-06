@@ -349,7 +349,7 @@ public with sharing class ParserManager {
      * @return map of source field names to custom field metadata records
      */
     public static Map<String, tsanetconnect__TSANetCustomField__mdt> getCustomFieldMapping(){
-        tsanetconnect__TSANetCustomField__mdt[] customFields = [SELECT Id, tsanetconnect__From__c, tsanetconnect__To__c, tsanetconnect__Type__c FROM tsanetconnect__TSANetCustomField__mdt WITH SECURITY_ENFORCED LIMIT 1000];
+        tsanetconnect__TSANetCustomField__mdt[] customFields = [SELECT Id, tsanetconnect__From__c, tsanetconnect__To__c, tsanetconnect__Type__c FROM tsanetconnect__TSANetCustomField__mdt WITH USER_MODE LIMIT 1000];
 
         Map<String, tsanetconnect__TSANetCustomField__mdt> sortedCustomFields = new Map<String, tsanetconnect__TSANetCustomField__mdt>();
         for(tsanetconnect__TSANetCustomField__mdt customField : customFields){

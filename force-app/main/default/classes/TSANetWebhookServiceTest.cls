@@ -75,7 +75,7 @@ public class TSANetWebhookServiceTest {
 
     @IsTest
     static void testRegisterWebhooksAsync() {
-        tsanetconnect__TSANet_Credentials__c cred = [SELECT Id FROM tsanetconnect__TSANet_Credentials__c LIMIT 1];
+        tsanetconnect__TSANet_Credentials__c cred = [SELECT Id FROM tsanetconnect__TSANet_Credentials__c WITH USER_MODE LIMIT 1];
 
         tsanetconnect__TSANetWebhook__c wh = new tsanetconnect__TSANetWebhook__c(
             tsanetconnect__CallbackUrl__c = 'https://example.com/services/apexrest/tsanetconnect/webhook',
@@ -94,6 +94,7 @@ public class TSANetWebhookServiceTest {
             SELECT tsanetconnect__WebhookId__c, tsanetconnect__Active__c
             FROM tsanetconnect__TSANetWebhook__c
             WHERE Id = :wh.Id
+            WITH USER_MODE
         ];
         System.assertEquals(42, updated.tsanetconnect__WebhookId__c, 'WebhookId should be set from API');
     }

@@ -196,7 +196,7 @@
             <targetReference>GetTSANetCase</targetReference>
         </connector>
     </start>
-    <status>Obsolete</status>
+    <status>Draft</status>
     <subflows>
         <name>TSANetAcceptAutomation</name>
         <label>TSANet Accept ( Automation )</label>

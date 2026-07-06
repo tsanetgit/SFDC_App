@@ -9,9 +9,19 @@ import tsaNetCaseCreator from 'c/tsaNetCaseCreator';
 
 import { getRelatedTSANetCases } from 'c/tsaNetHelper'
 
+// Width thresholds with hysteresis to prevent flicker when a scrollbar appears
+// after the view switches.
+const TABLE_BREAKPOINT_UP = 860
+const TABLE_BREAKPOINT_DOWN = 820
+
+// Single per-user preference (localStorage is already per-browser/per-user) shared
+// across all Case pages.
+const EXPANDED_STORAGE_KEY = 'tsanet:relatedListExpanded'
+
 export default class TsaNetCaseRelatedList extends NavigationMixin(LightningElement) {
 
     @api recordId
+    @api typingTokens = []
 
     tsaNetLogo = TSANET_LOGO
 
@@ -20,6 +30,12 @@ export default class TsaNetCaseRelatedList extends NavigationMixin(LightningElem
     @track _state
     @track records
     @track caseRecord
+
+    @track isTableView = false
+    @track isExpanded = true
+
+    _resizeObserver
+    _rafId
 
     @api
     get state(){
@@ -34,7 +50,83 @@ export default class TsaNetCaseRelatedList extends NavigationMixin(LightningElem
         this.records = value?.relatedCases ? value.relatedCases : []
     }
 
-    handleRefresh(){
+    connectedCallback(){
+        this.isExpanded = this.readExpandedPreference()
+    }
+
+    renderedCallback(){
+        if(!this._resizeObserver){
+            this.initResizeObserver()
+        }
+    }
+
+    disconnectedCallback(){
+        if(this._resizeObserver){
+            this._resizeObserver.disconnect()
+            this._resizeObserver = undefined
+        }
+        if(this._rafId){
+            cancelAnimationFrame(this._rafId)
+        }
+    }
+
+    // Observe the card's own width so the layout adapts to the actual region size.
+    initResizeObserver(){
+        const container = this.template.querySelector('.rl-card')
+        if(!container){
+            return
+        }
+        this._resizeObserver = new ResizeObserver(entries => {
+            this._rafId = requestAnimationFrame(() => {
+                this.updateView(entries[0]?.contentRect?.width)
+            })
+        })
+        this._resizeObserver.observe(container)
+    }
+
+    updateView(width){
+        if(!width){
+            return
+        }
+        if(!this.isTableView && width >= TABLE_BREAKPOINT_UP){
+            this.isTableView = true
+        } else if(this.isTableView && width <= TABLE_BREAKPOINT_DOWN){
+            this.isTableView = false
+        }
+    }
+
+    // Persistence
+
+    readExpandedPreference(){
+        try {
+            const stored = window.localStorage.getItem(EXPANDED_STORAGE_KEY)
+            return stored === null ? true : stored === 'true'
+        } catch(e){
+            return true
+        }
+    }
+
+    writeExpandedPreference(value){
+        try {
+            window.localStorage.setItem(EXPANDED_STORAGE_KEY, String(value))
+        } catch(e){
+            // localStorage may be unavailable (private mode / blocked); ignore.
+        }
+    }
+
+    handleToggleExpand(){
+        this.isExpanded = !this.isExpanded
+        this.writeExpandedPreference(this.isExpanded)
+    }
+
+    handleRefresh(event){
+        // Background refresh (e.g. after sending a message): let the app reload data silently,
+        // skipping the header spinner and the redundant API pull.
+        if(event?.detail?.background){
+            this.dispatchEvent(new CustomEvent('refresh', { detail: { background: true }}))
+            return
+        }
+
         this.isLoading = true
         getRelatedTSANetCases(this.recordId).then(() => {
             this.dispatchEvent(new CustomEvent('refresh'))
@@ -47,6 +139,11 @@ export default class TsaNetCaseRelatedList extends NavigationMixin(LightningElem
 
     handleOnLoading(event){
         this.isLoading = event?.detail?.isLoading
+    }
+
+    // Bubble the outbound-send signal up to the application for typing-indicator suppression.
+    handleNoteSent(event){
+        this.dispatchEvent(new CustomEvent('notesent', { detail: { token: event?.detail?.token }}))
     }
 
     async handleCreateNewCase() {
@@ -85,14 +182,16 @@ export default class TsaNetCaseRelatedList extends NavigationMixin(LightningElem
         return ' TSANet Cases (' + this.recordsLength + ')'
     }
 
-    get listHeight() {
-        if(this.records?.length == 0){
-            return 'min-height:3rem;';
-        } else if(this.records?.length > 3){
-            return 'max-height:400px;';
-        } else {
-            return 'min-height:150px;'
-        }
+    get chevronIcon(){
+        return this.isExpanded ? 'utility:chevrondown' : 'utility:chevronright'
+    }
+
+    get toggleAltText(){
+        return this.isExpanded ? 'Collapse TSANet Cases' : 'Expand TSANet Cases'
+    }
+
+    get ariaExpanded(){
+        return this.isExpanded ? 'true' : 'false'
     }
 
     get relatedListClass(){
@@ -105,5 +204,9 @@ export default class TsaNetCaseRelatedList extends NavigationMixin(LightningElem
             className += 'default-related-list-height'
         }
         return className;
+    }
+
+    get showFooter(){
+        return this.hasRecords && !this.isTableView
     }
 }

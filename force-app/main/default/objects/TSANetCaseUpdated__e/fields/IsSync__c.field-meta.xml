@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>IsSync__c</fullName>
+    <defaultValue>false</defaultValue>
+    <description>False = webhook received, processing started (show typing indicator). True = processing complete, records updated (refresh and hide indicator).</description>
+    <externalId>false</externalId>
+    <label>Is Sync</label>
+    <type>Checkbox</type>
+</CustomField>

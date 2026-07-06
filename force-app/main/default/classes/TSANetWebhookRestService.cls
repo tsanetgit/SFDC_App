@@ -1,6 +1,6 @@
 /** REST endpoint that receives inbound webhook events from TSANet. */
 @RestResource(urlMapping='/webhook/*')
-global with sharing class TSANetWebhookRestService {
+global without sharing class TSANetWebhookRestService {
 
     /** DTO for the inbound webhook event payload. */
     global class WebhookEvent {
@@ -11,12 +11,15 @@ global with sharing class TSANetWebhookRestService {
     }
 
     /**
-     * Handles incoming POST events: verifies HMAC signature, parses payload,
-     * and enqueues async processing.
+     * Health check endpoint for webhook availability monitoring.
+     * @return JSON payload with status and current UTC timestamp
      */
     @HttpGet
     global static String handleGet(){
-        return 'test';
+        return JSON.serialize(new Map<String, String>{
+            'status' => 'ok',
+            'timestamp' => Datetime.now().formatGmt('yyyy-MM-dd\'T\'HH:mm:ss.SSS\'Z\'')
+        });
     }
 
     /**
@@ -41,6 +44,9 @@ global with sharing class TSANetWebhookRestService {
             WebhookEvent event = (WebhookEvent) JSON.deserialize(body, WebhookEvent.class);
 
             if(String.isNotBlank(event.requestToken)){
+                // Fire the "processing started" event first so the LWC shows a typing indicator
+                // immediately, before the async callout/upsert runs.
+                publishProcessingStartedEvent(event.requestToken);
                 System.enqueueJob(new TSANetWebhookQueueable(event.eventType, event.requestToken, event.noteToken));
             }
 
@@ -50,6 +56,37 @@ global with sharing class TSANetWebhookRestService {
             ErrorLogger.logError(e, 'TSANET_WEBHOOK_RECEIVE');
             res.statusCode = 200;
             res.responseBody = Blob.valueOf('{"status":"ok"}');
+        }
+    }
+
+    /**
+     * Publishes the start TSANetCaseUpdated__e event (IsSync=false) so subscribed LWCs can show a
+     * "Someone is typing..." indicator while the async job processes the callout. Resolves the
+     * parent Case in SYSTEM_MODE because the webhook runs as the guest/integration user. A failure
+     * here must never block webhook acceptance.
+     * @param requestToken the collaboration request token from the inbound event
+     */
+    private static void publishProcessingStartedEvent(String requestToken){
+        try {
+            tsanetconnect__TSANetCase__c[] cases = [
+                SELECT Id, tsanetconnect__Case__c
+                FROM tsanetconnect__TSANetCase__c
+                WHERE tsanetconnect__Token__c = :requestToken
+                WITH SYSTEM_MODE
+                LIMIT 1
+            ];
+
+            if(cases.isEmpty() || cases[0].tsanetconnect__Case__c == null){
+                return;
+            }
+
+            EventBus.publish(new tsanetconnect__TSANetCaseUpdated__e(
+                tsanetconnect__CaseId__c = cases[0].tsanetconnect__Case__c,
+                tsanetconnect__RequestToken__c = requestToken,
+                tsanetconnect__IsSync__c = false
+            ));
+        } catch(Exception e){
+            ErrorLogger.logError(e, 'TSANET_WEBHOOK_TYPING_EVENT');
         }
     }
 
@@ -72,7 +109,7 @@ global with sharing class TSANetWebhookRestService {
             SELECT tsanetconnect__Secret__c
             FROM tsanetconnect__TSANetWebhook__c
             WHERE tsanetconnect__Active__c = TRUE AND tsanetconnect__Secret__c != NULL
-            WITH SECURITY_ENFORCED
+            WITH USER_MODE
         ];
 
         Blob payloadBlob = Blob.valueOf(payload);

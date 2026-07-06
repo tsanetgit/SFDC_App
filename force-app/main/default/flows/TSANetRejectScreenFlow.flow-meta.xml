@@ -114,7 +114,7 @@
             <targetReference>RejectReasonScreen</targetReference>
         </connector>
     </start>
-    <status>Obsolete</status>
+    <status>Draft</status>
     <subflows>
         <name>RejectRequest</name>
         <label>Reject Request</label>

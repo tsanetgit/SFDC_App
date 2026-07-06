@@ -112,7 +112,7 @@ public with sharing class TSANetUtils {
      */
     @AuraEnabled
     public static User getCurrentUserInfo(){
-        return [SELECT Id, Name, FirstName, LastName, Email, Phone FROM User WHERE Id =:UserInfo.getUserId() WITH SECURITY_ENFORCED LIMIT 1];
+        return [SELECT Id, Name, FirstName, LastName, Email, Phone FROM User WHERE Id =:UserInfo.getUserId() WITH USER_MODE LIMIT 1];
     }
 
     /**
@@ -164,13 +164,47 @@ public with sharing class TSANetUtils {
     }
 
     /**
-     * Updates a TSANetCase__c record.
-     * @param tsaNetCase the record to update
+     * Updates the Case lookup on a TSANetCase record after server-side access validation.
+     * @param tsaNetCaseId TSANetCase record Id to update
+     * @param caseId Salesforce Case Id to link (nullable to clear the link)
      * @return true if the update succeeded
      */
     @AuraEnabled
-    public static Boolean updateTSANetCase(tsanetconnect__TSANetCase__c tsaNetCase){
-        return Database.update(tsaNetCase, AccessLevel.USER_MODE).isSuccess();
+    public static Boolean updateTSANetCase(Id tsaNetCaseId, Id caseId){
+        if (tsaNetCaseId == null || !Schema.sObjectType.tsanetconnect__TSANetCase__c.isUpdateable()) {
+            return false;
+        }
+
+        UserRecordAccess[] access = [
+            SELECT RecordId, HasEditAccess
+            FROM UserRecordAccess
+            WHERE UserId = :UserInfo.getUserId()
+            AND RecordId = :tsaNetCaseId
+            WITH USER_MODE
+            LIMIT 1
+        ];
+        if (access.isEmpty() || !access[0].HasEditAccess) {
+            return false;
+        }
+
+        if (caseId != null) {
+            Case[] linkedCases = [
+                SELECT Id
+                FROM Case
+                WHERE Id = :caseId
+                WITH USER_MODE
+                LIMIT 1
+            ];
+            if (linkedCases.isEmpty()) {
+                return false;
+            }
+        }
+
+        tsanetconnect__TSANetCase__c rec = new tsanetconnect__TSANetCase__c(
+            Id = tsaNetCaseId,
+            tsanetconnect__Case__c = caseId
+        );
+        return Database.update(rec, AccessLevel.USER_MODE).isSuccess();
     }
 
     /**
@@ -192,14 +226,14 @@ public with sharing class TSANetUtils {
     public static ContentVersion[] getAllRelatedFiles(Id caseId){
         tsanetconnect__TSANetCase__c tsaNetCase = TSANetCaseSelector.getMinimalById(caseId);
 
-        ContentDocumentLink[] links = [SELECT Id, LinkedEntityId, ContentDocumentId FROM ContentDocumentLink WHERE LinkedEntityId =:tsaNetCase.Id OR LinkedEntityId =:tsaNetCase.tsanetconnect__Case__c WITH SECURITY_ENFORCED ];
+        ContentDocumentLink[] links = [SELECT Id, LinkedEntityId, ContentDocumentId FROM ContentDocumentLink WHERE LinkedEntityId =:tsaNetCase.Id OR LinkedEntityId =:tsaNetCase.tsanetconnect__Case__c WITH USER_MODE ];
 
         Id[] contentDocumentIds = new Id[]{};
         for(ContentDocumentLink link : links){
         	contentDocumentIds.add(link.ContentDocumentId);
         }
 
-        ContentVersion[] contentVersions = [SELECT Id, ContentDocumentId, Title FROM ContentVersion WHERE ContentDocumentId IN:contentDocumentIds WITH SECURITY_ENFORCED ];
+        ContentVersion[] contentVersions = [SELECT Id, ContentDocumentId, Title FROM ContentVersion WHERE ContentDocumentId IN:contentDocumentIds WITH USER_MODE ];
 
         return contentVersions;
     }

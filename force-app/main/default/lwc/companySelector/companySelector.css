@@ -38,7 +38,46 @@
     margin-top: -4px;
 }
 
-.company-row {
+/* Search result row: logo + label + tags on a single line */
+.company-option {
     display: flex;
     align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+}
+
+.company-option .small-icon {
+    flex: 0 0 auto;
+    margin: 0;
+}
+
+.company-option__label {
+    flex: 1 1 auto;
+    min-width: 0;
+    font-weight: 600;
+}
+
+/* Selected company display: label + tags inline, room for the clear button */
+.company-selected {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding-right: 2rem;
+}
+
+.company-selected__label {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+/* Tags stay grouped on the right and never wrap */
+.company-tags {
+    flex: 0 0 auto;
+    display: inline-flex;
+    flex-wrap: nowrap;
+    gap: 0.25rem;
+}
+
+.company-tag {
+    text-transform: capitalize;
 }

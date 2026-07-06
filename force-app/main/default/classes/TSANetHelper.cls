@@ -35,6 +35,20 @@ public with sharing class TSANetHelper {
      * @param response map of collaboration request fields returned from TSANet
      */
     public static void createCaseFeedItem(ID caseId, Map<String, Object> response){
+        if (caseId == null || !Schema.sObjectType.FeedItem.isCreateable()) {
+            return;
+        }
+
+        Case[] accessibleCases = [
+            SELECT Id
+            FROM Case
+            WHERE Id = :caseId
+            WITH USER_MODE
+            LIMIT 1
+        ];
+        if (accessibleCases.isEmpty()) {
+            return;
+        }
 
         Map<String, Object> submittedByMap = (Map<String, Object>) response.get('submittedBy');
         String submitCompanyName = (String) response.get('submitCompanyName');

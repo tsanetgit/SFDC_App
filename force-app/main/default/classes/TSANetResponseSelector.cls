@@ -1,5 +1,5 @@
 /** Centralized SOQL for tsanetconnect__TSANetResponse__c. */
-public inherited sharing class TSANetResponseSelector {
+public with sharing class TSANetResponseSelector {
 
     /**
      * Responses by parent TSANetCase external IDs (for trigger context).
@@ -14,7 +14,7 @@ public inherited sharing class TSANetResponseSelector {
                    tsanetconnect__tsaNetCaseId__c, tsanetconnect__tsaNetResponseId__c
             FROM tsanetconnect__TSANetResponse__c
             WHERE tsanetconnect__tsaNetCaseId__c IN :externalCaseIds
-            WITH SECURITY_ENFORCED
+            WITH USER_MODE
             ORDER BY tsanetconnect__CreatedAt__c DESC
         ];
     }

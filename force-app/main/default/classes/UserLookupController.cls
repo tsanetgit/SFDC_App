@@ -52,7 +52,7 @@ public with sharing class UserLookupController {
             SELECT Id, Name, Email, Title, SmallPhotoUrl, MobilePhone
             FROM User
             WHERE IsActive = true AND (Name LIKE :searchText OR Email LIKE :searchText)
-            WITH SECURITY_ENFORCED
+            WITH USER_MODE
             ORDER BY LastName NULLS LAST, FirstName NULLS LAST
             LIMIT :limitSize
         ];
@@ -83,7 +83,7 @@ public with sharing class UserLookupController {
             SELECT Id, Name, Email, Title, SmallPhotoUrl, MobilePhone
             FROM User
             WHERE Id = :userId
-            WITH SECURITY_ENFORCED
+            WITH USER_MODE
             LIMIT 1
         ];
         SObjectAccessDecision sec = Security.stripInaccessible(AccessType.READABLE, new List<User>{ u });

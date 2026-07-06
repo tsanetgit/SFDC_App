@@ -1,5 +1,5 @@
 /** Centralized SOQL for Case. */
-public inherited sharing class CaseSelector {
+public with sharing class CaseSelector {
 
     /**
      * Full detail including Owner, Account, and Contact relationship fields.
@@ -14,7 +14,7 @@ public inherited sharing class CaseSelector {
                    ContactId, Contact.Name, Contact.FirstName, Contact.LastName, Contact.Email, Contact.Phone
             FROM Case
             WHERE Id = :caseId
-            WITH SECURITY_ENFORCED
+            WITH USER_MODE
         ];
     }
 
@@ -28,7 +28,7 @@ public inherited sharing class CaseSelector {
             SELECT Id, CaseNumber
             FROM Case
             WHERE Id = :caseId
-            WITH SECURITY_ENFORCED
+            WITH USER_MODE
         ];
     }
 
@@ -42,7 +42,7 @@ public inherited sharing class CaseSelector {
             SELECT Id, CaseNumber, OwnerId, Owner.Name, Owner.Phone, Owner.Email
             FROM Case
             WHERE Id = :caseId
-            WITH SECURITY_ENFORCED
+            WITH USER_MODE
         ];
     }
 
@@ -56,7 +56,7 @@ public inherited sharing class CaseSelector {
             SELECT Id, OwnerId, CaseNumber
             FROM Case
             WHERE CaseNumber IN :caseNumbers
-            WITH SECURITY_ENFORCED
+            WITH USER_MODE
         ];
     }
 
@@ -68,7 +68,7 @@ public inherited sharing class CaseSelector {
         return [
             SELECT Id, CaseNumber, Subject
             FROM Case
-            WITH SECURITY_ENFORCED
+            WITH USER_MODE
             ORDER BY LastViewedDate DESC
             LIMIT 10
         ];
@@ -84,7 +84,7 @@ public inherited sharing class CaseSelector {
             SELECT Id, CaseNumber, Subject
             FROM Case
             WHERE (CaseNumber = :searchText OR Subject = :searchText)
-            WITH SECURITY_ENFORCED
+            WITH USER_MODE
         ];
     }
 }

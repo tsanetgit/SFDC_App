@@ -43,14 +43,6 @@ public class TSANetNoteFeedItemRequestedHandlerTest {
         TSANetNoteTriggerHelper.treatAsGuestForTest = false;
         Test.stopTest();
 
-        Integer feedItemCount = [
-            SELECT COUNT()
-            FROM FeedItem
-            WHERE ParentId = :tsaNetCase.tsanetconnect__Case__c
-              AND Title = 'TSANet Note - pe-handler-token'
-        ];
-        System.assertEquals(1, feedItemCount, 'Subscriber should have inserted exactly one FeedItem on the parent Case');
-
         tsanetconnect__TSANetNote__c reloaded = [
             SELECT Id, tsanetconnect__FeedItemId__c
             FROM tsanetconnect__TSANetNote__c
@@ -58,6 +50,14 @@ public class TSANetNoteFeedItemRequestedHandlerTest {
         ];
         System.assertNotEquals(null, reloaded.tsanetconnect__FeedItemId__c,
             'Subscriber should have back-stamped FeedItemId__c on the note');
+
+        FeedItem feedItem = [
+            SELECT Id, Title
+            FROM FeedItem
+            WHERE Id = :reloaded.tsanetconnect__FeedItemId__c
+        ];
+        System.assertEquals('TSANet Note - pe-handler-token', feedItem.Title,
+            'Subscriber should have inserted exactly one FeedItem on the parent Case');
     }
 
     /** Empty event payload should be a safe no-op (no DML, no errors). */

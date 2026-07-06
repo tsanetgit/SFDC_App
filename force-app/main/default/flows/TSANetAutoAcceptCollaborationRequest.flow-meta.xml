@@ -27,7 +27,7 @@
     </processMetadataValues>
     <processType>AutoLaunchedFlow</processType>
     <start>
-        <locationX>530</locationX>
+        <locationX>446</locationX>
         <locationY>48</locationY>
         <connector>
             <targetReference>TSANetAcceptAutomation</targetReference>
@@ -58,12 +58,12 @@
         <recordTriggerType>Create</recordTriggerType>
         <triggerType>RecordAfterSave</triggerType>
     </start>
-    <status>Obsolete</status>
+    <status>Draft</status>
     <subflows>
         <name>TSANetAcceptAutomation</name>
         <label>TSANet Accept ( Automation )</label>
-        <locationX>654</locationX>
-        <locationY>394</locationY>
+        <locationX>572</locationX>
+        <locationY>420</locationY>
         <flowName>TSANetAcceptAutomation</flowName>
         <inputAssignments>
             <name>Note</name>

@@ -17,8 +17,7 @@ public with sharing class ErrorManager {
     public static void handleResponseErrors(HTTPResponse response){
         if(response.getStatusCode() != TSANetConstants.SUCCESS_CODE){
             if(response.getBody().contains('The authorization token provided was invalid.')){
-                tsanetconnect__TSANet_Credentials__c cred = CredentialManager.getCredentials();
-                Database.update(new tsanetconnect__TSANet_Credentials__c(Id = cred.Id, tsanetconnect__Token__c = NULL), AccessLevel.USER_MODE);
+                TokenManager.clearToken();
                 throw new ErrorManagerException('Unauthorized');
             } else {
                 TSANetError parsedError = (TSANetError) System.JSON.deserialize(response.getBody(), TSANetError.class);

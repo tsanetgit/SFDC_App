@@ -7,7 +7,7 @@
         <locationY>468</locationY>
         <actionName>TSANetInvocableRejectCollaborationCase</actionName>
         <actionType>apex</actionType>
-        <flowTransactionModel>Automatic</flowTransactionModel>
+        <flowTransactionModel>NewTransaction</flowTransactionModel>
         <inputParameters>
             <name>caseRecord</name>
             <value>

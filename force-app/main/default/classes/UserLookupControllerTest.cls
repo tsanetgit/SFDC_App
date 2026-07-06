@@ -3,7 +3,7 @@ private class UserLookupControllerTest {
     @TestSetup
     static void setupData(){
         List<User> us = new List<User>();
-        Profile p = [SELECT Id FROM Profile WHERE Name = 'Standard User' LIMIT 1];
+        Profile p = [SELECT Id FROM Profile WHERE Name = 'Standard User' WITH USER_MODE LIMIT 1];
         // Створимо кількох активних
         for (Integer i=0; i<3; i++) {
             User u = new User(

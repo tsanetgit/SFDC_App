@@ -13,6 +13,9 @@ global with sharing class TSANetInvocableApproveRequestService {
         /** The approval form data to send to TSANet. */
         @InvocableVariable
         global TSANetApprovalForm request;
+        /** When true, runs the approval in a @Future context. */
+        @InvocableVariable
+        global Boolean runAsync;
     }
 
     /** Result wrapper returned by the approve-request invocable action. */
@@ -40,6 +43,13 @@ global with sharing class TSANetInvocableApproveRequestService {
         String json = System.JSON.serialize(input.request);
         String caseToken = input.caseRecord.tsanetconnect__Token__c;
 
+        if (input.runAsync == true) {
+            approveAsync(caseToken, json);
+            result.message = 'The collaboration request approval has been queued';
+            result.isSuccess = true;
+            return new TSANetAcceptRequestResult[]{ result };
+        }
+
         try {
             TSANetService.approveIncomingRequest(caseToken, json, null);
             result.message = 'The collaboration request has been accepted successfully';
@@ -49,6 +59,16 @@ global with sharing class TSANetInvocableApproveRequestService {
             result.message = e.getMessage();
             result.isSuccess = false;
             return new TSANetAcceptRequestResult[]{ result };
+        }
+    }
+
+    /** Runs the approval callout asynchronously. */
+    @Future(callout=true)
+    public static void approveAsync(String caseToken, String json) {
+        try {
+            TSANetService.approveIncomingRequest(caseToken, json, null);
+        } catch(Exception e) {
+            ErrorLogger.logError(e, 'TSANET_APPROVE_ASYNC');
         }
     }
 }

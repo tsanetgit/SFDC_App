@@ -2,19 +2,6 @@
 <Flow xmlns="http://soap.sforce.com/2006/04/metadata">
     <apiVersion>61.0</apiVersion>
     <areMetricsLoggedToDataCloud>false</areMetricsLoggedToDataCloud>
-    <description>Record-triggered flow that sends notifications to case owners when a new inbound TSANet note is created.</description>
-    <environments>Default</environments>
-    <formulas>
-        <name>Body</name>
-        <dataType>String</dataType>
-        <expression>&apos;You got a new note - &apos; + {!$Record.tsanetconnect__Summary__c} + &apos;. &apos; +
-{!$Record.tsanetconnect__DescriptionPlainText__c}</expression>
-    </formulas>
-    <formulas>
-        <name>TodayStart</name>
-        <dataType>DateTime</dataType>
-        <expression>DATETIMEVALUE(TEXT(YEAR(TODAY())) + &apos;-&apos; + LPAD(TEXT(MONTH(TODAY())), 2, &apos;0&apos;) + &apos;-&apos; + LPAD(TEXT(DAY(TODAY())), 2, &apos;0&apos;) + &apos;T00:00:00Z&apos;)</expression>
-    </formulas>
     <decisions>
         <name>IsNewNote</name>
         <label>Is New Note</label>
@@ -37,6 +24,19 @@
             <label>Created Today</label>
         </rules>
     </decisions>
+    <description>Template (System Context Without Sharing) record-triggered flow that sends notifications to case owners for new TSANet notes. Triggers on Create and Update so notes synced via refresh/webhook upsert (which resolves to UPDATE for existing rows) are still notified; the isNotified__c entry condition guarantees once-only delivery. Subscribers can deactivate or clone this template to customize.</description>
+    <environments>Default</environments>
+    <formulas>
+        <name>Body</name>
+        <dataType>String</dataType>
+        <expression>&apos;You got a new note - &apos; + {!$Record.tsanetconnect__Summary__c} + &apos;. &apos; +
+{!$Record.tsanetconnect__DescriptionPlainText__c}</expression>
+    </formulas>
+    <formulas>
+        <name>TodayStart</name>
+        <dataType>DateTime</dataType>
+        <expression>DATETIMEVALUE(TEXT(YEAR(TODAY())) + &apos;-&apos; + LPAD(TEXT(MONTH(TODAY())), 2, &apos;0&apos;) + &apos;-&apos; + LPAD(TEXT(DAY(TODAY())), 2, &apos;0&apos;) + &apos;T00:00:00Z&apos;)</expression>
+    </formulas>
     <interviewLabel>TSANet Notification {!$Flow.CurrentDateTime}</interviewLabel>
     <isTemplate>true</isTemplate>
     <label>TSANet: Inbound: Note Notification</label>
@@ -93,6 +93,7 @@
         </inputAssignments>
         <inputReference>$Record</inputReference>
     </recordUpdates>
+    <runInMode>SystemModeWithoutSharing</runInMode>
     <start>
         <locationX>530</locationX>
         <locationY>48</locationY>
@@ -108,7 +109,7 @@
             </value>
         </filters>
         <object>TSANetNote__c</object>
-        <recordTriggerType>Create</recordTriggerType>
+        <recordTriggerType>CreateAndUpdate</recordTriggerType>
         <triggerType>RecordAfterSave</triggerType>
     </start>
     <status>Active</status>

@@ -7,6 +7,7 @@
     <columns>RequestDate__c</columns>
     <columns>ResponseDate__c</columns>
     <columns>Status__c</columns>
+    <columns>Direction__c</columns>
     <filterScope>Everything</filterScope>
     <label>TSANet Case View</label>
 </ListView>

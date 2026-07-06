@@ -1,0 +1,152 @@
+<template>
+    <div class="notes">
+        <!-- Trigger: bell/chat toggle with a red count badge -->
+        <button
+            class="notes__toggle slds-button slds-button_reset slds-grid slds-grid_vertical-align-center"
+            type="button"
+            aria-expanded={isOpen}
+            title={toggleAltText}
+            onclick={handleToggle}
+        >
+            <span class="notes__bell slds-icon_container">
+                <lightning-icon icon-name={toggleIcon} size="x-small" alternative-text={toggleAltText}></lightning-icon>
+                <template lwc:if={hasCount}>
+                    <span class="notes__badge" aria-hidden="true">{countLabel}</span>
+                </template>
+            </span>
+            <span class="notes__toggle-label slds-m-left_x-small">Notes</span>
+        </button>
+
+        <!-- Conversation thread -->
+        <template lwc:if={isOpen}>
+            <div class="notes__panel slds-box slds-box_xx-small slds-m-top_x-small">
+
+                <template lwc:if={hasNotes}>
+                    <ul class="notes__thread slds-scrollable_y" role="list">
+                        <template for:each={notes} for:item="note">
+                            <li key={note.key} class="notes__item">
+
+                                <!-- Standard system note: compact status row -->
+                                <template lwc:if={note.isStandard}>
+                                    <div class="note-system slds-grid slds-grid_align-center slds-grid_vertical-align-center">
+                                        <span class={note.standardThemeClass}>
+                                            <lightning-icon
+                                                icon-name={note.standardIcon}
+                                                size="xx-small"
+                                                variant="inverse"
+                                                class="slds-m-right_xx-small"
+                                            ></lightning-icon>
+                                            {note.standardLabel}
+                                        </span>
+                                        <span class="note-system__time slds-m-left_x-small slds-text-body_small slds-text-color_weak">
+                                            <lightning-formatted-date-time
+                                                value={note.createdAt}
+                                                year="numeric" month="short" day="2-digit"
+                                                hour="2-digit" minute="2-digit"
+                                            ></lightning-formatted-date-time>
+                                        </span>
+                                    </div>
+                                </template>
+
+                                <!-- Regular note: conversation row (avatar + bubble) -->
+                                <template lwc:else>
+                                    <div class={note.rowClass}>
+                                        <span class="note-row__avatar" aria-hidden="true">{note.initials}</span>
+                                        <div class="note-row__content">
+                                            <div class={note.bubbleClass}>
+                                                <span class="note-bubble__sender slds-text-title_caps slds-truncate" title={note.sender}>{note.sender}</span>
+                                                <template lwc:if={note.showSummary}>
+                                                    <p class="note-bubble__summary">{note.summary}</p>
+                                                </template>
+                                                <div class="note-bubble__body">
+                                                    <lightning-formatted-rich-text value={note.description}></lightning-formatted-rich-text>
+                                                </div>
+                                            </div>
+                                            <span class="note-row__time slds-text-body_small slds-text-color_weak">
+                                                <template lwc:if={note.statusLabel}>
+                                                    <span class={note.statusClass}>{note.statusLabel}</span>
+                                                </template>
+                                                <template lwc:else>
+                                                    <lightning-formatted-date-time
+                                                        value={note.createdAt}
+                                                        year="numeric" month="short" day="2-digit"
+                                                        hour="2-digit" minute="2-digit"
+                                                    ></lightning-formatted-date-time>
+                                                </template>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </template>
+                            </li>
+                        </template>
+                    </ul>
+                </template>
+
+                <!-- Empty state -->
+                <template lwc:else>
+                    <div class="slds-align_absolute-center slds-p-vertical_small slds-text-color_weak slds-text-body_small">
+                        No notes yet
+                    </div>
+                </template>
+
+                <!-- "Someone is typing..." indicator: rendered as an inbound (partner) bubble on the right -->
+                <template lwc:if={isTyping}>
+                    <div class="note-row note-row_outbound notes__typing-row" aria-live="polite">
+                        <span class="note-row__avatar" aria-hidden="true">…</span>
+                        <div class="note-row__content">
+                            <div class="note-bubble note-bubble_outbound notes__typing-bubble">
+                                <span class="notes__typing-dots" aria-hidden="true">
+                                    <span></span><span></span><span></span>
+                                </span>
+                            </div>
+                        </div>
+                        <span class="slds-assistive-text">Someone is typing</span>
+                    </div>
+                </template>
+
+                <!-- Composer (Messenger-style); plain single-line by default, toggle to rich text -->
+                <template lwc:if={showComposer}>
+                    <div class={composerClass} onkeydown={handleKeyDown}>
+                        <button
+                            class={formatButtonClass}
+                            type="button"
+                            title={formatToggleTitle}
+                            onclick={handleToggleRichText}
+                        >
+                            <lightning-icon icon-name="utility:richtextbox" size="x-small" alternative-text={formatToggleTitle}></lightning-icon>
+                        </button>
+
+                        <div class="composer__field">
+                            <template lwc:if={isRichText}>
+                                <lightning-input-rich-text
+                                    placeholder="Write a message..."
+                                    value={message}
+                                    onchange={handleChangeMessage}
+                                ></lightning-input-rich-text>
+                            </template>
+                            <template lwc:else>
+                                <input
+                                    class="composer__input"
+                                    type="text"
+                                    placeholder="Write a message..."
+                                    value={message}
+                                    oninput={handleChangeMessage}
+                                />
+                            </template>
+                        </div>
+
+                        <button
+                            class="composer__send"
+                            type="button"
+                            title={sendTitle}
+                            disabled={isSendDisabled}
+                            onclick={handleSend}
+                        >
+                            <lightning-icon icon-name="utility:send" size="x-small" variant="inverse" alternative-text="Send"></lightning-icon>
+                        </button>
+                    </div>
+                </template>
+            </div>
+        </template>
+    </div>
+</template>

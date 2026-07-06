@@ -8,13 +8,18 @@ public with sharing class ConfigManager {
     @AuraEnabled
     public static Boolean updateTSANetCredentials(){
 
-        String token = TSANetService.getTSANetAccessToken();
+        AuthManager.AccessTokenResponse loginResponse = TSANetService.login();
+        if (loginResponse == null || String.isBlank(loginResponse.accessToken)) {
+            return false;
+        }
+
+        String token = loginResponse.accessToken;
         TSANetCompanyInfo info = TSANetService.getCompanyInformation(token);
 
         tsanetconnect__TSANet_Credentials__c credential = CredentialManager.getCredentials();
         credential.tsanetconnect__CompanyName__c = info.company.name;
         credential.tsanetconnect__CompanyId__c = info.company.id;
-        credential.tsanetconnect__Token__c = token;
+        TokenManager.updateToken(token, loginResponse.expiresIn);
         return Database.update(credential, AccessLevel.USER_MODE).isSuccess();
     }
 }

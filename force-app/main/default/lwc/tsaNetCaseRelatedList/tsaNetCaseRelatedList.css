@@ -11,15 +11,19 @@
     margin-left: -10px;
 }
 
+.rl-header {
+    cursor: default;
+}
+
 .related-list-box {
     display: flex;
     flex-direction: column;
-    overflow-y: scroll;
+    overflow-y: auto;
     overflow-x: hidden;
 }
 
 .full-related-list-height {
-    max-height:400px;
+    max-height: 400px;
 }
 
 .empty-related-list-height {
@@ -32,4 +36,52 @@
 
 .spinner-container {
     left: -23px;
+}
+
+/* Empty state */
+.rl-empty {
+    min-height: 8rem;
+    padding: var(--lwc-spacingMedium, 1rem);
+}
+
+.rl-empty-icon {
+    --sds-c-icon-color-foreground-default: var(--lwc-colorTextWeak, #747474);
+}
+
+/* Table (wide layout) */
+.rl-table-scroll {
+    display: block;
+    max-height: 300px;
+    overflow-y: auto;
+    overflow-x: auto;
+}
+
+.rl-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background-color: var(--lwc-colorBackgroundAlt, #fff);
+    font-weight: 600;
+}
+
+.rl-table tbody tr:hover {
+    background-color: var(--lwc-colorBackgroundRowHover, #f3f3f3);
+}
+
+.rl-table .rl-col-case {
+    width: 11rem;
+}
+
+.rl-table .rl-col-priority,
+.rl-table .rl-col-status {
+    width: 6rem;
+}
+
+.rl-table .rl-col-actions {
+    width: 3rem;
+}
+
+.rl-actions-cell {
+    text-align: right;
+    vertical-align: middle;
 }

@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Flow xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>61.0</apiVersion>
+    <areMetricsLoggedToDataCloud>false</areMetricsLoggedToDataCloud>
+    <description>Template (System Context Without Sharing) record-triggered flow that sends a custom notification to the case owner when a new TSANet collaboration case is created — inbound via webhook or outbound/manual from Salesforce. Subscribers can deactivate or clone this template to customize.</description>
+    <environments>Default</environments>
+    <formulas>
+        <name>Body</name>
+        <dataType>String</dataType>
+        <expression>&apos;You got a new collaboration case - &apos; + {!$Record.tsanetconnect__Summary__c} + IF(ISBLANK({!$Record.tsanetconnect__SubmittedCompanyName__c}), &apos;&apos;, &apos;. Company: &apos; + {!$Record.tsanetconnect__SubmittedCompanyName__c})</expression>
+    </formulas>
+    <interviewLabel>TSANet New Case Notification {!$Flow.CurrentDateTime}</interviewLabel>
+    <isTemplate>true</isTemplate>
+    <label>TSANet: New Collaboration Case Notification</label>
+    <processMetadataValues>
+        <name>BuilderType</name>
+        <value>
+            <stringValue>LightningFlowBuilder</stringValue>
+        </value>
+    </processMetadataValues>
+    <processMetadataValues>
+        <name>CanvasMode</name>
+        <value>
+            <stringValue>FREE_FORM_CANVAS</stringValue>
+        </value>
+    </processMetadataValues>
+    <processMetadataValues>
+        <name>OriginBuilderType</name>
+        <value>
+            <stringValue>LightningFlowBuilder</stringValue>
+        </value>
+    </processMetadataValues>
+    <processType>AutoLaunchedFlow</processType>
+    <runInMode>SystemModeWithoutSharing</runInMode>
+    <start>
+        <locationX>530</locationX>
+        <locationY>48</locationY>
+        <connector>
+            <targetReference>SendNotification</targetReference>
+        </connector>
+        <object>TSANetCase__c</object>
+        <recordTriggerType>Create</recordTriggerType>
+        <triggerType>RecordAfterSave</triggerType>
+    </start>
+    <status>Active</status>
+    <subflows>
+        <name>SendNotification</name>
+        <label>Send Notification</label>
+        <locationX>530</locationX>
+        <locationY>240</locationY>
+        <flowName>TSANetNotification</flowName>
+        <inputAssignments>
+            <name>body</name>
+            <value>
+                <elementReference>Body</elementReference>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
+            <name>TargetId</name>
+            <value>
+                <elementReference>$Record.Id</elementReference>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
+            <name>TSANetCase</name>
+            <value>
+                <elementReference>$Record</elementReference>
+            </value>
+        </inputAssignments>
+    </subflows>
+</Flow>

@@ -100,6 +100,8 @@ public with sharing class TSANetConstants {
     public static final Integer PAGE_SIZE = 50;
     public static final Integer SUCCESS_CODE = 200;
     public static final Integer TOKEN_SPLIT_LENGTH = 175;
+    /** Seconds before token expiry to proactively refresh. */
+    public static final Integer TOKEN_EXPIRY_BUFFER_SECONDS = 60;
     public static final String SHARE_TYPE_VIEWER = 'V';
     public static final String VISIBILITY_ALL = 'AllUsers';
     public static final String UPLOAD_STATUS_SUCCESS = 'SUCCESS';

@@ -1,5 +1,5 @@
 /** Centralized SOQL for tsanetconnect__TSANetNote__c. */
-public inherited sharing class TSANetNoteSelector {
+public with sharing class TSANetNoteSelector {
 
     /**
      * Lookup by token.
@@ -11,27 +11,35 @@ public inherited sharing class TSANetNoteSelector {
             SELECT Id, Name, tsanetconnect__Token__c
             FROM tsanetconnect__TSANetNote__c
             WHERE tsanetconnect__Token__c = :token
-            WITH SECURITY_ENFORCED
+            WITH USER_MODE
         ];
     }
 
     /**
      * Fields required to (re)build a Chatter FeedItem from a note.
-     * Runs WITH SYSTEM_MODE because the only caller is the Platform Event subscriber,
-     * which executes as the Automated Process User and must succeed regardless of FLS.
+     * Runs WITH SYSTEM_MODE via elevated inner class because the only caller is the
+     * Platform Event subscriber, which executes as the Automated Process User and must
+     * succeed regardless of FLS.
      * @param ids set of TSANetNote__c record Ids
      * @return matching TSANetNote__c records with feed-item fields populated
      */
     public static tsanetconnect__TSANetNote__c[] getForFeedItemBuild(Set<Id> ids) {
-        return [
-            SELECT Id, tsanetconnect__Token__c, tsanetconnect__isCaseFeed__c,
-                   tsanetconnect__TSANetCase__c, tsanetconnect__FeedItemId__c,
-                   tsanetconnect__CreatedAt__c, tsanetconnect__Description__c,
-                   tsanetconnect__Summary__c, tsanetconnect__CompanyName__c,
-                   tsanetconnect__CreatorName__c
-            FROM tsanetconnect__TSANetNote__c
-            WHERE Id IN :ids
-            WITH SYSTEM_MODE
-        ];
+        return new SystemContext().getForFeedItemBuild(ids);
+    }
+
+    /** Runs note lookups in system context for Platform Event subscriber feed-item builds. */
+    private without sharing class SystemContext {
+        public tsanetconnect__TSANetNote__c[] getForFeedItemBuild(Set<Id> ids) {
+            return [
+                SELECT Id, tsanetconnect__Token__c, tsanetconnect__isCaseFeed__c,
+                       tsanetconnect__TSANetCase__c, tsanetconnect__FeedItemId__c,
+                       tsanetconnect__CreatedAt__c, tsanetconnect__Description__c,
+                       tsanetconnect__Summary__c, tsanetconnect__CompanyName__c,
+                       tsanetconnect__CreatorName__c
+                FROM tsanetconnect__TSANetNote__c
+                WHERE Id IN :ids
+                WITH SYSTEM_MODE
+            ];
+        }
     }
 }

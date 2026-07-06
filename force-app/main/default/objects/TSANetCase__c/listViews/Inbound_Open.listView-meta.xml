@@ -13,5 +13,10 @@
         <operation>equals</operation>
         <value>OPEN</value>
     </filters>
+    <filters>
+        <field>Direction__c</field>
+        <operation>equals</operation>
+        <value>INBOUND</value>
+    </filters>
     <label>Inbound ( Open )</label>
 </ListView>

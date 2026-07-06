@@ -112,7 +112,7 @@
             <targetReference>VerificationScreen</targetReference>
         </connector>
     </start>
-    <status>Obsolete</status>
+    <status>Draft</status>
     <subflows>
         <name>TSANetCloseAutomation</name>
         <label>TSANet Close ( Automation )</label>

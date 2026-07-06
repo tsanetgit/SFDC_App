@@ -114,7 +114,7 @@
             <targetReference>RequestMoreInformationScreen</targetReference>
         </connector>
     </start>
-    <status>Obsolete</status>
+    <status>Draft</status>
     <subflows>
         <name>TSANetRequestInfoAutomation</name>
         <label>TSANet Request Info ( Automation )</label>

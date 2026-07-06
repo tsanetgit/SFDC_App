@@ -7,7 +7,7 @@
         <locationY>323</locationY>
         <actionName>TSANetInvocableCloseCollaborationRequest</actionName>
         <actionType>apex</actionType>
-        <flowTransactionModel>Automatic</flowTransactionModel>
+        <flowTransactionModel>NewTransaction</flowTransactionModel>
         <inputParameters>
             <name>caseRecord</name>
             <value>

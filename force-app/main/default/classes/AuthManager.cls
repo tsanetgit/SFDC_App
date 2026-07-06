@@ -15,15 +15,15 @@ public with sharing class AuthManager {
     }
 
     /**
-     * Retrieves the stored access token from credentials.
+     * Retrieves the stored access token, refreshing when missing or expired.
      * @return concatenated access token string
      */
     public static String getAccessToken(){
-        tsanetconnect__TSANet_Credentials__c credential = CredentialManager.getCredentials();
-        if(credential.tsanetconnect__AccessTokenPart1__c == NULL || credential.tsanetconnect__AccessTokenPart2__c == NULL){
-            throw new AuthManagerException('Unauthorized');
+        try {
+            return TokenManager.getAccessToken();
+        } catch (TokenManager.TokenManagerException e) {
+            throw new AuthManagerException(e.getMessage());
         }
-        return credential.tsanetconnect__AccessTokenPart1__c + credential.tsanetconnect__AccessTokenPart2__c;
     }
 
     /**
@@ -45,11 +45,11 @@ public with sharing class AuthManager {
     @AuraEnabled
     public static Boolean updateAccessToken(){
         tsanetconnect__TSANet_Credentials__c credential = CredentialManager.getCredentials();
-        String token = TSANetService.getTSANetAccessToken();
-        if(token == NULL){ return false; }
+        AuthManager.AccessTokenResponse response = TSANetService.login();
+        if(response == null || String.isBlank(response.accessToken)){ return false; }
 
+        TokenManager.updateToken(response.accessToken, response.expiresIn);
         InternalProcessManager.execute(credential);
-        return Database.update(new tsanetconnect__TSANet_Credentials__c(Id = credential.Id,
-                                                                         tsanetconnect__Token__c = token), AccessLevel.USER_MODE).isSuccess();
+        return true;
     }
 }

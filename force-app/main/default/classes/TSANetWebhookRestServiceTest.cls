@@ -16,7 +16,9 @@ public class TSANetWebhookRestServiceTest {
             String result = TSANetWebhookRestService.handleGet();
         Test.stopTest();
 
-        System.assertEquals('test', result, 'handleGet should return "test"');
+        Map<String, Object> payload = (Map<String, Object>) JSON.deserializeUntyped(result);
+        System.assertEquals('ok', payload.get('status'), 'Health check should return ok status');
+        System.assertNotEquals(null, payload.get('timestamp'), 'Health check should include a timestamp');
     }
 
     @IsTest

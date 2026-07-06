@@ -63,16 +63,18 @@ public with sharing class HttpClient {
      */
     private static HttpResponse send(String method, String endpoint, String token, String body, Integer timeout) {
         HttpRequest req = buildRequest(method, endpoint, token, body, timeout);
-
         Http http = new Http();
         HttpResponse res = http.send(req);
 
         if (res.getStatusCode() != TSANetConstants.SUCCESS_CODE && res.getStatusCode() != 204) {
             if (ErrorManager.isUnauthorized(res.getBody())) {
-                String newToken = TSANetService.getTSANetAccessToken();
+                AuthManager.AccessTokenResponse loginResponse = TSANetService.login();
+                String newToken = loginResponse != null ? loginResponse.accessToken : null;
                 req = buildRequest(method, endpoint, newToken, body, timeout);
                 res = http.send(req);
-                CredentialManager.updateToken(newToken);
+                if (String.isNotBlank(newToken)) {
+                    TokenManager.updateToken(newToken, loginResponse.expiresIn);
+                }
             }
 
             if (res.getStatusCode() != TSANetConstants.SUCCESS_CODE && res.getStatusCode() != 204) {
@@ -80,6 +82,7 @@ public with sharing class HttpClient {
             }
         }
 
+        TokenManager.commitTokenIfPending();
         return res;
     }
 

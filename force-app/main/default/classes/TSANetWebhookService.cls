@@ -80,7 +80,7 @@ public with sharing class TSANetWebhookService {
             SELECT Id, tsanetconnect__CallbackUrl__c, tsanetconnect__EventTypes__c
             FROM tsanetconnect__TSANetWebhook__c
             WHERE Id IN :recordIds
-            WITH SECURITY_ENFORCED
+            WITH USER_MODE
         ];
 
         String endpoint = EndpointManager.getWebhooksPath();

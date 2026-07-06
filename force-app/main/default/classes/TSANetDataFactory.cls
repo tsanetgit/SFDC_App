@@ -45,6 +45,30 @@ public class TSANetDataFactory {
         return u;
     }
 
+    /** Seeds org-default TSANet token custom settings.
+     * @param part1 first token part
+     * @param part2 second token part
+     */
+    public static void seedTokens(String part1, String part2) {
+        seedTokens(part1, part2, DateTime.now().addHours(1));
+    }
+
+    /** Seeds org-default TSANet token custom settings with expiry.
+     * @param part1 first token part
+     * @param part2 second token part
+     * @param expiresAt when the token expires
+     */
+    public static void seedTokens(String part1, String part2, DateTime expiresAt) {
+        tsanetconnect__TSANet_Tokens__c tokens = tsanetconnect__TSANet_Tokens__c.getOrgDefaults();
+        if (tokens == null) {
+            tokens = new tsanetconnect__TSANet_Tokens__c();
+        }
+        tokens.tsanetconnect__AccessTokenPart1__c = part1;
+        tokens.tsanetconnect__AccessTokenPart2__c = part2;
+        tokens.tsanetconnect__TokenExpiresAt__c = expiresAt;
+        upsert tokens;
+    }
+
     /** Creates and inserts a default TSANet credentials record.
      * @return the inserted credentials record
      */
@@ -53,10 +77,9 @@ public class TSANetDataFactory {
         credentials.tsanetconnect__UserName__c = 'username@gmail.com';
         credentials.tsanetconnect__Password__c = 'password111';
         credentials.tsanetconnect__Environment__c = 'dev';
-        credentials.tsanetconnect__AccessTokenPart1__c = 'token1';
-        credentials.tsanetconnect__AccessTokenPart2__c = 'token2';
         credentials.tsanetconnect__isPrimary__c = true;
         insert credentials;
+        seedTokens('token1', 'token2');
         return credentials;
     }
 

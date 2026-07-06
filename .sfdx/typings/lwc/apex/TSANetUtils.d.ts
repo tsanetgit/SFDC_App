@@ -26,7 +26,7 @@ declare module "@salesforce/apex/TSANetUtils.getCases" {
   export default function getCases(param: {searchText: any}): Promise<any>;
 }
 declare module "@salesforce/apex/TSANetUtils.updateTSANetCase" {
-  export default function updateTSANetCase(param: {tsaNetCase: any}): Promise<any>;
+  export default function updateTSANetCase(param: {tsaNetCaseId: any, caseId: any}): Promise<any>;
 }
 declare module "@salesforce/apex/TSANetUtils.getOneTSANetCase" {
   export default function getOneTSANetCase(param: {caseId: any}): Promise<any>;

@@ -1,5 +1,5 @@
 /** Persists error and exception records for diagnostics and troubleshooting. */
-public inherited sharing class ErrorLogger {
+public with sharing class ErrorLogger {
 
     private static final Integer STACK_TRACE_MAX_LEN = 255;
 

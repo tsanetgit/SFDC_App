@@ -198,7 +198,7 @@ IF({!$Record.tsanetconnect__TSANetCase__r.Owner:User.Id} != NULL, {!$Record.tsan
         <recordTriggerType>Create</recordTriggerType>
         <triggerType>RecordAfterSave</triggerType>
     </start>
-    <status>Obsolete</status>
+    <status>Draft</status>
     <variables>
         <name>caseRecord</name>
         <dataType>SObject</dataType>

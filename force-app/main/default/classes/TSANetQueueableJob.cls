@@ -98,7 +98,7 @@ public inherited sharing class TSANetQueueableJob implements Queueable, Database
             TSANetService.upsertTSANetData(data);
 
             if(token != NULL){
-                CredentialManager.updateToken(token);
+                TokenManager.updateToken(token, null);
             }
         }
     }

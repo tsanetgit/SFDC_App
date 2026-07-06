@@ -59,7 +59,7 @@ public with sharing class EndpointManager {
     public static String getDomain() {
         tsanetconnect__TSANet_Credentials__c creds = CredentialManager.getCredentials();
         String environment = creds.tsanetconnect__Environment__c + '_env';
-        tsanetconnect__TSANetEnvironment__mdt[] environments =[SELECT Id, tsanetconnect__Endpoint__c FROM tsanetconnect__TSANetEnvironment__mdt WHERE DeveloperName =:environment WITH SECURITY_ENFORCED ];
+        tsanetconnect__TSANetEnvironment__mdt[] environments =[SELECT Id, tsanetconnect__Endpoint__c FROM tsanetconnect__TSANetEnvironment__mdt WHERE DeveloperName =:environment WITH USER_MODE ];
 
         if(environments.size() > 0){
             return environments[0].tsanetconnect__Endpoint__c;

@@ -1,9 +1,9 @@
 /** Async processor for inbound webhook events — fetches full data from TSANet API and upserts locally by external Id. */
+@SuppressWarnings('PMD.ApexSharingViolations')
 public without sharing class TSANetWebhookQueueable implements Queueable, Database.AllowsCallouts {
 
     private static final String LOG_CONTEXT = 'TSANET_WEBHOOK_QUEUEABLE';
     private static final String CASE_PATH = '/v1/collaboration-requests/{token}';
-    private static final String LOGIN_PATH = '/v1/login';
 
     private String eventType;
     private String requestToken;
@@ -21,7 +21,6 @@ public without sharing class TSANetWebhookQueueable implements Queueable, Databa
     }
 
     public void execute(QueueableContext context){
-        System.debug('TSANetWebhookQueueable.execute START | eventType=' + eventType + ' | requestToken=' + requestToken + ' | noteToken=' + noteToken);
         try {
             String domain = getDomain();
             if(domain == null){
@@ -29,7 +28,7 @@ public without sharing class TSANetWebhookQueueable implements Queueable, Databa
                 return;
             }
 
-            String token = getAccessToken(domain);
+            String token = TokenManager.getAccessToken();
             if(token == null){
                 logFailure('Unable to obtain access token for webhook processing', null);
                 return;
@@ -37,25 +36,22 @@ public without sharing class TSANetWebhookQueueable implements Queueable, Databa
 
             if(eventType != null && (eventType.startsWith('collaboration-request.') || eventType.startsWith('note.'))){
                 syncCollaborationRequest(domain, token);
-            } else {
-                System.debug(LoggingLevel.WARN, 'TSANetWebhookQueueable: Unknown eventType=' + eventType);
             }
+
+            TokenManager.commitTokenIfPending();
         } catch(Exception e){
-            System.debug(LoggingLevel.ERROR, 'TSANetWebhookQueueable: Exception — ' + e.getMessage() + ' | ' + e.getStackTraceString());
             ErrorLogger.logError(e, LOG_CONTEXT, new Map<String, String>{
                 'eventType' => eventType,
                 'requestToken' => requestToken,
                 'noteToken' => noteToken
             });
         }
-        System.debug('TSANetWebhookQueueable.execute END');
     }
 
     /** Fetches the full collaboration request payload and upserts cases/notes/responses by their external Ids. */
     private void syncCollaborationRequest(String domain, String token){
         String endpoint = domain + CASE_PATH.replace('{token}', requestToken);
-        HttpResponse res = sendGet(endpoint, token);
-        System.debug('TSANetWebhookQueueable.syncCollaborationRequest: status=' + res.getStatusCode() + ' | body=' + res.getBody());
+        HttpResponse res = sendGetWithAuthRetry(endpoint, token);
 
         if(res.getStatusCode() != TSANetConstants.SUCCESS_CODE){
             logFailure(
@@ -66,9 +62,43 @@ public without sharing class TSANetWebhookQueueable implements Queueable, Databa
         }
 
         TSANetData data = ParserManager.parseTSANetCases('[' + res.getBody() + ']', null);
-        System.debug('TSANetWebhookQueueable.syncCollaborationRequest: parsed cases=' + data.cases.size() + ' | notes=' + data.notes.size() + ' | responses=' + data.responses.size());
-
         upsertAndLog(data);
+        publishCaseUpdatedEvent();
+    }
+
+    /**
+     * Publishes the completion TSANetCaseUpdated__e Platform Event (IsSync=true) for the affected
+     * Salesforce Case so subscribed LWCs refresh and clear the typing indicator. PublishAfterCommit
+     * ensures the event only fires once this job's upsert DML is committed.
+     */
+    private void publishCaseUpdatedEvent(){
+        try {
+            // SYSTEM_MODE: the webhook runs as the integration/guest user which may lack FLS,
+            // mirroring the other system-context lookups in this job (e.g. getDomain()).
+            tsanetconnect__TSANetCase__c[] cases = [
+                SELECT Id, tsanetconnect__Case__c
+                FROM tsanetconnect__TSANetCase__c
+                WHERE tsanetconnect__Token__c = :requestToken
+                WITH SYSTEM_MODE
+                LIMIT 1
+            ];
+
+            if(cases.isEmpty() || cases[0].tsanetconnect__Case__c == null){
+                return;
+            }
+
+            EventBus.publish(new tsanetconnect__TSANetCaseUpdated__e(
+                tsanetconnect__CaseId__c = cases[0].tsanetconnect__Case__c,
+                tsanetconnect__RequestToken__c = requestToken,
+                tsanetconnect__IsSync__c = true
+            ));
+        } catch(Exception e){
+            // A failed real-time notification must not fail webhook processing; users can still refresh manually.
+            ErrorLogger.logError(e, LOG_CONTEXT, new Map<String, String>{
+                'eventType' => eventType,
+                'requestToken' => requestToken
+            });
+        }
     }
 
     /**
@@ -82,14 +112,10 @@ public without sharing class TSANetWebhookQueueable implements Queueable, Databa
         UpsertExecutor.execute(data.cases, tsanetconnect__TSANetCase__c.tsanetconnect__Token__c, AccessLevel.SYSTEM_MODE);
         UpsertExecutor.execute(data.notes, tsanetconnect__TSANetNote__c.tsanetconnect__Token__c, AccessLevel.SYSTEM_MODE);
         UpsertExecutor.execute(data.responses, tsanetconnect__TSANetResponse__c.tsanetconnect__tsaNetResponseId__c, AccessLevel.SYSTEM_MODE);
-
-        System.debug('TSANetWebhookQueueable.upsertAndLog: complete');
     }
 
     /** Persists a webhook-processing failure with full execution context and the current Apex stack. */
     private void logFailure(String message, Exception cause){
-        System.debug(LoggingLevel.ERROR, 'TSANetWebhookQueueable: ' + message);
-
         String stack = (cause != null)
             ? cause.getStackTraceString()
             : new DmlException().getStackTraceString();
@@ -107,48 +133,13 @@ public without sharing class TSANetWebhookQueueable implements Queueable, Databa
         ErrorLogger.logErrors(new tsanetconnect__TSANetError__c[]{ log });
     }
 
-    /** Authenticates against TSANet API in system mode. */
-    private String getAccessToken(String domain){
-        tsanetconnect__TSANet_Credentials__c[] credentials = [
-            SELECT tsanetconnect__UserName__c, tsanetconnect__Password__c
-            FROM tsanetconnect__TSANet_Credentials__c
-            WHERE tsanetconnect__isPrimary__c = TRUE
-        ];
-
-        if(credentials.isEmpty()){
-            System.debug(LoggingLevel.ERROR, 'TSANetWebhookQueueable.getAccessToken: No credentials found');
-            return null;
-        }
-
-        tsanetconnect__TSANet_Credentials__c cred = credentials[0];
-
-        HttpRequest req = new HttpRequest();
-        req.setEndpoint(domain + LOGIN_PATH);
-        req.setMethod('POST');
-        req.setHeader('Content-Type', 'application/json');
-        req.setBody(JSON.serialize(new Map<String, String>{
-            'username' => cred.tsanetconnect__UserName__c,
-            'password' => cred.tsanetconnect__Password__c
-        }));
-        req.setTimeout(TSANetConstants.DEFAULT_TIMEOUT);
-
-        Http http = new Http();
-        HttpResponse res = http.send(req);
-
-        System.debug('TSANetWebhookQueueable.getAccessToken: status=' + res.getStatusCode());
-
-        if(res.getStatusCode() != TSANetConstants.SUCCESS_CODE){ return null; }
-
-        Map<String, Object> responseMap = (Map<String, Object>) JSON.deserializeUntyped(res.getBody());
-        return (String) responseMap.get('accessToken');
-    }
-
     /** Resolves the API domain in system mode. */
     private String getDomain(){
         tsanetconnect__TSANet_Credentials__c[] credentials = [
             SELECT tsanetconnect__Environment__c
             FROM tsanetconnect__TSANet_Credentials__c
             WHERE tsanetconnect__isPrimary__c = TRUE
+            WITH SYSTEM_MODE
         ];
 
         if(credentials.isEmpty()) return null;
@@ -158,6 +149,7 @@ public without sharing class TSANetWebhookQueueable implements Queueable, Databa
             SELECT tsanetconnect__Endpoint__c
             FROM tsanetconnect__TSANetEnvironment__mdt
             WHERE DeveloperName = :environment
+            WITH SYSTEM_MODE
         ];
 
         return environments.isEmpty() ? null : environments[0].tsanetconnect__Endpoint__c;
@@ -174,5 +166,30 @@ public without sharing class TSANetWebhookQueueable implements Queueable, Databa
 
         Http http = new Http();
         return http.send(req);
+    }
+
+    /**
+     * GET with automatic 401 refresh-and-retry. Callout phase only — no DML.
+     * On invalid token, logs in via TokenManager.refreshAccessToken() and retries once.
+     */
+    private HttpResponse sendGetWithAuthRetry(String endpoint, String token){
+        HttpResponse res = sendGet(endpoint, token);
+
+        if(isUnauthorizedResponse(res)){
+            String refreshed = TokenManager.refreshAccessToken();
+            if(String.isNotBlank(refreshed)){
+                res = sendGet(endpoint, refreshed);
+            }
+        }
+
+        return res;
+    }
+
+    /** True when the API response indicates an invalid or expired bearer token. */
+    private Boolean isUnauthorizedResponse(HttpResponse res){
+        return res != null && (
+            res.getStatusCode() == 401
+            || ErrorManager.isUnauthorized(res.getBody())
+        );
     }
 }

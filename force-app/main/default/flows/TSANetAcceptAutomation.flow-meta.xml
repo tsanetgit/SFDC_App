@@ -4,10 +4,10 @@
         <name>AcceptCollaborationRequest</name>
         <label>Accept Collaboration Request</label>
         <locationX>655</locationX>
-        <locationY>469</locationY>
+        <locationY>470</locationY>
         <actionName>TSANetInvocableApproveRequestService</actionName>
         <actionType>apex</actionType>
-        <flowTransactionModel>Automatic</flowTransactionModel>
+        <flowTransactionModel>NewTransaction</flowTransactionModel>
         <inputParameters>
             <name>caseRecord</name>
             <value>

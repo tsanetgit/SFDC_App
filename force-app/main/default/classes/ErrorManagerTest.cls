@@ -18,12 +18,12 @@ public class ErrorManagerTest {
         tsanetconnect__TSANet_Credentials__c credentials = new tsanetconnect__TSANet_Credentials__c();
         credentials.tsanetconnect__UserName__c = 'username@gmail.com';
         credentials.tsanetconnect__Password__c = 'password111';
-        credentials.tsanetconnect__Token__c = 'token';
         credentials.tsanetconnect__isPrimary__c = true;
         credentials.tsanetconnect__Environment__c = 'dev';
 
         credentials.tsanetconnect__isPrimary__c = true;
         insert credentials;
+        TSANetDataFactory.seedTokens(token, '');
         return credentials;
     }
 
@@ -59,12 +59,8 @@ public class ErrorManagerTest {
         }
         Test.stopTest();
 
-        tsanetconnect__TSANet_Credentials__c updated = [
-            SELECT Id, tsanetconnect__Token__c
-            FROM tsanetconnect__TSANet_Credentials__c
-            WHERE Id = :cred.Id
-        ];
-        System.assertEquals(null, updated.tsanetconnect__Token__c, 'Token should be cleared');
+        tsanetconnect__TSANet_Tokens__c updated = tsanetconnect__TSANet_Tokens__c.getOrgDefaults();
+        System.assertEquals(null, updated.tsanetconnect__AccessTokenPart1__c, 'Token should be cleared');
     }
 
     @IsTest

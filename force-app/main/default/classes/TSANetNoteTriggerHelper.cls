@@ -1,4 +1,5 @@
 /** Helper methods for TSANetNote__c trigger logic. */
+@SuppressWarnings('PMD.ApexSharingViolations')
 public without sharing class TSANetNoteTriggerHelper {
 
     private static Boolean feedItemsInProgress = false;
@@ -111,6 +112,8 @@ public without sharing class TSANetNoteTriggerHelper {
         List<tsanetconnect__TSANetNote__c> feedNotes = new List<tsanetconnect__TSANetNote__c>();
         List<FeedItem> feedItems = buildFeedItems(eligibleNotes, tsaNetCases, feedNotes);
         if(feedItems.isEmpty()){ return; }
+
+        if (!Schema.sObjectType.FeedItem.isCreateable()) { return; }
 
         // SYSTEM_MODE: this is system-level Chatter mirroring done by a trigger; the initiating
         // user does not need — and may not have — direct CRUD on FeedItem.

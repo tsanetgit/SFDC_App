@@ -114,6 +114,13 @@ export default class TsaNetForm extends LightningElement {
 
     @api
     resolveCustomForm() {
+        // Block submission when the Case has no Customer Account (e.g. the Contact
+        // has no AccountId) so we never send an incomplete collaboration request.
+        if (this.salesforceCaseRecord && !this.hasAccount) {
+            toast(this, WARNING_LABEL, TOAST_MODE.WARNING, ACCOUNT_REQUIRED_WARNING);
+            return { hasError: true, object: null };
+        }
+
         // Basic required fields
         if (!this.subjectValue || !this.priorityValue || !this.description) {
             toast(this, WARNING_LABEL, TOAST_MODE.WARNING, REQUIRED_FIELDS_WARNING);
@@ -230,12 +237,32 @@ export default class TsaNetForm extends LightningElement {
         return this.salesforceCaseRecord?.[CASE_NUMBER_FIELD.fieldApiName] ?? '';
     }
 
+    get accountId() {
+        return this.salesforceCaseRecord?.Account?.Id;
+    }
+
     get accountName() {
         return this.salesforceCaseRecord?.Account?.[ACCOUNT_NAME_FIELD.fieldApiName] ?? '';
     }
 
+    get hasAccount() {
+        return !!this.accountId;
+    }
+
+    get isMissingAccount() {
+        return !!this.salesforceCaseRecord && !this.hasAccount;
+    }
+
+    get contactId() {
+        return this.salesforceCaseRecord?.Contact?.Id;
+    }
+
     get contactName() {
         return this.salesforceCaseRecord?.Contact?.[CONTACT_NAME_FIELD.fieldApiName] ?? '';
+    }
+
+    get hasContact() {
+        return !!this.contactId;
     }
 
     get contactEmail() {

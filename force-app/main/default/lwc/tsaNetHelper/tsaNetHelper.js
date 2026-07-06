@@ -6,7 +6,8 @@ import {
     TSANET_CASE_STATUSES,
     TSANET_CASE_STATUS_STYLE,
     TSANET_CASE_PRIORITY_STYLE,
-    ACTION_CONFIG
+    ACTION_CONFIG,
+    getStandardNoteConfig
 } from 'c/tsaNetConstants'
 
 import getCaseInformation from '@salesforce/apex/TSANetUtils.getCaseInformation'
@@ -57,6 +58,8 @@ export const getCaseInfo = (caseId) => {
 const prepareCaseData = (data) => {
     data.caseRecord['link'] = '/' + data.caseRecord.Id
 
+    const caseSubject = data?.caseRecord?.Subject
+
     data?.relatedCases?.forEach(relatedCase => {
         relatedCase['link'] = '/' + relatedCase.Id
         relatedCase['caseLink'] = '/' + relatedCase.tsanetconnect__Case__c
@@ -75,6 +78,21 @@ const prepareCaseData = (data) => {
         relatedCase.statusStyle = TSANET_CASE_STATUS_STYLE[relatedCase.tsanetconnect__Status__c]
         relatedCase.priorityStyle = TSANET_CASE_PRIORITY_STYLE[relatedCase.tsanetconnect__Priority__c]
 
+        // Precompute badge class strings so card and table views render identical badges.
+        relatedCase.priorityBadgeClass = `card-pill ${relatedCase.priorityStyle}`
+        relatedCase.statusBadgeClass = `slds-badge_inverse card-pill ${relatedCase.statusStyle}`
+
+        // Precompute the escalation helptext so card and table views share one source.
+        const escalation = relatedCase.tsanetconnect__EscalationInstructions__c?.replace(/<[^>]*>/g, '') || ''
+        relatedCase.escalationText = `${relatedCase.tsanetconnect__Direction__c} - ${escalation}`
+
+        // Parse custom fields once into readable groups for the details popover.
+        relatedCase.customFieldGroups = parseCustomFields(relatedCase.tsanetconnect__customFields__c)
+
+        // Build the conversation/chat view model for the notes panel.
+        relatedCase.notes = mapNotes(relatedCase, caseSubject)
+        relatedCase.notesCount = relatedCase.notes.length
+
         relatedCase.isHideAction = ( relatedCase.isNoteable || relatedCase.isRejectable || relatedCase.isRequestable || relatedCase.isCloseable )
 
         if(relatedCase?.tsanetconnect__TSANetResponses__r && relatedCase?.tsanetconnect__TSANetResponses__r.length){
@@ -83,6 +101,93 @@ const prepareCaseData = (data) => {
     })
 
     return data
+}
+
+// Maps a related case's child notes into a chat view model for the notes panel.
+// Standard system notes (Case Created/Accepted/Rejected) become compact status rows;
+// the rest become conversation bubbles. Summary is hidden when it equals the Case Subject.
+const mapNotes = (relatedCase, caseSubject) => {
+    const rawNotes = relatedCase?.tsanetconnect__TSANetNotes__r || []
+
+    // Our company is the submitter on outbound cases and the receiver on inbound ones.
+    // Our (outbound) notes always render on the left; the partner's render on the right.
+    const ownCompany = relatedCase?.tsanetconnect__Direction__c === TSANET_DIRECTION.OUTBOUND
+        ? relatedCase?.tsanetconnect__SubmittedCompanyName__c
+        : relatedCase?.tsanetconnect__receivedCompanyName__c
+
+    return rawNotes.map(note => {
+        const summary = note?.tsanetconnect__Summary__c
+        const standardConfig = getStandardNoteConfig(summary)
+
+        // Hide the summary line when it just repeats the Case Subject.
+        const showSummary = !!summary && normalize(summary) !== normalize(caseSubject)
+        const sender = note?.tsanetconnect__CreatorName__c
+
+        const isOwn = !!ownCompany && note?.tsanetconnect__CompanyName__c === ownCompany
+
+        return {
+            key: note.Id,
+            createdAt: note?.tsanetconnect__CreatedAt__c,
+            sender,
+            initials: getInitials(sender),
+            companyName: note?.tsanetconnect__CompanyName__c,
+            summary,
+            showSummary,
+            description: note?.tsanetconnect__Description__c,
+            isStandard: !!standardConfig,
+            standardLabel: standardConfig?.label || summary,
+            standardIcon: standardConfig?.icon,
+            standardThemeClass: `note-system__pill ${standardConfig?.theme || ''}`,
+            alignRight: !isOwn,
+            rowClass: isOwn ? 'note-row note-row_inbound' : 'note-row note-row_outbound',
+            bubbleClass: isOwn ? 'note-bubble note-bubble_inbound' : 'note-bubble note-bubble_outbound'
+        }
+    })
+}
+
+// Normalizes a string for case-insensitive comparison.
+const normalize = (value) => (value || '').trim().toLowerCase()
+
+// Derives up-to-two-letter initials from a name for the chat avatar.
+const getInitials = (name) => {
+    if(!name){ return '?' }
+    const parts = name.trim().split(/\s+/)
+    const first = parts[0]?.charAt(0) || ''
+    const last = parts.length > 1 ? parts[parts.length - 1].charAt(0) : ''
+    return (first + last).toUpperCase()
+}
+
+// Parses the stored customFields JSON into readable, ordered groups keyed by section.
+const parseCustomFields = (raw) => {
+    if(!raw){ return [] }
+
+    let fields = []
+    try {
+        fields = JSON.parse(raw)
+    } catch(e){
+        return []
+    }
+
+    const withValues = (fields || [])
+        .filter(f => f && f.value !== null && f.value !== undefined && String(f.value).trim() !== '')
+        .sort((a, b) => (a.displayOrder ?? 0) - (b.displayOrder ?? 0))
+
+    const groups = []
+    withValues.forEach(f => {
+        const section = f.section || 'Custom Fields'
+        let group = groups.find(g => g.section === section)
+        if(!group){
+            group = { key: section, section, fields: [] }
+            groups.push(group)
+        }
+        group.fields.push({
+            key: `${section}:${f.fieldName}:${f.id}`,
+            fieldName: f.fieldName,
+            value: f.value
+        })
+    })
+
+    return groups
 }
 
 export const getCompanies = (companyName) => {

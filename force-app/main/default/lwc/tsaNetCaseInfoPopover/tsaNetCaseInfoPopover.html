@@ -1,0 +1,15 @@
+<template>
+    <span class="info-trigger">
+        <button
+            type="button"
+            class="info-trigger__btn"
+            aria-haspopup="dialog"
+            aria-expanded={showPopover}
+            onmouseenter={handleShow}
+            onmouseleave={handleHide}
+            onfocus={handleShow}
+        >
+            <lightning-icon icon-name="utility:info" size="small" class="info-trigger__icon"></lightning-icon>
+        </button>
+    </span>
+</template>

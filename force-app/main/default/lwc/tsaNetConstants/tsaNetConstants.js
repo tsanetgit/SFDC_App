@@ -165,6 +165,20 @@ export const TSANET_CASE_PRIORITY_STYLE = {
     'HIGH': 'slds-theme_error'
 }
 
+// Standard system note types, keyed by their normalized (lowercased, trimmed) Summary.
+// Used to render system notes as compact status rows instead of chat bubbles.
+export const STANDARD_NOTE_CONFIG = Object.freeze({
+  'case created': { label: 'Case Created', icon: 'utility:new', theme: 'slds-theme_success' },
+  'case accepted': { label: 'Case Accepted', icon: 'utility:success', theme: 'slds-theme_success' },
+  'case rejected': { label: 'Case Rejected', icon: 'utility:error', theme: 'slds-theme_error' }
+})
+
+// Returns the standard-note config for a summary, or undefined for a regular note.
+export const getStandardNoteConfig = (summary) => {
+  if(!summary){ return undefined }
+  return STANDARD_NOTE_CONFIG[summary.trim().toLowerCase()]
+}
+
 export const TYPING_INTERVAL = 300
 
 export const PRIORITY_OPTIONS = [

@@ -1,57 +1,23 @@
-/** Handles before-insert trigger logic for TSANetCase records. */
+/**
+ * Handles before-insert trigger logic for TSANetCase records.
+ *
+ * NOTE: The parent-Case linking logic previously implemented here has been
+ * moved to the "TSANet: Inbound: Find Parent Case" record-triggered flow.
+ * The original Apex implementation is retained below (commented out) for
+ * reference only and is no longer invoked.
+ */
 public with sharing class TSANetCaseTriggerHandler {
 
     /**
      * Entry point for the before-insert trigger on TSANetCase.
+     * Intentionally a no-op: logic moved to the Find Parent Case flow.
      * @param cases list of TSANetCase records being inserted
      */
     public static void handleBeforeInsert(tsanetconnect__TSANetCase__c[] cases){
-        findRelationships(cases);
+        // No-op. See class header.
     }
 
-    /**
-     * Links incoming TSANetCase records to their parent Case by matching case numbers.
-     * Uses elevated context to query Case since trigger may fire from guest user (webhook).
-     * @param cases list of TSANetCase records to link
-     */
-    public static void findRelationships(tsanetconnect__TSANetCase__c[] cases){
-
-        String[] caseNumbers = new String[]{};
-
-        for(tsanetconnect__TSANetCase__c caseRecord : cases){
-            caseNumbers.add(caseRecord.tsanetconnect__SubmitterCaseNumber__c);
-            caseNumbers.add(caseRecord.tsanetconnect__ReceiverCaseNumber__c);
-        }
-        if(caseNumbers.size() == 0){ return; }
-
-        Case[] sfCases = new SystemContext().getCasesByCaseNumbers(new Set<String>(caseNumbers));
-        Map<String, Case> caseNumberToCase = new Map<String, Case>();
-        for(Case sfCase : sfCases){
-            caseNumberToCase.put(sfCase.CaseNumber, sfCase);
-        }
-        for(tsanetconnect__TSANetCase__c caseRecord : cases){
-            if(caseNumberToCase.containsKey(caseRecord.tsanetconnect__SubmitterCaseNumber__c)){
-                Case relatedCase = caseNumberToCase.get(caseRecord.tsanetconnect__SubmitterCaseNumber__c);
-                caseRecord.tsanetconnect__Case__c = relatedCase.Id;
-                caseRecord.OwnerId = relatedCase.OwnerId;
-            } else {
-                if(caseNumberToCase.containsKey(caseRecord.tsanetconnect__ReceiverCaseNumber__c)){
-                    Case relatedCase = caseNumberToCase.get(caseRecord.tsanetconnect__ReceiverCaseNumber__c);
-                    caseRecord.tsanetconnect__Case__c = relatedCase.Id;
-                    caseRecord.OwnerId = relatedCase.OwnerId;
-                }
-            }
-        }
-    }
-
-    /** Runs Case queries in system context for trigger-level record linkage. */
-    private without sharing class SystemContext {
-        public Case[] getCasesByCaseNumbers(Set<String> caseNumbers) {
-            return [
-                SELECT Id, OwnerId, CaseNumber
-                FROM Case
-                WHERE CaseNumber IN :caseNumbers
-            ];
-        }
-    }
+    /*
+    // Moved to the "TSANet: Inbound: Find Parent Case" flow.
+    */
 }

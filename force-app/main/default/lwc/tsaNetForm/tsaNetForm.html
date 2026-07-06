@@ -45,8 +45,18 @@
                 </div>
                 <div class="slds-col slds-size_1-of-2">
                     <div class="slds-m-around_xx-small">
-                        <c-lookup-view icon-name="standard:account" label="Customer Account" record-id={salesforceCaseRecord.Account.Id} value={salesforceCaseRecord.Account.Name}></c-lookup-view>
-                        <c-lookup-view icon-name="standard:contact" label="Customer Contact" record-id={salesforceCaseRecord.Contact.Id} value={salesforceCaseRecord.Contact.Name}></c-lookup-view>
+                        <template if:true={hasAccount}>
+                            <c-lookup-view icon-name="standard:account" label="Customer Account" record-id={accountId} value={accountName}></c-lookup-view>
+                        </template>
+                        <template if:false={hasAccount}>
+                            <div class="slds-box slds-box_x-small slds-theme_warning slds-m-vertical_xx-small">
+                                <lightning-icon icon-name="utility:warning" size="x-small" variant="warning" class="slds-m-right_x-small"></lightning-icon>
+                                This Case has no Customer Account. Add an Account to the Case (or to its Contact) before creating a collaboration request.
+                            </div>
+                        </template>
+                        <template if:true={hasContact}>
+                            <c-lookup-view icon-name="standard:contact" label="Customer Contact" record-id={contactId} value={contactName}></c-lookup-view>
+                        </template>
                     </div>
                 </div>
 

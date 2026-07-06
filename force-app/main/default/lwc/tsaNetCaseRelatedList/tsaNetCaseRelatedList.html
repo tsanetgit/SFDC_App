@@ -1,9 +1,21 @@
 <template>
 
-    <div class="slds-card">
+    <div class="slds-card rl-card">
         <!-- Header -->
-        <div class="slds-card__header slds-grid slds-grid_align-spread slds-grid_vertical-align-center">
+        <div class="slds-card__header slds-grid slds-grid_align-spread slds-grid_vertical-align-center rl-header">
             <header class="slds-media slds-media_center slds-has-flexi-truncate">
+                <div class="slds-media__figure slds-m-right_x-small">
+                    <lightning-button-icon
+                        icon-name={chevronIcon}
+                        variant="bare"
+                        size="small"
+                        alternative-text={toggleAltText}
+                        title={toggleAltText}
+                        aria-expanded={ariaExpanded}
+                        aria-controls="rl-body"
+                        onclick={handleToggleExpand}
+                    ></lightning-button-icon>
+                </div>
                 <div class="slds-media__figure">
                     <span class="slds-icon_container" title="TSANet">
                         <img class="tsa-logo slds-m-right_small" src={tsaNetLogo} />
@@ -16,7 +28,7 @@
 
             <div class="slds-no-flex slds-grid slds-grid_vertical-align-center slds-gutters_x-small">
                 <template if:false={isLogin}>
-                    
+
                     <template lwc:if={isLoading}>
                         <div class="spinner-container slds-is-relative">
                             <lightning-spinner variant="brand" size="small"> </lightning-spinner>
@@ -34,6 +46,7 @@
 
                     <lightning-button
                         label="New"
+                        class="slds-m-right_x-small"
                         variant="neutral"
                         onclick={handleCreateNewCase}
                     ></lightning-button>
@@ -41,26 +54,103 @@
             </div>
         </div>
 
-        <!-- Body -->
-        <div class="slds-card__body slds-card__body_inner">
-            <template if:true={records.length}>
-                <div class={relatedListClass}>
-                    <template for:each={records} for:item="record">
-                        <c-tsa-net-case-card 
-                            key={record.Id} 
-                            record={record}
-                            state={state}
-                            onrefresh={handleRefresh}
-                            onloading={handleOnLoading}
-                        ></c-tsa-net-case-card>
-                    </template>
-                </div>
-            </template>
-        </div>
+        <!-- Body + Footer (collapsible) -->
+        <template lwc:if={isExpanded}>
+            <div id="rl-body" class="slds-card__body slds-card__body_inner">
 
-        <!-- Footer -->
-        <footer lwc:if={hasRecords} class="slds-card__footer">
-            <a class="slds-card__footer-action" onclick={handleRelatedListRedirect}>View All</a>
-        </footer>
+                <template lwc:if={hasRecords}>
+
+                    <!-- Wide layout: table view -->
+                    <template lwc:if={isTableView}>
+                        <div class="rl-scroll rl-table-scroll">
+                            <table class="slds-table slds-table_bordered slds-table_cell-buffer slds-table_fixed-layout rl-table">
+                                <thead>
+                                    <tr class="slds-line-height_reset">
+                                        <th class="rl-col-case" scope="col"><div class="slds-truncate" title="Case">Case</div></th>
+                                        <th scope="col"><div class="slds-truncate" title="Member">Member</div></th>
+                                        <th scope="col"><div class="slds-truncate" title="Contact">Contact</div></th>
+                                        <th scope="col"><div class="slds-truncate" title="Email">Email</div></th>
+                                        <th scope="col"><div class="slds-truncate" title="Request Date">Request Date</div></th>
+                                        <th class="rl-col-priority" scope="col"><div class="slds-truncate" title="Priority">Priority</div></th>
+                                        <th class="rl-col-status" scope="col"><div class="slds-truncate" title="Status">Status</div></th>
+                                        <th class="rl-col-actions" scope="col"><div class="slds-assistive-text">Actions</div></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <template for:each={records} for:item="record">
+                                        <tr key={record.Id} class="slds-hint-parent">
+                                            <th scope="row">
+                                                <div class="slds-truncate">
+                                                    <lightning-formatted-url value={record.link} label={record.Name}></lightning-formatted-url>
+                                                </div>
+                                            </th>
+                                            <td><div class="slds-truncate" title={record.tsanetconnect__Partner__c}>{record.tsanetconnect__Partner__c}</div></td>
+                                            <td><div class="slds-truncate" title={record.tsanetconnect__TSANetContact__c}>{record.tsanetconnect__TSANetContact__c}</div></td>
+                                            <td>
+                                                <div class="slds-truncate">
+                                                    <lightning-formatted-email value={record.tsanetconnect__TSANetEmail__c}></lightning-formatted-email>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="slds-truncate">
+                                                    <lightning-formatted-date-time value={record.tsanetconnect__RequestDate__c}></lightning-formatted-date-time>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <lightning-badge label={record.tsanetconnect__Priority__c} class={record.priorityBadgeClass}></lightning-badge>
+                                            </td>
+                                            <td>
+                                                <lightning-badge label={record.tsanetconnect__Status__c} class={record.statusBadgeClass}></lightning-badge>
+                                            </td>
+                                            <td class="rl-actions-cell">
+                                                <c-tsa-net-case-actions
+                                                    record={record}
+                                                    state={state}
+                                                    onrefresh={handleRefresh}
+                                                    onloading={handleOnLoading}
+                                                ></c-tsa-net-case-actions>
+                                            </td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </table>
+                        </div>
+                    </template>
+
+                    <!-- Narrow layout: card view -->
+                    <template lwc:else>
+                        <div class={relatedListClass}>
+                            <template for:each={records} for:item="record">
+                                <c-tsa-net-case-card
+                                    key={record.Id}
+                                    record={record}
+                                    state={state}
+                                    typing-tokens={typingTokens}
+                                    onrefresh={handleRefresh}
+                                    onloading={handleOnLoading}
+                                    onnotesent={handleNoteSent}
+                                ></c-tsa-net-case-card>
+                            </template>
+                        </div>
+                    </template>
+                </template>
+
+                <!-- Empty state -->
+                <template lwc:else>
+                    <div class="slds-align_absolute-center rl-empty">
+                        <div class="slds-text-align_center">
+                            <lightning-icon icon-name="utility:multi_select_checkbox" size="small" class="slds-m-bottom_x-small rl-empty-icon"></lightning-icon>
+                            <p class="slds-text-body_regular slds-text-color_weak">No TSANet cases yet</p>
+                            <p class="slds-text-body_small slds-text-color_weak">Use New to start a collaboration request.</p>
+                        </div>
+                    </div>
+                </template>
+            </div>
+
+            <!-- Footer (card view only) -->
+            <footer lwc:if={showFooter} class="slds-card__footer">
+                <a class="slds-card__footer-action" onclick={handleRelatedListRedirect}>View All</a>
+            </footer>
+        </template>
     </div>
 </template>

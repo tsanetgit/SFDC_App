@@ -208,6 +208,7 @@
             <targetReference>VerifyScreen</targetReference>
         </connector>
     </assignments>
+    <description>Screen flow for creating outbound TSANet collaboration cases from a Salesforce Case.</description>
     <dynamicChoiceSets>
         <name>CompanyChoice</name>
         <collectionReference>TSANetCompanies</collectionReference>
@@ -216,7 +217,6 @@
         <object xsi:nil="true"/>
         <valueField>value</valueField>
     </dynamicChoiceSets>
-    <description>Screen flow for creating outbound TSANet collaboration cases from a Salesforce Case.</description>
     <environments>Default</environments>
     <formulas>
         <name>CustomerDataValue</name>

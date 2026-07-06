@@ -129,11 +129,19 @@
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
+        <apexClass>TSANetWebhookRestServiceTest</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
         <apexClass>TSANetWebhookService</apexClass>
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
         <apexClass>TSANetWebhookTriggerHandler</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>TokenManager</apexClass>
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
@@ -152,6 +160,10 @@
         <enabled>true</enabled>
         <name>TSANetEnvironment__mdt</name>
     </customMetadataTypeAccesses>
+    <customSettingAccesses>
+        <enabled>true</enabled>
+        <name>TSANet_Tokens__c</name>
+    </customSettingAccesses>
     <fieldPermissions>
         <editable>true</editable>
         <field>Case.AccountId</field>
@@ -545,16 +557,6 @@
     <fieldPermissions>
         <editable>false</editable>
         <field>TSANetWebhook__c.WebhookId__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>false</editable>
-        <field>TSANet_Credentials__c.AccessTokenPart1__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>false</editable>
-        <field>TSANet_Credentials__c.AccessTokenPart2__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>

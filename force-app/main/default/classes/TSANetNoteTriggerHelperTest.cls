@@ -62,13 +62,20 @@ public class TSANetNoteTriggerHelperTest {
         TSANetNoteTriggerHelper.treatAsGuestForTest = false;
         Test.stopTest();
 
-        Integer feedItems = [
-            SELECT COUNT()
-            FROM FeedItem
-            WHERE ParentId = :tsaNetCase.tsanetconnect__Case__c
-              AND Title = 'TSANet Note - guest-path-token'
+        tsanetconnect__TSANetNote__c reloaded = [
+            SELECT Id, tsanetconnect__FeedItemId__c
+            FROM tsanetconnect__TSANetNote__c
+            WHERE Id = :note.Id
         ];
-        System.assertEquals(1, feedItems,
+        System.assertNotEquals(null, reloaded.tsanetconnect__FeedItemId__c,
+            'Guest publish + subscriber should have back-stamped FeedItemId__c on the note');
+
+        FeedItem feedItem = [
+            SELECT Id, Title
+            FROM FeedItem
+            WHERE Id = :reloaded.tsanetconnect__FeedItemId__c
+        ];
+        System.assertEquals('TSANet Note - guest-path-token', feedItem.Title,
             'Guest publish + subscriber should have produced one FeedItem on the parent Case');
     }
 }

@@ -31,7 +31,7 @@ public with sharing class TSANetCredentialsHelper {
         }
 
         if(isPrimary == TRUE){
-            tsanetconnect__TSANet_Credentials__c[] credentials = [SELECT Id, Name, tsanetconnect__UserName__c, tsanetconnect__Password__c, tsanetconnect__Environment__c, tsanetconnect__isPrimary__c FROM tsanetconnect__TSANet_Credentials__c WITH SECURITY_ENFORCED LIMIT 1000];
+            tsanetconnect__TSANet_Credentials__c[] credentials = [SELECT Id, Name, tsanetconnect__UserName__c, tsanetconnect__Password__c, tsanetconnect__Environment__c, tsanetconnect__isPrimary__c FROM tsanetconnect__TSANet_Credentials__c WITH USER_MODE LIMIT 1000];
             tsanetconnect__TSANet_Credentials__c[] credentialsToUpdate = new tsanetconnect__TSANet_Credentials__c[]{};
             for(tsanetconnect__TSANet_Credentials__c credential : credentials){
                 if(credential.Id != NULL){
@@ -65,7 +65,7 @@ public with sharing class TSANetCredentialsHelper {
         }
 
         if(isPrimary == TRUE){
-            tsanetconnect__TSANet_Credentials__c[] credentials = [SELECT Id, Name, tsanetconnect__UserName__c, tsanetconnect__Password__c, tsanetconnect__Environment__c, tsanetconnect__isPrimary__c FROM tsanetconnect__TSANet_Credentials__c WHERE Id NOT IN:credentialIds WITH SECURITY_ENFORCED ];
+            tsanetconnect__TSANet_Credentials__c[] credentials = [SELECT Id, Name, tsanetconnect__UserName__c, tsanetconnect__Password__c, tsanetconnect__Environment__c, tsanetconnect__isPrimary__c FROM tsanetconnect__TSANet_Credentials__c WHERE Id NOT IN:credentialIds WITH USER_MODE ];
             for(tsanetconnect__TSANet_Credentials__c credential : credentials){
                 credential.tsanetconnect__isPrimary__c = false;
             }
@@ -110,6 +110,7 @@ public with sharing class TSANetCredentialsHelper {
             SELECT Id FROM tsanetconnect__TSANetWebhook__c
             WHERE tsanetconnect__TSANetCredential__c = :credentialId
             AND tsanetconnect__CallbackUrl__c LIKE :sfWebhookSuffix
+            WITH SYSTEM_MODE
         ];
         if(!webhooks.isEmpty()){
             Database.delete(webhooks, false, AccessLevel.SYSTEM_MODE);

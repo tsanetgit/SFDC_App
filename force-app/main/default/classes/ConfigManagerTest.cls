@@ -23,9 +23,8 @@ public class ConfigManagerTest {
             HttpResponse res = new HttpResponse();
             res.setStatusCode(200);
 
-            // Імітуємо відповіді TSANet API
-            if (req.getEndpoint().contains('token')) {
-                res.setBody('{"access_token":"TEST_TOKEN"}');
+            if (req.getEndpoint().contains('login')) {
+                res.setBody('{"accessToken":"TEST_TOKEN","tokenType":"Bearer","expiresIn":3600}');
             } else {
                 res.setBody('{"company":{"id":"COMPANY_123","name":"Test Company"}}');
             }
@@ -42,18 +41,19 @@ public class ConfigManagerTest {
         Boolean result = ConfigManager.updateTSANetCredentials();
         Test.stopTest();
 
-        // Assert
         System.assertEquals(true, result);
 
         tsanetconnect__TSANet_Credentials__c updated = [
             SELECT tsanetconnect__CompanyId__c,
-                   tsanetconnect__CompanyName__c,
-                   tsanetconnect__Token__c
+                   tsanetconnect__CompanyName__c
             FROM tsanetconnect__TSANet_Credentials__c
             LIMIT 1
         ];
 
         System.assertEquals('COMPANY_123', updated.tsanetconnect__CompanyId__c);
         System.assertEquals('Test Company', updated.tsanetconnect__CompanyName__c);
+
+        tsanetconnect__TSANet_Tokens__c tokens = tsanetconnect__TSANet_Tokens__c.getOrgDefaults();
+        System.assertEquals('TEST_TOKEN', tokens.tsanetconnect__AccessTokenPart1__c);
     }
 }

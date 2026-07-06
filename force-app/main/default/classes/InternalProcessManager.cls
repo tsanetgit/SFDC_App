@@ -18,19 +18,21 @@ public with sharing class InternalProcessManager {
     @Future(callout=true)
     public static void syncAccount(Id credentialId){
         tsanetconnect__TSANet_Credentials__c credential = CredentialManager.getCredentialById(credentialId);
-        String token = TSANetService.getTSANetAccessToken();
+        AuthManager.AccessTokenResponse loginResponse = TSANetService.login();
+        if (loginResponse == null || String.isBlank(loginResponse.accessToken)) {
+            return;
+        }
+
+        String token = loginResponse.accessToken;
         TSANetCompanyInfo info = TSANetService.getCompanyInformation(token);
         if(info != NULL && info.company != NULL){
 			credential.tsanetconnect__CompanyId__c = info.company.id;
         	credential.tsanetconnect__CompanyName__c = info.company.name;
         }
 
-        AccessTokenSplitter.SplitResult splitResult = AccessTokenSplitter.splitBy175(token);
-        credential.tsanetconnect__AccessTokenPart1__c = splitResult.firstPart;
-        credential.tsanetconnect__AccessTokenPart2__c = splitResult.restPart;
-
         List<tsanetconnect__TSANetWebhook__c> webhookRecords = fetchWebhooks(credential.Id, token);
 
+        TokenManager.updateToken(token, loginResponse.expiresIn);
         Database.update(credential, AccessLevel.USER_MODE);
         if(!webhookRecords.isEmpty()){
             Database.upsert(webhookRecords, tsanetconnect__TSANetWebhook__c.tsanetconnect__WebhookId__c, false, AccessLevel.USER_MODE);
@@ -69,7 +71,7 @@ public with sharing class InternalProcessManager {
     public static void scheduleTSANetJobs(Id credentialId){
 
         String jobName = 'TSANetScheduledJob - ' + credentialId;
-        CronTrigger[] crons = [SELECT Id, CronJobDetailId, CronJobDetail.Name, State FROM CronTrigger WHERE CronJobDetail.Name =:jobName WITH SECURITY_ENFORCED ];
+        CronTrigger[] crons = [SELECT Id, CronJobDetailId, CronJobDetail.Name, State FROM CronTrigger WHERE CronJobDetail.Name =:jobName WITH USER_MODE ];
         Boolean isSchedule = crons.size() == 0;
 
         if(isSchedule){
@@ -88,7 +90,7 @@ public with sharing class InternalProcessManager {
      */
     public static void abortTSANetJobs(Id credentialId){
         String jonName = '%TSANetScheduledJob - ' + credentialId + '%';
-        CronTrigger[] cronTriggers = [ SELECT Id, CronJobDetail.Name FROM CronTrigger WHERE  CronJobDetail.Name LIKE :jonName WITH SECURITY_ENFORCED ];
+        CronTrigger[] cronTriggers = [ SELECT Id, CronJobDetail.Name FROM CronTrigger WHERE  CronJobDetail.Name LIKE :jonName WITH USER_MODE ];
 
         for(CronTrigger cron : cronTriggers){
             System.abortJob(cron.Id);

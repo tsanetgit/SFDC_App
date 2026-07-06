@@ -43,12 +43,19 @@ public with sharing class TSANetService {
     }
 
     /**
-     * Authenticates against the TSANet API and returns an access token.
-     * @return JWT access token, or null on failure
+     * Authenticates against the TSANet API and returns the login response.
+     * @return deserialised access token response, or null on failure
      */
-    @AuraEnabled
-    public static String getTSANetAccessToken(){
-        tsanetconnect__TSANet_Credentials__c credential = CredentialManager.getCredentials();
+    public static AuthManager.AccessTokenResponse login() {
+        return login(CredentialManager.getCredentials());
+    }
+
+    /**
+     * Authenticates against the TSANet API using the given credentials.
+     * @param credential credentials record with username and password
+     * @return deserialised access token response, or null on failure
+     */
+    public static AuthManager.AccessTokenResponse login(tsanetconnect__TSANet_Credentials__c credential) {
         String authEndpoint = EndpointManager.getAuthPath();
 
         HttpRequest req = new HttpRequest();
@@ -62,11 +69,24 @@ public with sharing class TSANetService {
 
         Http http = new Http();
         HTTPResponse res = http.send(req);
+        if (res.getStatusCode() != TSANetConstants.SUCCESS_CODE) {
+            return null;
+        }
 
-        if(res.getStatusCode() != TSANetConstants.SUCCESS_CODE){ return null; }
+        return (AuthManager.AccessTokenResponse) System.JSON.deserialize(
+            res.getBody(),
+            AuthManager.AccessTokenResponse.class
+        );
+    }
 
-        AuthManager.AccessTokenResponse response = (AuthManager.AccessTokenResponse) System.JSON.deserialize(res.getBody(), AuthManager.AccessTokenResponse.class);
-        return response.accessToken;
+    /**
+     * Authenticates against the TSANet API and returns an access token.
+     * @return JWT access token, or null on failure
+     */
+    @AuraEnabled
+    public static String getTSANetAccessToken(){
+        AuthManager.AccessTokenResponse response = login();
+        return response != null ? response.accessToken : null;
     }
 
     /**
@@ -268,6 +288,11 @@ public with sharing class TSANetService {
      */
     @AuraEnabled
     public static String sendAttachment(String token, List<Map<String, Object>> files){
+        if (!Schema.sObjectType.ContentVersion.isCreateable()
+            || !Schema.sObjectType.ContentDocumentLink.isCreateable()) {
+            throw new TSANetServiceException('Insufficient permissions to upload attachments.');
+        }
+
         tsanetconnect__TSANetCase__c tsaNetCase = TSANetCaseSelector.getIdByToken(token);
 
         Id[] contentVersionIds = new Id[]{};
@@ -279,7 +304,7 @@ public with sharing class TSANetService {
             }
         }
 
-        ContentVersion[] selectedContentVersions = [SELECT Id, Title, FileType, VersionData FROM ContentVersion WHERE Id IN:contentVersionIds WITH SECURITY_ENFORCED ];
+        ContentVersion[] selectedContentVersions = [SELECT Id, Title, FileType, VersionData FROM ContentVersion WHERE Id IN:contentVersionIds WITH USER_MODE ];
 
         List<Map<String, Object>> newFiles = new List<Map<String, Object>>();
         for(Map<String, Object> fileData : files){
@@ -365,7 +390,7 @@ public with sharing class TSANetService {
 			versionIds.add(version.Id);
         }
 
-        ContentVersion[] contentVersions = [SELECT Id, ContentDocumentId FROM ContentVersion WHERE Id IN:versionIds WITH SECURITY_ENFORCED ];
+        ContentVersion[] contentVersions = [SELECT Id, ContentDocumentId FROM ContentVersion WHERE Id IN:versionIds WITH USER_MODE ];
 
         ContentDocumentLink[] links = new ContentDocumentLink[]{};
         for(ContentVersion cv : contentVersions){

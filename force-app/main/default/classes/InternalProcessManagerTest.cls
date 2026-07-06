@@ -26,8 +26,8 @@ public class InternalProcessManagerTest {
 
             String endpoint = (req.getEndpoint() == null) ? '' : req.getEndpoint().toLowerCase();
 
-            if (endpoint.contains('token') || endpoint.contains('oauth')) {
-                res.setBody('{"access_token":"tok_test","token":"tok_test","jwt":"tok_test","expires_in":3600}');
+            if (endpoint.contains('login')) {
+                res.setBody('{"accessToken":"tok_test","tokenType":"Bearer","expiresIn":3600}');
                 return res;
             }
 
@@ -49,7 +49,7 @@ public class InternalProcessManagerTest {
 
     @IsTest
     static void test_scheduleTSANetJobs_creates4CronJobs() {
-        tsanetconnect__TSANet_Credentials__c cred = [SELECT Id FROM tsanetconnect__TSANet_Credentials__c LIMIT 1];
+        tsanetconnect__TSANet_Credentials__c cred = [SELECT Id FROM tsanetconnect__TSANet_Credentials__c WITH USER_MODE LIMIT 1];
 
         Test.startTest();
         InternalProcessManager.scheduleTSANetJobs(cred.Id);
@@ -59,6 +59,7 @@ public class InternalProcessManagerTest {
             SELECT Id, State, CronJobDetail.Name
             FROM CronTrigger
             WHERE CronJobDetail.Name LIKE :('%TSANetScheduledJob - ' + String.valueOf(cred.Id) + '%')
+            WITH USER_MODE
         ];
 
         System.assertEquals(4, crons.size(), 'Expected 4 scheduled TSANet jobs (:00/:15/:30/:45)');
@@ -66,7 +67,7 @@ public class InternalProcessManagerTest {
 
     @IsTest
     static void test_abortTSANetJobs_abortsAll() {
-        tsanetconnect__TSANet_Credentials__c cred = [SELECT Id FROM tsanetconnect__TSANet_Credentials__c LIMIT 1];
+        tsanetconnect__TSANet_Credentials__c cred = [SELECT Id FROM tsanetconnect__TSANet_Credentials__c WITH USER_MODE LIMIT 1];
 
         Test.startTest();
         	InternalProcessManager.abortTSANetJobs(cred.Id);
@@ -75,7 +76,7 @@ public class InternalProcessManagerTest {
 
     @IsTest
     static void test_syncAccount_updatesCredential() {
-        tsanetconnect__TSANet_Credentials__c cred = [SELECT Id FROM tsanetconnect__TSANet_Credentials__c LIMIT 1];
+        tsanetconnect__TSANet_Credentials__c cred = [SELECT Id FROM tsanetconnect__TSANet_Credentials__c WITH USER_MODE LIMIT 1];
 
         Test.setMock(HttpCalloutMock.class, new TSANetHttpMock());
 
@@ -84,18 +85,22 @@ public class InternalProcessManagerTest {
         Test.stopTest();
 
         tsanetconnect__TSANet_Credentials__c updated = [
-            SELECT Id, tsanetconnect__CompanyId__c, tsanetconnect__CompanyName__c, tsanetconnect__Token__c
+            SELECT Id, tsanetconnect__CompanyId__c, tsanetconnect__CompanyName__c
             FROM tsanetconnect__TSANet_Credentials__c
             WHERE Id = :cred.Id
+            WITH USER_MODE
         ];
 
         System.assertEquals('cmp_123', updated.tsanetconnect__CompanyId__c, 'CompanyId should be set');
         System.assertEquals('Test Company', updated.tsanetconnect__CompanyName__c, 'CompanyName should be set');
+
+        tsanetconnect__TSANet_Tokens__c tokens = tsanetconnect__TSANet_Tokens__c.getOrgDefaults();
+        System.assertEquals('tok_test', tokens.tsanetconnect__AccessTokenPart1__c, 'Token should be stored in custom settings');
     }
 
     @IsTest
     static void test_execute_runs_withoutErrors_andSchedulesJobs() {
-        tsanetconnect__TSANet_Credentials__c cred = [SELECT Id FROM tsanetconnect__TSANet_Credentials__c LIMIT 1];
+        tsanetconnect__TSANet_Credentials__c cred = [SELECT Id FROM tsanetconnect__TSANet_Credentials__c WITH USER_MODE LIMIT 1];
 
         Test.setMock(HttpCalloutMock.class, new TSANetHttpMock());
 
@@ -108,6 +113,7 @@ public class InternalProcessManagerTest {
             SELECT Id, State, CronJobDetail.Name
             FROM CronTrigger
             WHERE CronJobDetail.Name LIKE :('%TSANetScheduledJob - ' + String.valueOf(cred.Id) + '%')
+            WITH USER_MODE
         ];
         System.assertEquals(4, crons.size(), 'Expected 4 scheduled jobs after execute()');
     }
