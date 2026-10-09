@@ -1,54 +1,24 @@
-/** Manages authentication and access token operations for TSANet API. */
+/** Reconnects the TSANet integration by re-running the setup sync for the primary credential. */
 public with sharing class AuthManager {
 
     /** Exception thrown for authentication failures. */
     public class AuthManagerException extends Exception {}
 
-    /** Wrapper for the access token HTTP response payload. */
-    public class AccessTokenResponse {
-        /** The OAuth access token string. */
-        public String accessToken;
-        /** The token type (e.g. Bearer). */
-        public String tokenType;
-        /** Token lifetime in seconds. */
-        public Integer expiresIn;
-    }
-
     /**
-     * Retrieves the stored access token, refreshing when missing or expired.
-     * @return concatenated access token string
-     */
-    public static String getAccessToken(){
-        try {
-            return TokenManager.getAccessToken();
-        } catch (TokenManager.TokenManagerException e) {
-            throw new AuthManagerException(e.getMessage());
-        }
-    }
-
-    /**
-     * Returns the access token prefixed with "Bearer ".
-     * @return Bearer token string
-     */
-    public static String getBearerToken(){
-        String token = getAccessToken();
-        if(token == NULL && !Test.isRunningTest()){
-			throw new AuthManagerException('Unauthorized');
-        }
-        return 'Bearer ' + token;
-    }
-
-    /**
-     * Refreshes the stored access token from TSANet API.
-     * @return true if the token was updated successfully
+     * Re-runs the TSANet setup sync for the primary credential. Named Credential callouts are
+     * authorized by the External Credential, so there is no token to refresh: the credential is
+     * marked disconnected and the account probe decides whether it comes back connected.
+     * @return true when the reconnect was started
      */
     @AuraEnabled
     public static Boolean updateAccessToken(){
         tsanetconnect__TSANet_Credentials__c credential = CredentialManager.getCredentials();
-        AuthManager.AccessTokenResponse response = TSANetService.login();
-        if(response == null || String.isBlank(response.accessToken)){ return false; }
 
-        TokenManager.updateToken(response.accessToken, response.expiresIn);
+        if(!AuthModeManager.usesNamedCredential(credential)){
+            throw new AuraHandledException(TSANetConstants.NOT_CONFIGURED_ERROR);
+        }
+
+        InternalProcessManager.markDisconnected(credential);
         InternalProcessManager.execute(credential);
         return true;
     }

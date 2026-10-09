@@ -2,24 +2,34 @@
 public with sharing class ConfigManager {
 
     /**
-     * Fetches a new access token and company info, then updates stored credentials.
+     * Refreshes the company name and Id on the primary credential from the TSANet API.
+     * Uses the Named Credential, so no login call or token handling is involved.
      * @return true if the credentials were updated successfully
      */
     @AuraEnabled
     public static Boolean updateTSANetCredentials(){
+        tsanetconnect__TSANet_Credentials__c credential = CredentialManager.getCredentials();
 
-        AuthManager.AccessTokenResponse loginResponse = TSANetService.login();
-        if (loginResponse == null || String.isBlank(loginResponse.accessToken)) {
+        if(!AuthModeManager.usesNamedCredential(credential)){
+            throw new AuraHandledException(TSANetConstants.NOT_CONFIGURED_ERROR);
+        }
+
+        TSANetCompanyInfo info = TSANetAPIService.getCompanyInformation();
+        if(info == null || info.company == null){
             return false;
         }
 
-        String token = loginResponse.accessToken;
-        TSANetCompanyInfo info = TSANetService.getCompanyInformation(token);
+        if(!Schema.sObjectType.tsanetconnect__TSANet_Credentials__c.isUpdateable()
+            || !Schema.sObjectType.tsanetconnect__TSANet_Credentials__c.fields.tsanetconnect__CompanyName__c.isUpdateable()
+            || !Schema.sObjectType.tsanetconnect__TSANet_Credentials__c.fields.tsanetconnect__CompanyId__c.isUpdateable()){
+            return false;
+        }
 
-        tsanetconnect__TSANet_Credentials__c credential = CredentialManager.getCredentials();
-        credential.tsanetconnect__CompanyName__c = info.company.name;
-        credential.tsanetconnect__CompanyId__c = info.company.id;
-        TokenManager.updateToken(token, loginResponse.expiresIn);
-        return Database.update(credential, AccessLevel.USER_MODE).isSuccess();
+        tsanetconnect__TSANet_Credentials__c updatedCredential = new tsanetconnect__TSANet_Credentials__c(
+            Id = credential.Id,
+            tsanetconnect__CompanyName__c = info.company.name,
+            tsanetconnect__CompanyId__c = info.company.id
+        );
+        return Database.update(updatedCredential, AccessLevel.USER_MODE).isSuccess();
     }
 }

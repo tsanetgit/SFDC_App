@@ -14,14 +14,16 @@ public with sharing class ParserManager {
         'submitterCaseNumber' 	    => tsanetconnect__TSANetCase__c.tsanetconnect__SubmitterCaseNumber__c,
         'receiverCaseNumber' 		=> tsanetconnect__TSANetCase__c.tsanetconnect__ReceiverCaseNumber__c,
         'direction' 				=> tsanetconnect__TSANetCase__c.tsanetconnect__Direction__c,
-        'escalationInstructions' 	=> tsanetconnect__TSANetCase__c.tsanetconnect__EscalationInstructions__c
+        'escalationInstructions' 	=> tsanetconnect__TSANetCase__c.tsanetconnect__EscalationInstructions__c,
+        'contactDocumentName' 		=> tsanetconnect__TSANetCase__c.tsanetconnect__DocumentName__c
     };
 
     /** Maps JSON field names to TSANetCase numeric fields. */
     public static Map<String, SObjectField> TSANET_CASE_NUMBER_FIELD_MAP = new Map<String, SObjectField>{
         'id' 					=> tsanetconnect__TSANetCase__c.tsanetconnect__tsaNetCaseId__c,
     	'submitCompanyId'       => tsanetconnect__TSANetCase__c.tsanetconnect__SubmittedCompanyId__c,
-        'receiveCompanyId'      => tsanetconnect__TSANetCase__c.tsanetconnect__receivedCompanyId__c
+        'receiveCompanyId'      => tsanetconnect__TSANetCase__c.tsanetconnect__receivedCompanyId__c,
+        'contactDocumentId'     => tsanetconnect__TSANetCase__c.tsanetconnect__DocumentId__c
     };
 
     /** Maps JSON field names to TSANetCase datetime fields. */
@@ -47,12 +49,15 @@ public with sharing class ParserManager {
         'token'          => tsanetconnect__TSANetNote__c.tsanetconnect__Token__c,
         'creatorName'    => tsanetconnect__TSANetNote__c.tsanetconnect__CreatorName__c,
         'companyName'    => tsanetconnect__TSANetNote__c.tsanetconnect__CompanyName__c,
-        'creatorEmail'   => tsanetconnect__TSANetNote__c.tsanetconnect__CreatorEmail__c
+        'creatorEmail'   => tsanetconnect__TSANetNote__c.tsanetconnect__CreatorEmail__c,
+        'type'           => tsanetconnect__TSANetNote__c.tsanetconnect__Type__c,
+        'direction'      => tsanetconnect__TSANetNote__c.tsanetconnect__Direction__c
     };
 
     /** Maps JSON field names to TSANetNote numeric fields. */
     public static final Map<String, SObjectField> TSANET_NOTE_NUMBER_FIELD_MAP = new Map<String, SObjectField>{
-        'caseId'  => tsanetconnect__TSANetNote__c.tsanetconnect__CaseId__c
+        'caseId'     => tsanetconnect__TSANetNote__c.tsanetconnect__CaseId__c,
+        'companyId'  => tsanetconnect__TSANetNote__c.tsanetconnect__CompanyId__c
     };
 
     /** Maps JSON field names to TSANetNote datetime fields. */
@@ -150,14 +155,11 @@ public with sharing class ParserManager {
 
                 // Relations — stamp the parent TSANet case id on each child so the
                 // TSANetNote trigger (findRelationships) can link them to TSANetCase__c.
-                tsaNetNotes.addAll(parseTSANetNotes(tsaNetCaseId, caseRecordFieldMap));
-                tsaNetResponses.addAll(parseTSANetResponses(tsaNetCaseId, caseRecordFieldMap));
+                tsaNetNotes.addAll(parseTSANetNotes(tsaNetCaseId, caseRecordFieldMap, caseId));
+                tsaNetResponses.addAll(parseTSANetResponses(tsaNetCaseId, caseRecordFieldMap, caseId));
 
-                // Custom fields
-                parseCustomFields(sfCase, caseRecordFieldMap);
-
-                // Submitted By
-                parseSubmittedBy(sfCase, caseRecordFieldMap);
+                parseCustomFields(sfCase, caseRecordFieldMap, caseId);
+                parseSubmittedBy(sfCase, caseRecordFieldMap, caseId);
 
                 tsaNetCases.add(sfCase);
             }
@@ -186,10 +188,15 @@ public with sharing class ParserManager {
      * @return array of parsed TSANetNote records
      */
     public static tsanetconnect__TSANetNote__c[] parseTSANetNotes(String caseId, Map<String, Object> caseRecordFieldMap){
+        return parseTSANetNotes(caseId, caseRecordFieldMap, null);
+    }
+
+    /** Parses notes and stamps mapping errors with the related Salesforce Case Id when known. */
+    public static tsanetconnect__TSANetNote__c[] parseTSANetNotes(String caseId, Map<String, Object> caseRecordFieldMap, String salesforceCaseId){
         try {
             List<Object> caseNotes = (List<Object>) caseRecordFieldMap.get('caseNotes');
             tsanetconnect__TSANetNote__c[] sfNotes = new tsanetconnect__TSANetNote__c[]{};
-            if(caseNotes.size() > 0){
+            if(caseNotes != null && caseNotes.size() > 0){
 
                 for(Object note : caseNotes){
 
@@ -211,8 +218,7 @@ public with sharing class ParserManager {
 
                         if(TSANET_NOTE_NUMBER_FIELD_MAP.containsKey(noteField)){
                             SObjectField field = TSANET_NOTE_NUMBER_FIELD_MAP.get(noteField);
-                            Integer value = (Integer) noteRecordFieldMap.get(noteField);
-                            sfNote.put(field, String.valueOf(value));
+                            sfNote.put(field, toText(noteRecordFieldMap.get(noteField)));
                         }
 
                         if(TSANET_NOTE_DATETIME_FIELD_MAP.containsKey(noteField)){
@@ -227,7 +233,7 @@ public with sharing class ParserManager {
             }
             return sfNotes;
         } catch(Exception e){
-            ErrorLogger.logError(e, 'TSANET_NOTE_MAPPING_ERROR');
+            logMappingError(e, 'TSANET_NOTE_MAPPING_ERROR', salesforceCaseId, caseRecordFieldMap);
             return new tsanetconnect__TSANetNote__c[]{};
         }
     }
@@ -239,12 +245,17 @@ public with sharing class ParserManager {
      * @return array of parsed TSANetResponse records
      */
     public static tsanetconnect__TSANetResponse__c[] parseTSANetResponses(String caseId, Map<String, Object> caseRecordFieldMap){
+        return parseTSANetResponses(caseId, caseRecordFieldMap, null);
+    }
+
+    /** Parses responses and stamps mapping errors with the related Salesforce Case Id when known. */
+    public static tsanetconnect__TSANetResponse__c[] parseTSANetResponses(String caseId, Map<String, Object> caseRecordFieldMap, String salesforceCaseId){
         try {
             List<Object> caseResponses = (List<Object>) caseRecordFieldMap.get('caseResponses');
 
             tsanetconnect__TSANetResponse__c[] sfResponses = new tsanetconnect__TSANetResponse__c[]{};
 
-            if(caseResponses.size() > 0){
+            if(caseResponses != null && caseResponses.size() > 0){
 
                 for(Object caseResponse : caseResponses){
 
@@ -279,7 +290,7 @@ public with sharing class ParserManager {
             }
             return sfResponses;
         } catch(Exception e){
-            ErrorLogger.logError(e, 'TSANET_RESPONSE_MAPPING_ERROR');
+            logMappingError(e, 'TSANET_RESPONSE_MAPPING_ERROR', salesforceCaseId, caseRecordFieldMap);
             return new tsanetconnect__TSANetResponse__c[]{};
         }
     }
@@ -290,8 +301,14 @@ public with sharing class ParserManager {
      * @param caseRecordFieldMap the deserialized case record field map
      */
     public static void parseCustomFields(tsanetconnect__TSANetCase__c sfCase, Map<String, Object> caseRecordFieldMap){
+        parseCustomFields(sfCase, caseRecordFieldMap, null);
+    }
+
+    /** Applies custom fields; a missing list is a no-op, not an error. */
+    public static void parseCustomFields(tsanetconnect__TSANetCase__c sfCase, Map<String, Object> caseRecordFieldMap, String salesforceCaseId){
         try {
             List<Object> customFields = (List<Object>) caseRecordFieldMap.get('customFields');
+            if(customFields == null){ return; }
 
             sfCase.put(tsanetconnect__TSANetCase__c.tsanetconnect__customFields__c, System.JSON.serialize(customFields));
 
@@ -318,7 +335,7 @@ public with sharing class ParserManager {
                 }
             }
         } catch(Exception e){
-            ErrorLogger.logError(e, 'CUSTOM_FIELDS_MAPPING_ERROR');
+            logMappingError(e, 'CUSTOM_FIELDS_MAPPING_ERROR', salesforceCaseId, caseRecordFieldMap);
         }
     }
 
@@ -328,9 +345,19 @@ public with sharing class ParserManager {
      * @param caseRecordFieldMap the deserialized case record field map
      */
     public static void parseSubmittedBy(tsanetconnect__TSANetCase__c sfCase, Map<String, Object> caseRecordFieldMap){
+        parseSubmittedBy(sfCase, caseRecordFieldMap, null);
+    }
 
+    /**
+     * Applies submitter fields. A missing submittedBy object is valid API data and must
+     * not be logged as an error — that insert was also DML in the middle of the paged
+     * callout loop and caused TSANET_QUEUEABLE_JOB_ERROR (uncommitted work).
+     */
+    public static void parseSubmittedBy(tsanetconnect__TSANetCase__c sfCase, Map<String, Object> caseRecordFieldMap, String salesforceCaseId){
         try {
             Map<String, Object> submittedBy = (Map<String, Object>) caseRecordFieldMap.get('submittedBy');
+            if(submittedBy == null){ return; }
+
             for(String fieldName : submittedBy.keySet()){
                 if(TSANET_CASE_SUBMITTED_BY_FIELD_MAP.containsKey(fieldName)){
                     SObjectField field = TSANET_CASE_SUBMITTED_BY_FIELD_MAP.get(fieldName);
@@ -340,8 +367,27 @@ public with sharing class ParserManager {
                 }
             }
         } catch(Exception e){
-            ErrorLogger.logError(e, 'SUBMITTED_BY_MAPPING_ERROR');
+            logMappingError(e, 'SUBMITTED_BY_MAPPING_ERROR', salesforceCaseId, caseRecordFieldMap);
         }
+    }
+
+    /** Logs a parse failure with token, external id, and Salesforce Case id when they are known. */
+    private static void logMappingError(Exception ex, String context, String salesforceCaseId, Map<String, Object> caseRecordFieldMap){
+        Map<String, String> relations = new Map<String, String>();
+        if(String.isNotBlank(salesforceCaseId)){
+            relations.put('caseId', salesforceCaseId);
+        }
+        if(caseRecordFieldMap != null){
+            Object token = caseRecordFieldMap.get('token');
+            if(token != null){
+                relations.put('token', String.valueOf(token));
+            }
+            Object externalId = caseRecordFieldMap.get('id');
+            if(externalId != null){
+                relations.put('tsaNetExternalId', String.valueOf(externalId));
+            }
+        }
+        ErrorLogger.logError(ex, context, relations);
     }
 
     /**
@@ -378,6 +424,11 @@ public with sharing class ParserManager {
         }
     }
 
+    /** Converts a numeric JSON value to text, keeping null as null instead of the string 'null'. */
+    private static String toText(Object value){
+        return value == null ? null : String.valueOf(value);
+    }
+
     /**
      * Parses a single TSANet note from JSON into a TSANetNote SObject.
      * @param json the JSON string representing a note
@@ -404,8 +455,7 @@ public with sharing class ParserManager {
 
                 if(TSANET_NOTE_NUMBER_FIELD_MAP.containsKey(fieldName)){
                     SObjectField field = TSANET_NOTE_NUMBER_FIELD_MAP.get(fieldName);
-                    Integer value = (Integer) noteFieldMap.get(fieldName);
-                    sfNote.put(field, String.valueOf(value));
+                    sfNote.put(field, toText(noteFieldMap.get(fieldName)));
                 }
 
                 if(TSANET_NOTE_DATETIME_FIELD_MAP.containsKey(fieldName)){

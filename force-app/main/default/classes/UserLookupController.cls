@@ -37,7 +37,10 @@ public with sharing class UserLookupController {
      */
     @AuraEnabled(cacheable=true)
     public static List<UserDTO> searchUsers(String searchTerm, Integer limitSize){
-        if (limitSize == null || limitSize <= 0 || limitSize > 50) {
+        if (limitSize == null) {
+            limitSize = 10;
+        }
+        if (limitSize <= 0 || limitSize > 50) {
             limitSize = 10;
         }
         String term = (searchTerm == null) ? '' : searchTerm.trim();
@@ -76,7 +79,10 @@ public with sharing class UserLookupController {
      */
     @AuraEnabled(cacheable=true)
     public static UserDTO getUserById(Id userId){
-        if (userId == null || !Schema.sObjectType.User.isAccessible()) {
+        if (userId == null) {
+            return null;
+        }
+        if (!Schema.sObjectType.User.isAccessible()) {
             return null;
         }
         User u = [

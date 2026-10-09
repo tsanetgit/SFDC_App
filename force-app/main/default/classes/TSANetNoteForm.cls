@@ -10,6 +10,9 @@ global inherited sharing class TSANetNoteForm {
     /** Note priority level. */
     @AuraEnabled
     global String priority { get; set; }
+    /** Optional note type (USER_PUBLIC or USER_PARTNER); omitted means USER_PARTNER on TSANet side. */
+    @AuraEnabled
+    global String type { get; set; }
 
     /** Information about who submitted the note. */
     @AuraEnabled

@@ -24,25 +24,27 @@ global with sharing class TSANetInvocableRejectCollaborationCase {
     /**
      * Rejects the specified TSANet collaboration case with the provided reason.
      * @param data list of TSANetInput containing the case and rejection form
-     * @return list of TSANetRejectResult with success flag and message
+     * @return one result per input, in the same order
      */
     @InvocableMethod(label='Reject TSANet Collaboration Request' description='Returns: isSuccess: boolean, message: string' category='TSANet')
     global static TSANetRejectResult[] rejectCollaborationCase(TSANetInput[] data) {
-
-        TSANetRejectResult result = new TSANetRejectResult();
-
-        TSANetInput input = data[0];
-        String json = JSON.serialize(input.form);
-
-        try {
-            TSANetService.rejectTSANetCase(input.caseRecord.Id, json, null);
-            result.message = 'The collaboration request has been rejected successfully';
-            result.isSuccess = true;
-            return new TSANetRejectResult[]{ result };
-        } catch(Exception e){
-            result.message = e.getMessage();
-            result.isSuccess = false;
-            return new TSANetRejectResult[]{ result };
+        TSANetRejectResult[] results = new TSANetRejectResult[]{};
+        if (data == null) {
+            return results;
         }
+
+        for (TSANetInput input : data) {
+            TSANetRejectResult result = new TSANetRejectResult();
+            try {
+                TSANetService.rejectTSANetCase(input.caseRecord.Id, JSON.serialize(input.form));
+                result.message = 'The collaboration request has been rejected successfully';
+                result.isSuccess = true;
+            } catch (Exception e) {
+                result.message = e.getMessage();
+                result.isSuccess = false;
+            }
+            results.add(result);
+        }
+        return results;
     }
 }

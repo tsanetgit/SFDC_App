@@ -24,25 +24,27 @@ global with sharing class TSANetInvocableRequestMoreInformation  {
     /**
      * Sends a request for additional information on the specified TSANet collaboration case.
      * @param data list of TSANetInput containing the case and request-info form
-     * @return list of TSANetRequestResult with success flag and message
+     * @return one result per input, in the same order
      */
     @InvocableMethod(label='Request More Information' description='Returns: isSuccess: boolean, message: string' category='TSANet')
     global static TSANetRequestResult[] requestMoreInformation(TSANetInput[] data) {
-
-        TSANetRequestResult result = new TSANetRequestResult();
-
-        TSANetInput input = data[0];
-        String json = JSON.serialize(input.form);
-
-        try {
-            TSANetService.requestAdditionalInformation(input.caseRecord.Id, json, null);
-            result.message = 'The request for additional information has been sent successfully';
-            result.isSuccess = true;
-            return new TSANetRequestResult[]{ result };
-        } catch(Exception e){
-            result.message = e.getMessage();
-            result.isSuccess = false;
-            return new TSANetRequestResult[]{ result };
+        TSANetRequestResult[] results = new TSANetRequestResult[]{};
+        if (data == null) {
+            return results;
         }
+
+        for (TSANetInput input : data) {
+            TSANetRequestResult result = new TSANetRequestResult();
+            try {
+                TSANetService.requestAdditionalInformation(input.caseRecord.Id, JSON.serialize(input.form));
+                result.message = 'The request for additional information has been sent successfully';
+                result.isSuccess = true;
+            } catch (Exception e) {
+                result.message = e.getMessage();
+                result.isSuccess = false;
+            }
+            results.add(result);
+        }
+        return results;
     }
 }

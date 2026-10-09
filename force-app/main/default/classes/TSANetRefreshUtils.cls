@@ -15,7 +15,7 @@ public inherited sharing class TSANetRefreshUtils {
      */
     public PageReference refresh() {
         try {
-            System.enqueueJob(new TSANetQueueableJob(0, null, null, null, null, null));
+            TSANetQueueableJob.enqueueIfConnected(null);
             PageReference returnPage = goBack();
             return returnPage;
 
@@ -46,8 +46,7 @@ public inherited sharing class TSANetRefreshUtils {
                 Case sfCase = CaseSelector.getById(caseId);
                 caseNumber = sfCase.CaseNumber;
             }
-            System.enqueueJob(new TSANetQueueableJob(0, null, null, null, null, caseNumber));
-            return true;
+            return TSANetQueueableJob.enqueueIfConnected(caseNumber);
         } catch(Exception e){
             return true;
         }

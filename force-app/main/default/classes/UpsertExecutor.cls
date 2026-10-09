@@ -6,26 +6,23 @@
  * winner's row and falls into the INSERT branch — the unique index on the external Id
  * field then rejects it with DUPLICATE_VALUE.
  *
- * This utility transparently recovers from that race by re-querying the existing
- * record(s) by external Id and retrying as Id-based UPDATE, so the losing transaction's
- * payload still gets persisted. Only genuine, non-recoverable failures are written to
- * tsanetconnect__TSANetError__c.
- *
- * The recovery path runs in SYSTEM_MODE so it can also fix the cross-owner case where
- * the original upsert ran USER_MODE but the running user can't see the existing row
- * because of sharing/FLS.
+ * This utility recovers from that race by re-querying the existing record(s) by
+ * external Id (USER_MODE) and retrying as Id-based UPDATE.
  */
-@SuppressWarnings('PMD.ApexSharingViolations')
-public without sharing class UpsertExecutor {
+public with sharing class UpsertExecutor {
 
     private static final String LOG_CONTEXT_RETRY = 'UPSERT_RETRY_ERROR_LOG';
     private static final Integer STACK_TRACE_MAX_LEN = 255;
+    private static final Pattern SAFE_IDENTIFIER = Pattern.compile('^[A-Za-z0-9_]+$');
+
+    /** Raised when a dynamic SOQL identifier fails validation. */
+    public class UpsertExecutorException extends Exception {}
 
     /**
      * Upsert with concurrent-insert recovery.
      * @param records list of SObjects to upsert (no-op if null/empty)
      * @param externalIdField external Id field used to match existing rows
-     * @param accessLevel access level for the initial upsert (USER_MODE or SYSTEM_MODE)
+     * @param accessLevel access level for the initial upsert
      */
     public static void execute(List<SObject> records,
                                SObjectField externalIdField,
@@ -68,28 +65,25 @@ public without sharing class UpsertExecutor {
     }
 
     /**
-     * Re-queries existing Ids by external Id (SYSTEM_MODE) and updates the records
-     * by Id; logs any retry failures. SYSTEM_MODE is intentional: the only reason we
-     * are here is the running user couldn't see the existing row during the original
-     * upsert's SELECT phase.
+     * Re-queries existing Ids by external Id (USER_MODE) and updates the records by Id.
      */
     private static void retryAsUpdate(List<SObject> records, SObjectField externalIdField){
         if (records == null || records.isEmpty()) { return; }
 
+        DescribeSObjectResult objectDescribe = records[0].getSObjectType().getDescribe();
         String fieldName = externalIdField.getDescribe().getName();
-        String objectName = records[0].getSObjectType().getDescribe().getName();
+        String objectName = objectDescribe.getName();
 
         Set<String> extIds = collectExternalIds(records, fieldName);
         if (extIds.isEmpty()) { return; }
 
-        Map<String, Id> extIdToId = lookupExistingIds(objectName, fieldName, extIds);
+        Map<String, Id> extIdToId = lookupExistingIds(objectDescribe, fieldName, extIds);
         List<SObject> toUpdate = stampIds(records, fieldName, extIdToId);
         if (toUpdate.isEmpty()) { return; }
 
-        DescribeSObjectResult objectDescribe = records[0].getSObjectType().getDescribe();
         if (!objectDescribe.isUpdateable()) { return; }
 
-        Database.SaveResult[] saveResults = Database.update(toUpdate, false, AccessLevel.SYSTEM_MODE);
+        Database.SaveResult[] saveResults = Database.update(toUpdate, false, AccessLevel.USER_MODE);
         logRetryFailures(saveResults, toUpdate, fieldName, objectName);
     }
 
@@ -103,17 +97,39 @@ public without sharing class UpsertExecutor {
         return extIds;
     }
 
-    /** Returns externalId-to-Id map by re-querying the object in SYSTEM_MODE. */
-    private static Map<String, Id> lookupExistingIds(String objectName,
+    /**
+     * Returns externalId-to-Id map by re-querying the object in USER_MODE.
+     * Identifiers come from describe results and SAFE_IDENTIFIER, not caller input.
+     */
+    private static Map<String, Id> lookupExistingIds(DescribeSObjectResult objectDescribe,
                                                      String fieldName,
                                                      Set<String> extIds){
-        String soql = 'SELECT Id, ' + fieldName + ' FROM ' + objectName +
-                      ' WHERE ' + fieldName + ' IN :extIds WITH SYSTEM_MODE';
+        String objectName = assertSafeIdentifier(objectDescribe.getName());
+        String safeFieldName = assertSafeIdentifier(fieldName);
+
+        if (!objectDescribe.fields.getMap().containsKey(safeFieldName)) {
+            throw new UpsertExecutorException(
+                'Unknown external Id field ' + safeFieldName + ' on ' + objectName
+            );
+        }
+
+        String soql = 'SELECT Id, ' + safeFieldName + ' FROM ' + objectName +
+                      ' WHERE ' + safeFieldName + ' IN :extIds';
+
+        Map<String, Object> binds = new Map<String, Object>{ 'extIds' => extIds };
         Map<String, Id> extIdToId = new Map<String, Id>();
-        for (SObject existing : Database.query(soql)) {
-            extIdToId.put(String.valueOf(existing.get(fieldName)), (Id) existing.get('Id'));
+        for (SObject existing : Database.queryWithBinds(soql, binds, AccessLevel.USER_MODE)) {
+            extIdToId.put(String.valueOf(existing.get(safeFieldName)), (Id) existing.get('Id'));
         }
         return extIdToId;
+    }
+
+    /** Rejects anything that is not a bare API name before it reaches dynamic SOQL. */
+    private static String assertSafeIdentifier(String identifier){
+        if (String.isBlank(identifier) || !SAFE_IDENTIFIER.matcher(identifier).matches()) {
+            throw new UpsertExecutorException('Unsafe SOQL identifier: ' + identifier);
+        }
+        return identifier;
     }
 
     /** Stamps each record's Id from the lookup map; returns the list ready for update. */

@@ -85,6 +85,16 @@
                 <identifier>Recordtsanetconnect__CompanyName__cField</identifier>
             </fieldInstance>
         </itemInstances>
+        <itemInstances>
+            <fieldInstance>
+                <fieldInstanceProperties>
+                    <name>uiBehavior</name>
+                    <value>none</value>
+                </fieldInstanceProperties>
+                <fieldItem>Record.CompanyId__c</fieldItem>
+                <identifier>Recordtsanetconnect__CompanyId__cField</identifier>
+            </fieldInstance>
+        </itemInstances>
         <name>Facet-3b481c21-cba7-4efd-9eff-6ed5f22e3ece</name>
         <type>Facet</type>
     </flexiPageRegions>
@@ -117,6 +127,26 @@
                 </fieldInstanceProperties>
                 <fieldItem>Record.Priority__c</fieldItem>
                 <identifier>Recordtsanet_connect_Priority_cField</identifier>
+            </fieldInstance>
+        </itemInstances>
+        <itemInstances>
+            <fieldInstance>
+                <fieldInstanceProperties>
+                    <name>uiBehavior</name>
+                    <value>none</value>
+                </fieldInstanceProperties>
+                <fieldItem>Record.Type__c</fieldItem>
+                <identifier>Recordtsanetconnect__Type__cField</identifier>
+            </fieldInstance>
+        </itemInstances>
+        <itemInstances>
+            <fieldInstance>
+                <fieldInstanceProperties>
+                    <name>uiBehavior</name>
+                    <value>none</value>
+                </fieldInstanceProperties>
+                <fieldItem>Record.Direction__c</fieldItem>
+                <identifier>Recordtsanetconnect__Direction__cField</identifier>
             </fieldInstance>
         </itemInstances>
         <itemInstances>

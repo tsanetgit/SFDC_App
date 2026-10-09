@@ -7,8 +7,6 @@ trigger TSANetCredentialsTrigger on tsanetconnect__TSANet_Credentials__c (before
         if(Trigger.isUpdate) {
             TSANetCredentialsHelper.turnOfPrimaryTSANetCredentialsOnUpdate((tsanetconnect__TSANet_Credentials__c[]) Trigger.new,
                                                                            (Map<Id, tsanetconnect__TSANet_Credentials__c>) Trigger.oldMap);
-            TSANetCredentialsHelper.changePrimaryUser((tsanetconnect__TSANet_Credentials__c[]) Trigger.new,
-                                                      (Map<Id, tsanetconnect__TSANet_Credentials__c>) Trigger.oldMap);
         }
 
         if(Trigger.isDelete) {

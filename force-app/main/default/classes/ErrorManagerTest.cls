@@ -12,25 +12,8 @@ public class ErrorManagerTest {
         }
 	}
 
-    // Helper: create a credentials record so CredentialManager.getCredentials() can return it.
-    // Adjust required fields if your org has validations on tsanetconnect__TSANet_Credentials__c.
-    private static tsanetconnect__TSANet_Credentials__c createCred(String token) {
-        tsanetconnect__TSANet_Credentials__c credentials = new tsanetconnect__TSANet_Credentials__c();
-        credentials.tsanetconnect__UserName__c = 'username@gmail.com';
-        credentials.tsanetconnect__Password__c = 'password111';
-        credentials.tsanetconnect__isPrimary__c = true;
-        credentials.tsanetconnect__Environment__c = 'dev';
-
-        credentials.tsanetconnect__isPrimary__c = true;
-        insert credentials;
-        TSANetDataFactory.seedTokens(token, '');
-        return credentials;
-    }
-
     @IsTest
     static void test_handleResponseErrors_status200_noException() {
-        createCred('tok');
-
         HttpResponse res = new HttpResponse();
         res.setStatusCode(200);
         res.setBody('{"ok":true}');
@@ -43,9 +26,7 @@ public class ErrorManagerTest {
     }
 
     @IsTest
-    static void test_handleResponseErrors_invalidToken_clearsToken_andThrowsUnauthorized() {
-        tsanetconnect__TSANet_Credentials__c cred = createCred('tok_to_clear');
-
+    static void test_handleResponseErrors_invalidToken_throwsUnauthorized() {
         HttpResponse res = new HttpResponse();
         res.setStatusCode(401);
         res.setBody('The authorization token provided was invalid.');
@@ -58,15 +39,10 @@ public class ErrorManagerTest {
             System.assertEquals('Unauthorized', e.getMessage());
         }
         Test.stopTest();
-
-        tsanetconnect__TSANet_Tokens__c updated = tsanetconnect__TSANet_Tokens__c.getOrgDefaults();
-        System.assertEquals(null, updated.tsanetconnect__AccessTokenPart1__c, 'Token should be cleared');
     }
 
     @IsTest
     static void test_handleResponseErrors_parsesJson_message() {
-        createCred('tok');
-
         HttpResponse res = new HttpResponse();
         res.setStatusCode(400);
         res.setBody('{"message":"Bad request","detail":"ignored"}');
@@ -83,8 +59,6 @@ public class ErrorManagerTest {
 
     @IsTest
     static void test_handleResponseErrors_parsesJson_detail_whenMessageNull() {
-        createCred('tok');
-
         HttpResponse res = new HttpResponse();
         res.setStatusCode(400);
         res.setBody('{"message":null,"detail":"Details here"}');

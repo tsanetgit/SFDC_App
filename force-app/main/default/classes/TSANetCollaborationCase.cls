@@ -63,6 +63,12 @@ global inherited sharing class TSANetCollaborationCase {
     /** Escalation instructions for the case. */
     @AuraEnabled
     global String escalationInstructions { get; set; }
+    /** Contact document identifier from TSANet. */
+    @AuraEnabled
+    global Integer contactDocumentId { get; set; }
+    /** Contact document name from TSANet. */
+    @AuraEnabled
+    global String contactDocumentName { get; set; }
     /** Whether this is a test case. */
     @AuraEnabled
     global Boolean testCase { get; set; }

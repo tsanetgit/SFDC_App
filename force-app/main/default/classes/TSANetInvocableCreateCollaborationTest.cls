@@ -27,6 +27,7 @@ public class TSANetInvocableCreateCollaborationTest {
             input.form = form;
 
             TSANetInvocableCreateCollaborationCase.TSANetCollaborationCaseResult[] data = TSANetInvocableCreateCollaborationCase.createCollaborationCase(new TSANetInvocableCreateCollaborationCase.TSANetInput[]{ input });
+            System.assertEquals(1, data.size(), 'Expected one result per input');
             System.assertEquals(true, data[0].caseRecord != NULL);
         Test.stopTest();
     }

@@ -1,5 +1,5 @@
-/** Scheduled job that enqueues TSANet collaboration-case synchronisation. */
-global inherited sharing class TSANetScheduledJob implements Schedulable, Database.AllowsCallouts {
+/** Scheduled job that enqueues TSANet collaboration-case synchronisation. Explicit with sharing: this is a platform entry point. */
+global with sharing class TSANetScheduledJob implements Schedulable, Database.AllowsCallouts {
 
     /** Custom exception for TSANetScheduledJob errors. */
     public class TSANetScheduledJobException extends Exception {}
@@ -9,6 +9,6 @@ global inherited sharing class TSANetScheduledJob implements Schedulable, Databa
      * @param sc schedulable context provided by the platform
      */
     global void execute(SchedulableContext sc){
-        System.enqueueJob(new TSANetQueueableJob(0, null, null, null, null, null));
+        TSANetQueueableJob.enqueueIfConnected(null);
     }
 }

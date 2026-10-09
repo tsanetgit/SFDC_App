@@ -4,7 +4,7 @@
         <name>SendNotification</name>
         <label>Send Notification</label>
         <locationX>656</locationX>
-        <locationY>572</locationY>
+        <locationY>660</locationY>
         <actionName>customNotificationAction</actionName>
         <actionType>customNotificationAction</actionType>
         <flowTransactionModel>CurrentTransaction</flowTransactionModel>
@@ -47,7 +47,7 @@
         <name>AddRecipients</name>
         <label>Add Recipients</label>
         <locationX>657</locationX>
-        <locationY>442</locationY>
+        <locationY>540</locationY>
         <assignmentItems>
             <assignToReference>recipientIds</assignToReference>
             <operator>Add</operator>
@@ -59,8 +59,35 @@
             <targetReference>SendNotification</targetReference>
         </connector>
     </assignments>
-    <description>Autolaunched subflow that sends custom notifications to case owners for TSANet events.</description>
+    <decisions>
+        <name>RecipientIsActive</name>
+        <label>Recipient Is Active</label>
+        <locationX>656</locationX>
+        <locationY>300</locationY>
+        <defaultConnectorLabel>Inactive</defaultConnectorLabel>
+        <rules>
+            <name>Active</name>
+            <conditionLogic>and</conditionLogic>
+            <conditions>
+                <leftValueReference>isRecipientActive</leftValueReference>
+                <operator>EqualTo</operator>
+                <rightValue>
+                    <booleanValue>true</booleanValue>
+                </rightValue>
+            </conditions>
+            <connector>
+                <targetReference>GetNotificationType</targetReference>
+            </connector>
+            <label>Active</label>
+        </rules>
+    </decisions>
+    <description>Autolaunched subflow that sends custom notifications to case owners for TSANet events. Delivery is skipped when the case owner is an inactive user, because customNotificationAction errors out on inactive recipients.</description>
     <environments>Default</environments>
+    <formulas>
+        <name>isRecipientActive</name>
+        <dataType>Boolean</dataType>
+        <expression>IF({!GetCase.Owner:User.Id} != null, {!GetCase.Owner:User.IsActive}, true)</expression>
+    </formulas>
     <formulas>
         <name>recipientId</name>
         <dataType>String</dataType>
@@ -95,7 +122,7 @@
         <locationY>183</locationY>
         <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
         <connector>
-            <targetReference>GetNotificationType</targetReference>
+            <targetReference>RecipientIsActive</targetReference>
         </connector>
         <filterLogic>and</filterLogic>
         <filters>
@@ -113,7 +140,7 @@
         <name>GetNotificationType</name>
         <label>Get Notification Type</label>
         <locationX>657</locationX>
-        <locationY>303</locationY>
+        <locationY>420</locationY>
         <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
         <connector>
             <targetReference>AddRecipients</targetReference>
@@ -130,7 +157,6 @@
         <object>CustomNotificationType</object>
         <storeOutputAutomatically>true</storeOutputAutomatically>
     </recordLookups>
-    <runInMode>SystemModeWithoutSharing</runInMode>
     <start>
         <locationX>530</locationX>
         <locationY>48</locationY>

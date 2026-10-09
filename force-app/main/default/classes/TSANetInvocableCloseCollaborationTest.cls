@@ -20,10 +20,14 @@ public class TSANetInvocableCloseCollaborationTest {
         tsanetconnect__TSANetCase__c caseRecord = [SELECT Id FROM tsanetconnect__TSANetCase__c LIMIT 1];
         input.caseRecord = caseRecord;
         Test.startTest();
-        	TSANetInvocableCloseCollaborationRequest.closeCollaborationCase(
-                new TSANetInvocableCloseCollaborationRequest.TSANetInput[]{ input }
-            );
+        	TSANetInvocableCloseCollaborationRequest.TSANetCloseResult[] results =
+                TSANetInvocableCloseCollaborationRequest.closeCollaborationCase(
+                    new TSANetInvocableCloseCollaborationRequest.TSANetInput[]{ input }
+                );
         Test.stopTest();
+
+        System.assertEquals(1, results.size(), 'Expected one result per input');
+        System.assertEquals(true, results[0].isSuccess, 'Close should succeed: ' + results[0].message);
     }
 
     @IsTest
@@ -39,9 +43,14 @@ public class TSANetInvocableCloseCollaborationTest {
         tsanetconnect__TSANetCase__c caseRecord = [SELECT Id FROM tsanetconnect__TSANetCase__c LIMIT 1];
         input.caseRecord = caseRecord;
         Test.startTest();
-        	TSANetInvocableCloseCollaborationRequest.closeCollaborationCase(
-                new TSANetInvocableCloseCollaborationRequest.TSANetInput[]{ input }
-            );
+        	TSANetInvocableCloseCollaborationRequest.TSANetCloseResult[] results =
+                TSANetInvocableCloseCollaborationRequest.closeCollaborationCase(
+                    new TSANetInvocableCloseCollaborationRequest.TSANetInput[]{ input }
+                );
         Test.stopTest();
+
+        System.assertEquals(1, results.size(), 'A failure must still return one result per input');
+        System.assertEquals(false, results[0].isSuccess, 'Closing without credentials must fail');
+        System.assertNotEquals(null, results[0].message, 'A failed result must explain why');
     }
 }

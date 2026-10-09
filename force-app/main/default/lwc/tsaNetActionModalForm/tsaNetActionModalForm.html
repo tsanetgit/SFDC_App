@@ -1,19 +1,38 @@
 <template>
-    <div lwc:if={isNoteMode} class="slds-m-horizontal_small">
-        <!-- Summary -->
-        <lightning-input 
-            type="text" 
-            label="Summary" 
-            name="summary" 
-            value={summaryValue} 
-            onchange={handleChangeSummary} 
-            required></lightning-input>
+    <div lwc:if={isNoteMode} class="slds-p-horizontal_small slds-p-vertical_x-small">
+        <!-- Summary + Type in one row -->
+        <lightning-layout multiple-rows vertical-align="start" pull-to-boundary="small" class="slds-m-bottom_medium">
+            <lightning-layout-item size="12" medium-device-size="8" large-device-size="9" padding="horizontal-small">
+                <lightning-input 
+                    type="text" 
+                    label="Summary" 
+                    name="summary" 
+                    placeholder="Short summary of the note"
+                    max-length="500"
+                    value={summaryValue} 
+                    onchange={handleChangeSummary} 
+                    required></lightning-input>
+            </lightning-layout-item>
+            <lightning-layout-item size="12" medium-device-size="4" large-device-size="3" padding="horizontal-small">
+                <lightning-combobox
+                    label="Type"
+                    name="type"
+                    value={noteType}
+                    options={noteTypeOptions}
+                    dropdown-alignment="auto"
+                    onchange={handleChangeType}
+                ></lightning-combobox>
+            </lightning-layout-item>
+        </lightning-layout>
         <!-- Description -->
         <lightning-input-rich-text
             label="Description"
+            label-visible
+            placeholder="Write your note…"
             value={description}
             onchange={handleChangeDescription}
             formats={richTextFormats}
+            required
         ></lightning-input-rich-text>
     </div>
 

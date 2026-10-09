@@ -2,15 +2,22 @@
 public with sharing class TSANetCredentialsHelper {
 
     /**
+     * Single switch for the setup initialization the credential trigger kicks off. On by
+     * default, so tests exercise the same initialization as production; tests that insert a
+     * credential purely as fixture data turn it off to avoid the future callout, queueable
+     * and four scheduled jobs it fans out to.
+     */
+    @TestVisible
+    private static Boolean initializeOnPrimaryChange = true;
+
+    /**
      * Triggers token retrieval for each primary credential record.
      * @param credentials list of credential records to process
      */
     public static void getToken(tsanetconnect__TSANet_Credentials__c[] credentials){
         for(tsanetconnect__TSANet_Credentials__c credential : credentials){
-            if(credential.tsanetconnect__isPrimary__c == true){
-                if(!Test.isRunningTest()){
-                    InternalProcessManager.execute(credential);
-                }
+            if(credential.tsanetconnect__isPrimary__c == true && initializeOnPrimaryChange){
+                InternalProcessManager.execute(credential);
             }
         }
     }
@@ -24,14 +31,14 @@ public with sharing class TSANetCredentialsHelper {
         for(tsanetconnect__TSANet_Credentials__c newCredential : newCredentials){
             if(newCredential.tsanetconnect__isPrimary__c == true){
                 isPrimary = true;
-                if(newCredential.IntegrationUser__c == NULL){
-                    newCredential.IntegrationUser__c = UserInfo.getUserId();
+                if(initializeOnPrimaryChange){
+                    newCredential.tsanetconnect__isConnected__c = false;
                 }
             }
         }
 
         if(isPrimary == TRUE){
-            tsanetconnect__TSANet_Credentials__c[] credentials = [SELECT Id, Name, tsanetconnect__UserName__c, tsanetconnect__Password__c, tsanetconnect__Environment__c, tsanetconnect__isPrimary__c FROM tsanetconnect__TSANet_Credentials__c WITH USER_MODE LIMIT 1000];
+            tsanetconnect__TSANet_Credentials__c[] credentials = [SELECT Id, Name, tsanetconnect__isPrimary__c FROM tsanetconnect__TSANet_Credentials__c WITH USER_MODE LIMIT 1000];
             tsanetconnect__TSANet_Credentials__c[] credentialsToUpdate = new tsanetconnect__TSANet_Credentials__c[]{};
             for(tsanetconnect__TSANet_Credentials__c credential : credentials){
                 if(credential.Id != NULL){
@@ -52,11 +59,18 @@ public with sharing class TSANetCredentialsHelper {
         Boolean isPrimary = false;
         Id[] credentialIds = new Id[]{};
         for(tsanetconnect__TSANet_Credentials__c newCredential : newCredentials){
-            if(newCredential.tsanetconnect__isPrimary__c == true &&
-               ( oldCredentials.get(newCredential.Id).tsanetconnect__isPrimary__c != newCredential.tsanetconnect__isPrimary__c )){
+            tsanetconnect__TSANet_Credentials__c oldCredential = oldCredentials.get(newCredential.Id);
+            Boolean wasPrimary = oldCredential.tsanetconnect__isPrimary__c == true;
+            Boolean nowPrimary = newCredential.tsanetconnect__isPrimary__c == true;
 
+            if(wasPrimary && !nowPrimary){
+                InternalProcessManager.abortTSANetJobs(newCredential.Id);
+            }
+
+            if(nowPrimary && !wasPrimary){
                 isPrimary = true;
-               	if(!Test.isRunningTest()){
+               	if(initializeOnPrimaryChange){
+                    newCredential.tsanetconnect__isConnected__c = false;
                		InternalProcessManager.execute(newCredential);
                	}
                	credentialIds.add(newCredential.Id);
@@ -65,26 +79,11 @@ public with sharing class TSANetCredentialsHelper {
         }
 
         if(isPrimary == TRUE){
-            tsanetconnect__TSANet_Credentials__c[] credentials = [SELECT Id, Name, tsanetconnect__UserName__c, tsanetconnect__Password__c, tsanetconnect__Environment__c, tsanetconnect__isPrimary__c FROM tsanetconnect__TSANet_Credentials__c WHERE Id NOT IN:credentialIds WITH USER_MODE ];
+            tsanetconnect__TSANet_Credentials__c[] credentials = [SELECT Id, Name, tsanetconnect__isPrimary__c FROM tsanetconnect__TSANet_Credentials__c WHERE Id NOT IN:credentialIds WITH USER_MODE ];
             for(tsanetconnect__TSANet_Credentials__c credential : credentials){
                 credential.tsanetconnect__isPrimary__c = false;
             }
             Database.update(credentials, AccessLevel.USER_MODE);
-        }
-    }
-
-    /**
-     * Detects changes to the integration user on credential records.
-     * @param newCredentials list of updated credential records
-     * @param oldCredentials map of previous credential values by Id
-     */
-    public static void changePrimaryUser(tsanetconnect__TSANet_Credentials__c[] newCredentials, Map<Id, tsanetconnect__TSANet_Credentials__c> oldCredentials){
-		Id integrationUser;
-        for(tsanetconnect__TSANet_Credentials__c newCredential : newCredentials){
-            if(newCredential.tsanetconnect__IntegrationUser__c != NULL &&
-               oldCredentials.get(newCredential.Id).tsanetconnect__IntegrationUser__c != newCredential.tsanetconnect__IntegrationUser__c ){
-               integrationUser = newCredential.tsanetconnect__IntegrationUser__c;
-            }
         }
     }
 
@@ -110,10 +109,10 @@ public with sharing class TSANetCredentialsHelper {
             SELECT Id FROM tsanetconnect__TSANetWebhook__c
             WHERE tsanetconnect__TSANetCredential__c = :credentialId
             AND tsanetconnect__CallbackUrl__c LIKE :sfWebhookSuffix
-            WITH SYSTEM_MODE
+            WITH USER_MODE
         ];
         if(!webhooks.isEmpty()){
-            Database.delete(webhooks, false, AccessLevel.SYSTEM_MODE);
+            Database.delete(webhooks, false, AccessLevel.USER_MODE);
         }
     }
 }

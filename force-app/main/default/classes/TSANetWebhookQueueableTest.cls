@@ -4,9 +4,6 @@ public class TSANetWebhookQueueableTest {
 
     private static final String COLLAB_RESPONSE_BODY = '[{"id":2718,"submitCompanyName":"Demo - VMware","submitCompanyId":1072,"submitterCaseNumber":"00001036","receiveCompanyName":"Demo - Cisco","receiveCompanyId":1071,"receiverCaseNumber":"2718","summary":"Test webhook sync","description":"Webhook test","priority":"LOW","status":"ACCEPTED","token":"webhookTestToken1","createdAt":"2024-06-19T17:17:00Z","updatedAt":"2024-06-28T04:54:26Z","deletedAt":null,"responded":true,"respondBy":"2024-06-20T17:17:00Z","feedbackRequested":false,"reminderSent":false,"priorityNote":"<p>Priority 3</p>","escalationInstructions":"test","testCase":false,"customFields":[],"submittedBy":{"id":8706,"username":null,"firstName":"Sue","lastName":"Test","email":"sue@test.com","phone":"5551212","phoneCountryCode":"US","city":"Test"},"caseNotes":[{"id":151,"caseId":2718,"creatorUsername":null,"creatorEmail":"john@test.com","summary":"note","description":"<p>testing</p>","priority":"low","status":"entered","token":"noteToken1","createdAt":"2024-06-19T17:20:23Z","updatedAt":"2024-06-19T17:20:24Z"}],"caseResponses":[{"id":2136,"type":"APPROVAL","caseNumber":"2718","engineerName":"John","engineerPhone":"+1212","engineerEmail":"john@test.com","nextSteps":"Contact you.","createdAt":null}]}]';
     private static final String NOTE_RESPONSE_BODY = '[{"id":151,"caseId":2718,"creatorUsername":null,"creatorEmail":"john@test.com","summary":"note","description":"<p>testing</p>","priority":"low","status":"entered","token":"noteToken1","createdAt":"2024-06-19T17:20:23Z","updatedAt":"2024-06-19T17:20:24Z","companyName":"Demo"}]';
-    private static final String LOGIN_RESPONSE_BODY = '{"accessToken":"mock-access-token","tokenType":"bearer","expiresIn":3600}';
-    private static final String UNAUTHORIZED_BODY = '{"message":"The authorization token provided was invalid."}';
-    private static final String SINGLE_COLLAB_RESPONSE_BODY = COLLAB_RESPONSE_BODY.substring(1, COLLAB_RESPONSE_BODY.length() - 1);
 
     @TestSetup
     static void testSetup() {
@@ -18,7 +15,7 @@ public class TSANetWebhookQueueableTest {
 /*
     @IsTest
     static void testSyncCollaborationRequest() {
-        Test.setMock(HttpCalloutMock.class, new WebhookQueueableMock(200, LOGIN_RESPONSE_BODY, COLLAB_RESPONSE_BODY));
+        Test.setMock(HttpCalloutMock.class, new WebhookQueueableMock(200, COLLAB_RESPONSE_BODY));
 
         Test.startTest();
             System.enqueueJob(new TSANetWebhookQueueable('collaboration-request.created', 'webhookTestToken1', null));
@@ -30,7 +27,7 @@ public class TSANetWebhookQueueableTest {
 
     @IsTest
     static void testSyncCollaborationRequestUpdated() {
-        Test.setMock(HttpCalloutMock.class, new WebhookQueueableMock(200, LOGIN_RESPONSE_BODY, COLLAB_RESPONSE_BODY));
+        Test.setMock(HttpCalloutMock.class, new WebhookQueueableMock(200, COLLAB_RESPONSE_BODY));
 
         Test.startTest();
             System.enqueueJob(new TSANetWebhookQueueable('collaboration-request.updated', 'webhookTestToken1', null));
@@ -48,7 +45,7 @@ public class TSANetWebhookQueueableTest {
         );
         insert parentCase;
 
-        Test.setMock(HttpCalloutMock.class, new WebhookQueueableMock(200, LOGIN_RESPONSE_BODY, NOTE_RESPONSE_BODY));
+        Test.setMock(HttpCalloutMock.class, new WebhookQueueableMock(200, NOTE_RESPONSE_BODY));
 
         Test.startTest();
             System.enqueueJob(new TSANetWebhookQueueable('note.created', 'parentCaseToken', 'noteToken1'));
@@ -68,7 +65,7 @@ public class TSANetWebhookQueueableTest {
         );
         insert parentCase;
 
-        Test.setMock(HttpCalloutMock.class, new WebhookQueueableMock(200, LOGIN_RESPONSE_BODY, singleNote));
+        Test.setMock(HttpCalloutMock.class, new WebhookQueueableMock(200, singleNote));
 
         Test.startTest();
             System.enqueueJob(new TSANetWebhookQueueable('note.updated', 'parentToken2', 'singleNoteToken'));
@@ -90,7 +87,7 @@ public class TSANetWebhookQueueableTest {
             tsanetconnect__Case__c = sfCase.Id
         );
 
-        Test.setMock(HttpCalloutMock.class, new WebhookQueueableMock(200, LOGIN_RESPONSE_BODY, COLLAB_RESPONSE_BODY));
+        Test.setMock(HttpCalloutMock.class, new WebhookQueueableMock(200, COLLAB_RESPONSE_BODY));
 
         Test.startTest();
             System.enqueueJob(new TSANetWebhookQueueable('collaboration-request.updated', 'peSyncToken', null));
@@ -108,8 +105,40 @@ public class TSANetWebhookQueueableTest {
     }
 
     @IsTest
+    static void testCloudEventCreatedTypeSyncs() {
+        Account account = TSANetDataFactory.createAccount();
+        Contact contact = TSANetDataFactory.createContact(account.Id);
+        Case sfCase = TSANetDataFactory.createCase(account.Id, contact.Id);
+
+        insert new tsanetconnect__TSANetCase__c(
+            tsanetconnect__Token__c = 'v2SyncToken',
+            tsanetconnect__tsaNetCaseId__c = '8888',
+            tsanetconnect__Case__c = sfCase.Id
+        );
+
+        Test.setMock(HttpCalloutMock.class, new WebhookQueueableMock(200, COLLAB_RESPONSE_BODY));
+
+        Test.startTest();
+            System.enqueueJob(new TSANetWebhookQueueable(
+                'org.tsanet.connect.collaboration-request.created',
+                'v2SyncToken',
+                null
+            ));
+        Test.stopTest();
+
+        tsanetconnect__TSANetCase__c linked = [
+            SELECT tsanetconnect__Case__c
+            FROM tsanetconnect__TSANetCase__c
+            WHERE tsanetconnect__Token__c = 'v2SyncToken'
+            LIMIT 1
+        ];
+        System.assertEquals(sfCase.Id, linked.tsanetconnect__Case__c,
+            'V2 CloudEvent types must still sync the collaboration request');
+    }
+
+    @IsTest
     static void testUnknownEventType() {
-        Test.setMock(HttpCalloutMock.class, new WebhookQueueableMock(200, LOGIN_RESPONSE_BODY, '{}'));
+        Test.setMock(HttpCalloutMock.class, new WebhookQueueableMock(200, '{}'));
 
         Test.startTest();
             System.enqueueJob(new TSANetWebhookQueueable('unknown.event', 'tok', null));
@@ -120,7 +149,7 @@ public class TSANetWebhookQueueableTest {
 
     @IsTest
     static void testNullEventType() {
-        Test.setMock(HttpCalloutMock.class, new WebhookQueueableMock(200, LOGIN_RESPONSE_BODY, '{}'));
+        Test.setMock(HttpCalloutMock.class, new WebhookQueueableMock(200, '{}'));
 
         Test.startTest();
             System.enqueueJob(new TSANetWebhookQueueable(null, 'tok', null));
@@ -130,106 +159,51 @@ public class TSANetWebhookQueueableTest {
     }
 
     @IsTest
-    static void testLoginFailure() {
-        Test.setMock(HttpCalloutMock.class, new WebhookQueueableMock(401, '{"error":"Unauthorized"}', '{}'));
+    static void testUnauthorizedResponseIsLoggedNotThrown() {
+        Test.setMock(HttpCalloutMock.class, new WebhookQueueableMock(401, '{"error":"Unauthorized"}'));
 
         Test.startTest();
             System.enqueueJob(new TSANetWebhookQueueable('collaboration-request.created', 'tok', null));
         Test.stopTest();
 
-        System.assert(true, 'Login failure should be handled gracefully');
+        System.assertNotEquals(0, [
+            SELECT COUNT() FROM tsanetconnect__TSANetError__c WHERE tsanetconnect__Context__c = 'TSANET_WEBHOOK_QUEUEABLE'
+        ], 'A rejected callout must be logged instead of failing the job');
     }
 
     @IsTest
-    static void testStaleToken401RefreshesAndSyncs() {
-        User user = TSANetDataFactory.createAdminUser();
-
-        System.runAs(user) {
-            TSANetDataFactory.seedTokens('stale', 'token', DateTime.now().addHours(1));
-            Test.setMock(HttpCalloutMock.class, new UnauthorizedRetryMock());
-
-            Test.startTest();
-            System.enqueueJob(new TSANetWebhookQueueable('note.created', 'webhookTestToken1', 'noteToken1'));
-            Test.stopTest();
-
-            List<tsanetconnect__TSANetCase__c> cases = [
-                SELECT Id
-                FROM tsanetconnect__TSANetCase__c
-                WHERE tsanetconnect__Token__c = 'webhookTestToken1'
-            ];
-            System.assertEquals(1, cases.size(), 'Expected collaboration request sync after 401 retry');
-
-            tsanetconnect__TSANet_Tokens__c stored = tsanetconnect__TSANet_Tokens__c.getOrgDefaults();
-            System.assertEquals('mock-access-token', stored.tsanetconnect__AccessTokenPart1__c,
-                'Refreshed token should be persisted after callouts');
-        }
-    }
-/*
-    @IsTest
-    static void testNoDomain() {
-        delete [SELECT Id FROM tsanetconnect__TSANet_Credentials__c];
-
-        Test.setMock(HttpCalloutMock.class, new WebhookQueueableMock(200, LOGIN_RESPONSE_BODY, '{}'));
+    static void testMissingNamedCredentialIsLogged() {
+        tsanetconnect__TSANet_Credentials__c credential = [SELECT Id FROM tsanetconnect__TSANet_Credentials__c LIMIT 1];
+        credential.tsanetconnect__NamedCredential__c = null;
+        TSANetDataFactory.suppressSetupInitialization();
+        update credential;
+        AuthModeManager.clearCache();
 
         Test.startTest();
             System.enqueueJob(new TSANetWebhookQueueable('collaboration-request.created', 'tok', null));
         Test.stopTest();
 
-        System.assert(true, 'Missing domain should be handled gracefully');
+        System.assertNotEquals(0, [
+            SELECT COUNT() FROM tsanetconnect__TSANetError__c WHERE tsanetconnect__Context__c = 'TSANET_WEBHOOK_QUEUEABLE'
+        ], 'Without a Named Credential the job must log the configuration problem');
     }
-*/
-    /** Multi-endpoint mock: returns login response for POST /login, data response for GET requests. */
+    /**
+     * Named Credential mock: every callout returns the given status and body.
+     */
     private class WebhookQueueableMock implements HttpCalloutMock {
         private Integer statusCode;
-        private String loginBody;
         private String dataBody;
 
-        public WebhookQueueableMock(Integer statusCode, String loginBody, String dataBody) {
+        public WebhookQueueableMock(Integer statusCode, String dataBody) {
             this.statusCode = statusCode;
-            this.loginBody = loginBody;
             this.dataBody = dataBody;
         }
 
         public HTTPResponse respond(HTTPRequest req) {
             HttpResponse res = new HttpResponse();
             res.setHeader('Content-Type', 'application/json');
-
-            if (req.getMethod() == 'POST' && req.getEndpoint().contains('/login')) {
-                res.setStatusCode(this.statusCode);
-                res.setBody(this.loginBody);
-            } else {
-                res.setStatusCode(200);
-                res.setBody(this.dataBody);
-            }
-            return res;
-        }
-    }
-
-    /** Returns 401 on first GET, login success, then 200 on retry GET. */
-    private class UnauthorizedRetryMock implements HttpCalloutMock {
-        private Integer getCount = 0;
-
-        public HTTPResponse respond(HTTPRequest req) {
-            HttpResponse res = new HttpResponse();
-            res.setHeader('Content-Type', 'application/json');
-
-            if (req.getMethod() == 'POST' && req.getEndpoint().contains('/login')) {
-                res.setStatusCode(200);
-                res.setBody(LOGIN_RESPONSE_BODY);
-            } else if (req.getMethod() == 'GET') {
-                getCount++;
-                if (getCount == 1) {
-                    res.setStatusCode(401);
-                    res.setBody(UNAUTHORIZED_BODY);
-                } else {
-                    res.setStatusCode(200);
-                    res.setBody(SINGLE_COLLAB_RESPONSE_BODY);
-                }
-            } else {
-                res.setStatusCode(200);
-                res.setBody('{}');
-            }
-
+            res.setStatusCode(this.statusCode);
+            res.setBody(this.dataBody);
             return res;
         }
     }

@@ -23,20 +23,12 @@ public inherited sharing class TSANetWebhookTriggerHandler implements ITriggerHa
         }
     }
 
-    /** Registers new webhooks with the TSANet API after record creation. */
+    /**
+     * Not implemented — webhooks are registered from the New form with required
+     * Connected App Client Id/Secret, which this trigger does not have.
+     */
     public void afterInsert(Map<Id, SObject> newItems){
-        Map<Id, tsanetconnect__TSANetWebhook__c> webhooks = (Map<Id, tsanetconnect__TSANetWebhook__c>) newItems;
-
-        Set<Id> recordIds = new Set<Id>();
-        for(tsanetconnect__TSANetWebhook__c wh : webhooks.values()){
-            if(wh.tsanetconnect__WebhookId__c == null){
-                recordIds.add(wh.Id);
-            }
-        }
-
-        if(!recordIds.isEmpty() && !System.isFuture() && !System.isBatch()){
-            TSANetWebhookService.registerWebhooksAsync(recordIds);
-        }
+        // Registration requires OAuth client credentials that are never stored on the record.
     }
 
     public void afterUpdate(Map<Id, SObject> newItems, Map<Id, SObject> oldItems){

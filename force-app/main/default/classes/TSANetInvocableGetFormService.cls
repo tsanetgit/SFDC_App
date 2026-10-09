@@ -11,16 +11,26 @@ global with sharing class TSANetInvocableGetFormService {
     /**
      * Retrieves the collaboration form for the specified TSANet company.
      * @param companyIds list containing the company Id to fetch the form for
-     * @return list of TSANetCompanyFormResult with the company form
+     * @return one result per input, in the same order
      */
     @InvocableMethod(label='Get Company Form' description='Returns company form' category='TSANet')
     global static TSANetCompanyFormResult[] getFormByCompanyId(String[] companyIds) {
-        String companyId = companyIds[0];
-        String body = TSANetService.getFormByCompanyId(companyId, 'company', null);
+        TSANetCompanyFormResult[] results = new TSANetCompanyFormResult[]{};
+        if (companyIds == null) {
+            return results;
+        }
 
-        TSANetCompanyFormResult result = new TSANetCompanyFormResult();
-        result.form = (TSANetCompanyForm) System.JSON.deserialize(body, TSANetCompanyForm.class);
-        return new TSANetCompanyFormResult[]{ result };
+        for (String companyId : companyIds) {
+            TSANetCompanyFormResult result = new TSANetCompanyFormResult();
+            try {
+                String body = TSANetService.getFormByCompanyId(companyId, 'company');
+                result.form = (TSANetCompanyForm) JSON.deserialize(body, TSANetCompanyForm.class);
+            } catch (Exception e) {
+                // Leave form null so Flow can branch on it.
+            }
+            results.add(result);
+        }
+        return results;
     }
 
 }

@@ -97,7 +97,7 @@
             <label>Yes</label>
         </rules>
     </decisions>
-    <description>Template (System Context Without Sharing) before-save record-triggered flow on TSANetCase__c. Branches on Direction__c: Outbound cases look up the parent Case by SubmitterCaseNumber__c, Inbound cases by ReceiverCaseNumber__c, then stamp Case__c on the new record. Runs without sharing so the lookup succeeds when the trigger fires from a Guest User context (for example, an inbound webhook). Subscribers clone this template into their own flow and activate it.</description>
+    <description>Template before-save record-triggered flow on TSANetCase__c. Branches on Direction__c: Outbound cases look up the parent Case by SubmitterCaseNumber__c, Inbound cases by ReceiverCaseNumber__c, then stamp Case__c on the new record. Runs in the Integration User or end-user context. Subscribers clone this template into their own flow and activate it.</description>
     <environments>Default</environments>
     <interviewLabel>TSANet Inbound: Find Parent Case {!$Flow.CurrentDateTime}</interviewLabel>
     <isTemplate>true</isTemplate>
@@ -165,7 +165,6 @@
         <queriedFields>Id</queriedFields>
         <storeOutputAutomatically>true</storeOutputAutomatically>
     </recordLookups>
-    <runInMode>SystemModeWithoutSharing</runInMode>
     <start>
         <locationX>151</locationX>
         <locationY>0</locationY>

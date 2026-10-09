@@ -1,11 +1,12 @@
 import { LightningElement, api, track } from 'lwc'
 
-import { getRecordNotifyChange } from 'lightning/uiRecordApi';
+import { updateRecord, getRecordNotifyChange } from 'lightning/uiRecordApi';
 
 import { ShowToastEvent } from "lightning/platformShowToastEvent";
 
 import getTSANetRecordPageInfo from '@salesforce/apex/TSANetUtils.getTSANetRecordPageInfo'
 
+import ID_FIELD from '@salesforce/schema/TSANetCase__c.Id'
 import NAME_FIELD from '@salesforce/schema/TSANetCase__c.Name'
 import CASE_FIELD from '@salesforce/schema/TSANetCase__c.Case__c'
 import PRIORITY_NOTE_FIELD from '@salesforce/schema/TSANetCase__c.PriorityNote__c'
@@ -21,6 +22,8 @@ import RESPONSE_DATE_FIELD from '@salesforce/schema/TSANetCase__c.ResponseDate__
 import ESCALATION_INSTRUCTIONS_FIELD from '@salesforce/schema/TSANetCase__c.EscalationInstructions__c'
 import ADMIN_NOTE_FIELD from '@salesforce/schema/TSANetCase__c.AdminNote__c'
 import RECEIVER_CASE_NUMBER from '@salesforce/schema/TSANetCase__c.ReceiverCaseNumber__c'
+import DOCUMENT_ID_FIELD from '@salesforce/schema/TSANetCase__c.DocumentId__c'
+import DOCUMENT_NAME_FIELD from '@salesforce/schema/TSANetCase__c.DocumentName__c'
 
 
 
@@ -38,8 +41,6 @@ import LAST_MODIFIED_BY_FIELD from '@salesforce/schema/TSANetCase__c.LastModifie
 
 import TOKEN_FIELD from '@salesforce/schema/TSANetCase__c.Token__c'
 
-import updateTSANetCase from '@salesforce/apex/TSANetUtils.updateTSANetCase'
-
 export default class TsaNetRecordPage extends LightningElement {
     nameField = NAME_FIELD
     @track caseField = CASE_FIELD
@@ -48,6 +49,8 @@ export default class TsaNetRecordPage extends LightningElement {
     summaryField = SUMMARY_FIELD
     descriptionField = DESCRIPTION_FIELD
     receiverCaseNumber = RECEIVER_CASE_NUMBER
+    documentIdField = DOCUMENT_ID_FIELD
+    documentNameField = DOCUMENT_NAME_FIELD
 
     externalCaseId = EXTERNAL_CASE_ID_FIELD
     statusField = STATUS_FIELD
@@ -120,16 +123,21 @@ export default class TsaNetRecordPage extends LightningElement {
         this.isCaseMode = !this.isCaseMode
     }
 
+    /** Assigns the selected Case lookup through Lightning Data Service instead of Apex DML. */
     handleSubmit(){
         this.isLoading = true
-        updateTSANetCase({ tsaNetCaseId: this.recordId, caseId: this.selectedCaseRecordId }).then(() => {
+        const fields = {}
+        fields[ID_FIELD.fieldApiName] = this.recordId
+        fields[CASE_FIELD.fieldApiName] = this.selectedCaseRecordId ?? null
+        updateRecord({ fields }).then(() => {
             this.isLoading = false
             this.toast('Success', 'success', 'The record have been assigned successfully!')
             this.isCaseMode = false
             this.getData()
             getRecordNotifyChange([{recordId: this.recordId}]);
         }).catch(error => {
-            this.toast('Error', 'error', error.body.message)
+            this.isLoading = false
+            this.toast('Error', 'error', error?.body?.message || error?.message)
         })
     }
     /*

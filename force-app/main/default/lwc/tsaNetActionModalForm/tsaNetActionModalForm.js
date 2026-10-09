@@ -11,7 +11,9 @@ import {
     USER_MOBILE_PHONE_FIELD,
 
     ACTIONS,
-    NOTE_STATE
+    NOTE_STATE,
+    NOTE_TYPE_OPTIONS,
+    RICH_TEXT_FORMATS
 } from 'c/tsaNetConstants'
 
 import {
@@ -28,7 +30,8 @@ export default class TsaNetActionModalForm extends LightningElement {
     @track note = NOTE_STATE
     @track summary
     @track description
-
+    noteType = ''
+    noteTypeOptions = NOTE_TYPE_OPTIONS
     // Accept, Reject, Request Info, Send Info
     @track form
 
@@ -46,18 +49,27 @@ export default class TsaNetActionModalForm extends LightningElement {
         this.dispatchEvent(new CustomEvent('changeform', { detail: { form: this.note }}))
     }
 
+    handleChangeType(event){
+        this.noteType = event?.detail?.value ?? ''
+        this.generateNote()
+        this.dispatchEvent(new CustomEvent('changeform', { detail: { form: this.note }}))
+    }
+
     get richTextFormats() {
-        return [
-            'font', 'size', 'bold', 'italic', 'underline', 'strike',
-            'list', 'indent', 'align', 'link', 'clean', 'table', 'header'
-        ];
+        return RICH_TEXT_FORMATS
     }
 
     generateNote(){
         this.note.summary = this.summaryValue
         this.note.description = this.description
-        this.note.submittedBy.firstName = this.ownerFirstName || this.userFirstName
-        this.note.submittedBy.lastName = this.ownerLastName || this.userLastName
+        this.note.submittedBy.firstName = this.userFirstName
+        this.note.submittedBy.lastName = this.userLastName
+        // "None" omits the type so TSANet applies its default.
+        if(this.noteType){
+            this.note.type = this.noteType
+        } else {
+            delete this.note.type
+        }
     }
 
     handleChangeField(event){
@@ -128,11 +140,11 @@ export default class TsaNetActionModalForm extends LightningElement {
     // Current User Data
 
     get userFirstName() {
-        return this.state?.user[USER_FIRST_NAME_FIELD.fieldApiName] ?? '';
+        return this.state?.user?.[USER_FIRST_NAME_FIELD.fieldApiName] ?? '';
     }
 
     get userLastName() {
-        return this.state?.user[USER_LAST_NAME_FIELD.fieldApiName] ?? '';
+        return this.state?.user?.[USER_LAST_NAME_FIELD.fieldApiName] ?? '';
     }
 
     get userName() {

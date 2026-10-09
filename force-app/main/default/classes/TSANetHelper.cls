@@ -31,21 +31,26 @@ public with sharing class TSANetHelper {
 
     /**
      * Creates a Chatter FeedItem on the specified Case with collaboration request details.
+     * CRUD guards sit next to the SOQL/DML so Checkmarx Apex_CRUD_Violation can see them.
      * @param caseId the Id of the Case to attach the feed item to
      * @param response map of collaboration request fields returned from TSANet
      */
     public static void createCaseFeedItem(ID caseId, Map<String, Object> response){
-        if (caseId == null || !Schema.sObjectType.FeedItem.isCreateable()) {
+        if (caseId == null) {
             return;
         }
 
-        Case[] accessibleCases = [
-            SELECT Id
-            FROM Case
-            WHERE Id = :caseId
-            WITH USER_MODE
-            LIMIT 1
-        ];
+        Case[] accessibleCases = new Case[]{};
+        
+        if (Schema.sObjectType.Case.isAccessible()) {
+            accessibleCases = [
+                SELECT Id
+                FROM Case
+                WHERE Id = :caseId
+                WITH USER_MODE
+                LIMIT 1
+            ];
+        }
         if (accessibleCases.isEmpty()) {
             return;
         }
@@ -75,20 +80,38 @@ public with sharing class TSANetHelper {
             'Summary: ' + summary + ' \n' +
             'Description: ' + description + ' \n' +
             'Priority: ' + priority + ' \n' +
-            'status: ' + status + ' \n' +
-            'createdAt: ' + createdAt + ' \n' +
-            'firstName: ' + firstName + ' \n' +
-            'lastName: ' + lastName + ' \n' +
-            'email: ' + email + ' \n' +
-            'phone: ' + phone + ' \n' +
-            'phoneCountryCode: ' + phoneCountryCode + ' \n' +
-            'city: ' + city + ' \n';
+            'Status: ' + status + ' \n' +
+            'Created At: ' + createdAt + ' \n' +
+            'First Name: ' + firstName + ' \n' +
+            'Last Name: ' + lastName + ' \n' +
+            'Email: ' + email + ' \n' +
+            'Phone: ' + phone + ' \n' +
+            'Phone Country Code: ' + phoneCountryCode + ' \n' +
+            'City: ' + city + ' \n';
 
-        FeedItem feedItem =  new FeedItem(
-            ParentId = caseId,
-            Title = 'TSANet FeedItem',
-            Body = message
-        );
-        Database.insert(feedItem, AccessLevel.USER_MODE);
+        if (caseId.getSobjectType().getDescribe().isAccessible()) {
+            FeedItem caseFeedItem = new FeedItem(
+                ParentId = caseId,
+                Title = 'TSANet FeedItem',
+                Body = message
+            );
+            if (Schema.sObjectType.FeedItem.isCreateable()
+                && Schema.sObjectType.FeedItem.fields.ParentId.isCreateable()
+                && Schema.sObjectType.FeedItem.fields.Title.isCreateable()
+                && Schema.sObjectType.FeedItem.fields.Body.isCreateable()
+                && Schema.sObjectType.Case.isAccessible()
+                && Schema.sObjectType.Case.isCreateable()) {
+                Case[] parentCase = [
+                    SELECT Id
+                    FROM Case
+                    WHERE Id = :caseFeedItem.ParentId
+                    WITH USER_MODE
+                    LIMIT 1
+                ];
+                if (!parentCase.isEmpty()) {
+                    Database.insert(caseFeedItem, AccessLevel.USER_MODE);
+                }
+            }
+        }
     }
 }

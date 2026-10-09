@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Type__c</fullName>
+    <deprecated>false</deprecated>
+    <description>Sender intent: USER_PUBLIC may be shown to the partner&apos;s end customer, USER_PARTNER is for the partner&apos;s engineers, SYSTEM is an author-less platform note.</description>
+    <label>Type</label>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>USER_PUBLIC</fullName>
+                <default>false</default>
+                <label>User Public</label>
+            </value>
+            <value>
+                <fullName>USER_PARTNER</fullName>
+                <default>false</default>
+                <label>User Partner</label>
+            </value>
+            <value>
+                <fullName>SYSTEM</fullName>
+                <default>false</default>
+                <label>System</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

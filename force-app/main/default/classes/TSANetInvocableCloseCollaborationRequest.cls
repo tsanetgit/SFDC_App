@@ -21,24 +21,27 @@ global with sharing class TSANetInvocableCloseCollaborationRequest {
     /**
      * Closes the specified TSANet collaboration case.
      * @param data list of TSANetInput containing the case record to close
-     * @return list of TSANetCloseResult with success flag and message
+     * @return one result per input, in the same order
      */
     @InvocableMethod(label='Close TSANet Collaboration Request' description='Returns: isSuccess: boolean, message: string' category='TSANet')
     global static TSANetCloseResult[] closeCollaborationCase(TSANetInput[] data) {
-
-        TSANetCloseResult result = new TSANetCloseResult();
-
-        TSANetInput input = data[0];
-
-        try {
-            TSANetService.closeTSANetCase(input.caseRecord.Id, null);
-            result.message = 'The collaboration request has been closed successfully';
-            result.isSuccess = true;
-            return new TSANetCloseResult[]{ result };
-        } catch(Exception e){
-            result.message = e.getMessage();
-            result.isSuccess = false;
-            return new TSANetCloseResult[]{ result };
+        TSANetCloseResult[] results = new TSANetCloseResult[]{};
+        if (data == null) {
+            return results;
         }
+
+        for (TSANetInput input : data) {
+            TSANetCloseResult result = new TSANetCloseResult();
+            try {
+                TSANetService.closeTSANetCase(input.caseRecord.Id);
+                result.message = 'The collaboration request has been closed successfully';
+                result.isSuccess = true;
+            } catch (Exception e) {
+                result.message = e.getMessage();
+                result.isSuccess = false;
+            }
+            results.add(result);
+        }
+        return results;
     }
 }

@@ -24,28 +24,41 @@ global with sharing class TSANetInvocableNoteService {
     /**
      * Creates a note on the specified TSANet collaboration case.
      * @param data list of TSANetInput containing the case and note form
-     * @return list of TSANetNoteResult with success flag and message
+     * @return one result per input, in the same order
      */
     @InvocableMethod(label='Create TSANet Note' description='Returns: isSuccess: boolean, message: string' category='TSANet')
     global static TSANetNoteResult[] createNote(TSANetInput[] data) {
-
-        TSANetNoteResult result = new TSANetNoteResult();
-
-        TSANetInput input = data[0];
-
-        String caseToken = input.caseRecord.tsanetconnect__Token__c;
-        String json = System.JSON.serialize(input.note);
-
-        try {
-            TSANetService.createTSANetNote(caseToken, json, null);
-            result.message = 'Note has been created successfully';
-            result.isSuccess = true;
-            return new TSANetNoteResult[]{ result };
-        } catch(Exception e){
-            result.message = e.getMessage();
-            result.isSuccess = false;
-            return new TSANetNoteResult[]{ result };
+        TSANetNoteResult[] results = new TSANetNoteResult[]{};
+        if (data == null) {
+            return results;
         }
 
+        for (TSANetInput input : data) {
+            TSANetNoteResult result = new TSANetNoteResult();
+            try {
+                String caseToken = input.caseRecord.tsanetconnect__Token__c;
+                applyCurrentUserAsSubmitter(input.note);
+                TSANetService.createTSANetNote(caseToken, JSON.serialize(input.note, true));
+                result.message = 'Note has been created successfully';
+                result.isSuccess = true;
+            } catch (Exception e) {
+                result.message = e.getMessage();
+                result.isSuccess = false;
+            }
+            results.add(result);
+        }
+        return results;
+    }
+
+    /** Notes are authored as the running user, not the Case Owner. */
+    private static void applyCurrentUserAsSubmitter(TSANetNoteForm note){
+        if(note == null){
+            return;
+        }
+        if(note.submittedBy == null){
+            note.submittedBy = new TSANetSubmittedBy();
+        }
+        note.submittedBy.firstName = UserInfo.getFirstName();
+        note.submittedBy.lastName = UserInfo.getLastName();
     }
 }

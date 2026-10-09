@@ -22,12 +22,7 @@ public class ConfigManagerTest {
         public HTTPResponse respond(HTTPRequest req) {
             HttpResponse res = new HttpResponse();
             res.setStatusCode(200);
-
-            if (req.getEndpoint().contains('login')) {
-                res.setBody('{"accessToken":"TEST_TOKEN","tokenType":"Bearer","expiresIn":3600}');
-            } else {
-                res.setBody('{"company":{"id":"COMPANY_123","name":"Test Company"}}');
-            }
+            res.setBody('{"company":{"id":"COMPANY_123","name":"Test Company"}}');
             return res;
         }
     }
@@ -52,8 +47,24 @@ public class ConfigManagerTest {
 
         System.assertEquals('COMPANY_123', updated.tsanetconnect__CompanyId__c);
         System.assertEquals('Test Company', updated.tsanetconnect__CompanyName__c);
+    }
 
-        tsanetconnect__TSANet_Tokens__c tokens = tsanetconnect__TSANet_Tokens__c.getOrgDefaults();
-        System.assertEquals('TEST_TOKEN', tokens.tsanetconnect__AccessTokenPart1__c);
+    @IsTest
+    static void test_updateTSANetCredentials_withoutNamedCredential() {
+        // The trigger blocks deleting a primary credential, so clear the Named Credential instead.
+        tsanetconnect__TSANet_Credentials__c credential = [SELECT Id FROM tsanetconnect__TSANet_Credentials__c LIMIT 1];
+        credential.tsanetconnect__NamedCredential__c = null;
+        TSANetDataFactory.suppressSetupInitialization();
+        update credential;
+        AuthModeManager.clearCache();
+
+        Test.startTest();
+        try {
+            ConfigManager.updateTSANetCredentials();
+            System.assert(false, 'A credential without a Named Credential must not attempt a callout');
+        } catch (Exception e) {
+            System.assert(e instanceof AuraHandledException, 'The UI must receive a handled configuration error');
+        }
+        Test.stopTest();
     }
 }

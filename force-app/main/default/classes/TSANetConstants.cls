@@ -37,7 +37,9 @@ public with sharing class TSANetConstants {
         'RequestDate'           => tsanetconnect__TSANetCase__c.tsanetconnect__RequestDate__c,
         'ResponseDate'          => tsanetconnect__TSANetCase__c.tsanetconnect__ResponseDate__c,
         'PriorityNote'          => tsanetconnect__TSANetCase__c.tsanetconnect__PriorityNote__c,
-        'Direction'             => tsanetconnect__TSANetCase__c.tsanetconnect__Direction__c
+        'Direction'             => tsanetconnect__TSANetCase__c.tsanetconnect__Direction__c,
+        'DocumentId'            => tsanetconnect__TSANetCase__c.tsanetconnect__DocumentId__c,
+        'DocumentName'          => tsanetconnect__TSANetCase__c.tsanetconnect__DocumentName__c
     };
 
     public static final List<String> TSANET_CASE_RELATIONSHIP_FIELDS = new List<String>{
@@ -99,10 +101,25 @@ public with sharing class TSANetConstants {
     public static final Integer SHORT_TIMEOUT = 10000;
     public static final Integer PAGE_SIZE = 50;
     public static final Integer SUCCESS_CODE = 200;
-    public static final Integer TOKEN_SPLIT_LENGTH = 175;
-    /** Seconds before token expiry to proactively refresh. */
-    public static final Integer TOKEN_EXPIRY_BUFFER_SECONDS = 60;
     public static final String SHARE_TYPE_VIEWER = 'V';
     public static final String VISIBILITY_ALL = 'AllUsers';
     public static final String UPLOAD_STATUS_SUCCESS = 'SUCCESS';
+
+    /** Shown whenever the primary credential has no Named Credential to call out with. */
+    public static final String NOT_CONFIGURED_ERROR =
+        'TSANet Connect is not configured. Open the primary TSANet Credentials record, select a '
+        + 'Named Credential, and make sure its External Credential principal has the client ID and secret.';
+
+    // ── API payload keys ───────────────────────────────────────────────
+
+    public static final String KEY_NAME = 'name';
+    public static final String KEY_EMAIL = 'email';
+    public static final String KEY_PHONE = 'phone';
+    public static final String KEY_INTERNAL_CASE_NUMBER = 'internalCaseNumber';
+    public static final String KEY_SUBMITTER_CONTACT_DETAILS = 'submitterContactDetails';
+    public static final String KEY_CASE_NUMBER = 'caseNumber';
+    public static final String KEY_ENGINEER_NAME = 'engineerName';
+    public static final String KEY_ENGINEER_PHONE = 'engineerPhone';
+    public static final String KEY_ENGINEER_EMAIL = 'engineerEmail';
+    public static final String KEY_NEXT_STEPS = 'nextSteps';
 }

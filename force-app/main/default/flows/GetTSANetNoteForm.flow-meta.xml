@@ -32,14 +32,14 @@
             <assignToReference>TSANetNoteForm.submittedBy.firstName</assignToReference>
             <operator>Assign</operator>
             <value>
-                <elementReference>GetSalesforceCaseRecord.Owner:User.FirstName</elementReference>
+                <elementReference>$User.FirstName</elementReference>
             </value>
         </assignmentItems>
         <assignmentItems>
             <assignToReference>TSANetNoteForm.submittedBy.lastName</assignToReference>
             <operator>Assign</operator>
             <value>
-                <elementReference>GetSalesforceCaseRecord.Owner:User.LastName</elementReference>
+                <elementReference>$User.LastName</elementReference>
             </value>
         </assignmentItems>
     </assignments>
@@ -72,32 +72,11 @@
         </value>
     </processMetadataValues>
     <processType>AutoLaunchedFlow</processType>
-    <recordLookups>
-        <name>GetSalesforceCaseRecord</name>
-        <label>Get Salesforce Case Record</label>
-        <locationX>572</locationX>
-        <locationY>201</locationY>
-        <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
-        <connector>
-            <targetReference>CreateTSANetNoteForm</targetReference>
-        </connector>
-        <filterLogic>and</filterLogic>
-        <filters>
-            <field>Id</field>
-            <operator>EqualTo</operator>
-            <value>
-                <elementReference>TSANetCase.Case__c</elementReference>
-            </value>
-        </filters>
-        <getFirstRecordOnly>true</getFirstRecordOnly>
-        <object>Case</object>
-        <storeOutputAutomatically>true</storeOutputAutomatically>
-    </recordLookups>
     <start>
         <locationX>446</locationX>
         <locationY>48</locationY>
         <connector>
-            <targetReference>GetSalesforceCaseRecord</targetReference>
+            <targetReference>CreateTSANetNoteForm</targetReference>
         </connector>
     </start>
     <status>Active</status>

@@ -3,6 +3,8 @@
     <fullName>IntegrationUser__c</fullName>
     <deleteConstraint>SetNull</deleteConstraint>
     <deprecated>false</deprecated>
+    <description>Salesforce user that owns Chatter FeedItems created by webhook, queueable, and scheduled TSANet sync. Required on the layout; User lookups cannot be schema-required.</description>
+    <inlineHelpText>User shown as the author of Case Feed items created by inbound webhooks and background jobs.</inlineHelpText>
     <label>Integration User</label>
     <referenceTo>User</referenceTo>
     <relationshipName>TSANetCredentials</relationshipName>

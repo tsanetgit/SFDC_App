@@ -23,7 +23,8 @@ public with sharing class TSANetCaseSelector {
                    tsanetconnect__ReminderSent__c, tsanetconnect__Priority__c,
                    tsanetconnect__tsaNetCaseId__c, tsanetconnect__RequestDate__c,
                    tsanetconnect__ResponseDate__c, tsanetconnect__PriorityNote__c,
-                   tsanetconnect__Direction__c,
+                   tsanetconnect__Direction__c, tsanetconnect__DocumentId__c,
+                   tsanetconnect__DocumentName__c,
                    (SELECT Id, Name, tsanetconnect__TSANetCase__c, tsanetconnect__Type__c,
                            tsanetconnect__EngineerName__c, tsanetconnect__EngineerPhone__c,
                            tsanetconnect__EngineerEmail__c, tsanetconnect__Note__c,
@@ -65,7 +66,8 @@ public with sharing class TSANetCaseSelector {
                    tsanetconnect__ReminderSent__c, tsanetconnect__Priority__c,
                    tsanetconnect__tsaNetCaseId__c, tsanetconnect__RequestDate__c,
                    tsanetconnect__ResponseDate__c, tsanetconnect__PriorityNote__c,
-                   tsanetconnect__Direction__c,
+                   tsanetconnect__Direction__c, tsanetconnect__DocumentId__c,
+                   tsanetconnect__DocumentName__c,
                    (SELECT Id, Name, tsanetconnect__TSANetCase__c, tsanetconnect__Type__c,
                            tsanetconnect__EngineerName__c, tsanetconnect__EngineerPhone__c,
                            tsanetconnect__EngineerEmail__c, tsanetconnect__Note__c,
@@ -125,32 +127,32 @@ public with sharing class TSANetCaseSelector {
 
     /**
      * Trigger helper fields by external case IDs — superset for note/response triggers.
-     * Runs in SYSTEM_MODE via elevated inner class because it is invoked from before-insert
-     * triggers that must resolve the parent TSANetCase__c regardless of the running user's
-     * FLS — e.g. the Site Guest User used by the inbound webhook does not have FLS on
-     * Engineer* fields, which would otherwise make WITH USER_MODE throw and the trigger
-     * silently skip the lookup.
      * @param externalIds set of external TSANet case Ids
      * @return list of matching TSANetCase records
      */
     public static tsanetconnect__TSANetCase__c[] getByExternalCaseIds(Set<String> externalIds) {
-        return new SystemContext().getByExternalCaseIds(externalIds);
+        return [
+            SELECT Id, Name, OwnerId, tsanetconnect__Case__c, tsanetconnect__tsaNetCaseId__c,
+                   tsanetconnect__Partner__c, tsanetconnect__EngineerName__c,
+                   tsanetconnect__EngineerPhone__c, tsanetconnect__EngineerEmail__c
+            FROM tsanetconnect__TSANetCase__c
+            WHERE tsanetconnect__tsaNetCaseId__c IN :externalIds
+            WITH USER_MODE
+        ];
     }
 
     /**
      * Feed-item helper fields by record Ids.
-     * Runs in SYSTEM_MODE via elevated inner class because the only caller is the
-     * Chatter feed-item builder (invoked from the TSANetNote__c trigger and the
-     * TSANetNoteFeedItemRequested__e PE subscriber). Both paths must resolve the
-     * parent Case lookup regardless of the running user's FLS — e.g. the Site
-     * Guest User and the Automated Process User running the PE subscriber lack
-     * read FLS on tsanetconnect__Case__c, which would otherwise make WITH USER_MODE
-     * throw "No such column" and silently skip the FeedItem insert.
      * @param ids set of TSANetCase record Ids
      * @return list of matching TSANetCase records
      */
     public static tsanetconnect__TSANetCase__c[] getByIds(Set<Id> ids) {
-        return new SystemContext().getByIds(ids);
+        return [
+            SELECT Id, Name, tsanetconnect__Case__c, tsanetconnect__Partner__c
+            FROM tsanetconnect__TSANetCase__c
+            WHERE Id IN :ids
+            WITH USER_MODE
+        ];
     }
 
     /**
@@ -213,26 +215,4 @@ public with sharing class TSANetCaseSelector {
         ];
     }
 
-    /** Runs TSANetCase lookups in system context for trigger-level record linkage. */
-    private without sharing class SystemContext {
-        public tsanetconnect__TSANetCase__c[] getByExternalCaseIds(Set<String> externalIds) {
-            return [
-                SELECT Id, Name, OwnerId, tsanetconnect__Case__c, tsanetconnect__tsaNetCaseId__c,
-                       tsanetconnect__Partner__c, tsanetconnect__EngineerName__c,
-                       tsanetconnect__EngineerPhone__c, tsanetconnect__EngineerEmail__c
-                FROM tsanetconnect__TSANetCase__c
-                WHERE tsanetconnect__tsaNetCaseId__c IN :externalIds
-                WITH SYSTEM_MODE
-            ];
-        }
-
-        public tsanetconnect__TSANetCase__c[] getByIds(Set<Id> ids) {
-            return [
-                SELECT Id, Name, tsanetconnect__Case__c, tsanetconnect__Partner__c
-                FROM tsanetconnect__TSANetCase__c
-                WHERE Id IN :ids
-                WITH SYSTEM_MODE
-            ];
-        }
-    }
 }

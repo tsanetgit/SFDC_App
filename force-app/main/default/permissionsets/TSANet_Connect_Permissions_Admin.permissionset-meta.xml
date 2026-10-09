@@ -9,11 +9,15 @@
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
-        <apexClass>AccessTokenSplitter</apexClass>
+        <apexClass>AuthManager</apexClass>
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
-        <apexClass>AuthManager</apexClass>
+        <apexClass>AuthModeManager</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>AuthModeManagerTest</apexClass>
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
@@ -65,10 +69,6 @@
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
-        <apexClass>HttpClient</apexClass>
-        <enabled>true</enabled>
-    </classAccesses>
-    <classAccesses>
         <apexClass>ITriggerHandler</apexClass>
         <enabled>true</enabled>
     </classAccesses>
@@ -85,7 +85,23 @@
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
+        <apexClass>NamedCredentialHttpClient</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>NamedCredentialSelector</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>NamedCredentialSelectorTest</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
         <apexClass>ParserManager</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>ParserManagerTest</apexClass>
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
@@ -114,6 +130,18 @@
     </classAccesses>
     <classAccesses>
         <apexClass>TSANetCaseRecordTest</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>TSANetCaseRefreshQueueable</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>TSANetCaseRefreshService</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>TSANetCaseRefreshServiceTest</apexClass>
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
@@ -253,6 +281,14 @@
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
+        <apexClass>TSANetInvocableProcessWebhookEvent</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>TSANetInvocableProcessWebhookEventTest</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
         <apexClass>TSANetInvocableRefreshCasesService</apexClass>
         <enabled>true</enabled>
     </classAccesses>
@@ -333,6 +369,14 @@
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
+        <apexClass>TSANetPostInstallHandler</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>TSANetPostInstallHandlerTest</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
         <apexClass>TSANetQueueableJob</apexClass>
         <enabled>true</enabled>
     </classAccesses>
@@ -389,6 +433,30 @@
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
+        <apexClass>TSANetAPIService</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>TSANetAPIServiceTest</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>TSANetHttpRouter</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>AttachmentUploadHelper</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>AttachmentUploadHelperTest</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>TSANetWebhookNotifier</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
         <apexClass>TSANetServiceTest</apexClass>
         <enabled>true</enabled>
     </classAccesses>
@@ -414,6 +482,14 @@
     </classAccesses>
     <classAccesses>
         <apexClass>TSANetUtilsTest</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>TSANetWebhookEventTriggerHandler</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>TSANetWebhookEventTriggerHandlerTest</apexClass>
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
@@ -449,14 +525,6 @@
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
-        <apexClass>TokenManager</apexClass>
-        <enabled>true</enabled>
-    </classAccesses>
-    <classAccesses>
-        <apexClass>TokenManagerTest</apexClass>
-        <enabled>true</enabled>
-    </classAccesses>
-    <classAccesses>
         <apexClass>TriggerDispatcher</apexClass>
         <enabled>true</enabled>
     </classAccesses>
@@ -488,395 +556,22 @@
         <enabled>true</enabled>
         <name>TSANetPermission</name>
     </customPermissions>
-    <customSettingAccesses>
+    <externalCredentialPrincipalAccesses>
         <enabled>true</enabled>
-        <name>TSANet_Tokens__c</name>
-    </customSettingAccesses>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>TSANetCase__c.AdminNote__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>TSANetCase__c.Case__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>TSANetCase__c.Description__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>TSANetCase__c.Direction__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>TSANetCase__c.Email__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>TSANetCase__c.EngineerEmail__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>TSANetCase__c.EngineerName__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>TSANetCase__c.EngineerPhone__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>TSANetCase__c.EscalationInstructions__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>TSANetCase__c.FeedbackRequested__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>TSANetCase__c.FirstName__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>TSANetCase__c.LastName__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>TSANetCase__c.Phone__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>TSANetCase__c.PriorityNote__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>TSANetCase__c.Priority__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>TSANetCase__c.ReceiverCaseNumber__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>TSANetCase__c.ReminderSent__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>TSANetCase__c.RequestDate__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>TSANetCase__c.Responded__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>TSANetCase__c.ResponseDate__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>TSANetCase__c.Status__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>TSANetCase__c.SubmittedCompanyId__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>TSANetCase__c.SubmittedCompanyName__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>TSANetCase__c.SubmitterCaseNumber__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>TSANetCase__c.Summary__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>TSANetCase__c.UpdatedAt__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>TSANetCase__c.customFields__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>TSANetCase__c.receivedCompanyId__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>TSANetCase__c.receivedCompanyName__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>TSANetCase__c.tsaNetCaseId__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>TSANetError__c.Case__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>TSANetError__c.Context__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>TSANetError__c.ErrorMessage__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>TSANetError__c.StackTrace__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>TSANetError__c.TSANetCase__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>TSANetError__c.TSANetNote__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>TSANetError__c.Type__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>TSANetNote__c.CaseId__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>false</editable>
-        <field>TSANetCaseUpdated__e.IsSync__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>false</editable>
-        <field>TSANetCaseUpdated__e.RequestToken__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>TSANetNote__c.CompanyName__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>TSANetNote__c.CreatedAt__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>TSANetNote__c.CreatorEmail__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>TSANetNote__c.CreatorName__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>TSANetNote__c.CreatorUserName__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>TSANetNote__c.DescriptionPlainText__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>TSANetNote__c.Description__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>TSANetNote__c.FeedItemId__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>TSANetNote__c.Priority__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>TSANetNote__c.Status__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>TSANetNote__c.Summary__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>TSANetNote__c.TSANetCase__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>TSANetNote__c.Token__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>TSANetNote__c.UpdatedAt__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>TSANetNote__c.isCaseFeed__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>TSANetNote__c.isNotified__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>TSANetResponse__c.CaseId__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>TSANetResponse__c.CaseNumber__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>TSANetResponse__c.CreatedAt__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>TSANetResponse__c.EngineerEmail__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>TSANetResponse__c.EngineerName__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>TSANetResponse__c.EngineerPhone__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>TSANetResponse__c.Note__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>TSANetResponse__c.TSANetCase__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>TSANetResponse__c.Type__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>TSANetResponse__c.tsaNetCaseId__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>TSANetResponse__c.tsaNetResponseId__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>TSANetWebhook__c.Active__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>TSANetWebhook__c.CallbackUrl__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>TSANetWebhook__c.CreatedAt__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>TSANetWebhook__c.EventTypes__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>TSANetWebhook__c.Secret__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>TSANetWebhook__c.TSANetCredential__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>TSANetWebhook__c.WebhookId__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>TSANet_Credentials__c.CompanyId__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>TSANet_Credentials__c.CompanyName__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>TSANet_Credentials__c.Environment__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
+        <externalCredentialPrincipal>tsanetconnect__TSANetExternalCredential-TSANetApp</externalCredentialPrincipal>
+    </externalCredentialPrincipalAccesses>
+    <externalCredentialPrincipalAccesses>
+        <enabled>true</enabled>
+        <externalCredentialPrincipal>tsanetconnect__TSANetExternalCredentialBeta-TSANetApp</externalCredentialPrincipal>
+    </externalCredentialPrincipalAccesses>
+    <externalCredentialPrincipalAccesses>
+        <enabled>true</enabled>
+        <externalCredentialPrincipal>tsanetconnect__TSANetExternalCredentialDev-TSANetApp</externalCredentialPrincipal>
+    </externalCredentialPrincipalAccesses>
+    <externalCredentialPrincipalAccesses>
+        <enabled>true</enabled>
+        <externalCredentialPrincipal>tsanetconnect__TSANetExternalCredentialProd-TSANetApp</externalCredentialPrincipal>
+    </externalCredentialPrincipalAccesses>
     <fieldPermissions>
         <editable>true</editable>
         <field>TSANet_Credentials__c.IntegrationUser__c</field>
@@ -884,12 +579,12 @@
     </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
-        <field>TSANet_Credentials__c.Password__c</field>
+        <field>TSANet_Credentials__c.NamedCredential__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
-        <field>TSANet_Credentials__c.UserName__c</field>
+        <field>TSANet_Credentials__c.isConnected__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>

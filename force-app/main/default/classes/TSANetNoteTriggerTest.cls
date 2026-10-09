@@ -19,6 +19,13 @@ public class TSANetNoteTriggerTest {
 
         TSANetNote__c note = new TSANetNote__c(tsanetconnect__Summary__c = 'Test');
 
-        insert note;
+        Test.startTest();
+            insert note;
+        Test.stopTest();
+
+        System.assertNotEquals(null, note.Id, 'The trigger must not block a note without a parent case');
+        System.assertEquals(1, [
+            SELECT COUNT() FROM TSANetNote__c WHERE Id = :note.Id
+        ], 'The note should have been persisted');
     }
 }

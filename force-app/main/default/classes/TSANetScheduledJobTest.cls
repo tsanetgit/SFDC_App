@@ -23,7 +23,45 @@ public class TSANetScheduledJobTest {
         String cronExp = '0 '+ dt.minute() + ' * ' + dt.day() + ' ' + dt.month() + ' ? ' + dt.year();
         System.schedule('TSANetScheduledJobTest', cronExp, new TSANetScheduledJob());
 
-        ParserManager.parseTSANetCases(body, [SELECT Id FROM Case LIMIT 1].Id);
+        Id caseId = [SELECT Id FROM Case LIMIT 1].Id;
+        TSANetData data = ParserManager.parseTSANetCases(body, caseId);
         Test.stopTest();
+
+        System.assertEquals(1, data.cases.size(), 'Expected one parsed collaboration case');
+        System.assertEquals('Pp8DCQVVHkkVvd0rpn', data.cases[0].tsanetconnect__Token__c,
+            'The parsed case should carry the TSANet token');
+        System.assertEquals(1, [
+            SELECT COUNT() FROM CronTrigger WHERE CronJobDetail.Name = 'TSANetScheduledJobTest'
+        ], 'The sync job should be scheduled');
+    }
+
+    @IsTest
+    static void test_execute_skipsWhenDisconnected() {
+        tsanetconnect__TSANet_Credentials__c cred = [
+            SELECT Id FROM tsanetconnect__TSANet_Credentials__c WITH USER_MODE LIMIT 1
+        ];
+        cred.tsanetconnect__isConnected__c = false;
+        update cred;
+
+        Test.startTest();
+            new TSANetScheduledJob().execute(null);
+        Test.stopTest();
+
+        System.assertEquals(0, [
+            SELECT COUNT() FROM AsyncApexJob WHERE ApexClass.Name = 'TSANetQueueableJob'
+        ], 'A disconnected credential must not enqueue TSANetQueueableJob');
+    }
+
+    @IsTest
+    static void test_execute_enqueuesWhenConnected() {
+        Test.setMock(HttpCalloutMock.class, new MockHttpResponseGenerator(200, '{"totalPages":1,"content":[]}', null));
+
+        Test.startTest();
+            new TSANetScheduledJob().execute(null);
+        Test.stopTest();
+
+        System.assertEquals(1, [
+            SELECT COUNT() FROM AsyncApexJob WHERE ApexClass.Name = 'TSANetQueueableJob'
+        ], 'A connected credential should enqueue TSANetQueueableJob');
     }
 }

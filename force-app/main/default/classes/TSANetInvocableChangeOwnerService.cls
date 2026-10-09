@@ -21,27 +21,32 @@ global with sharing class TSANetInvocableChangeOwnerService {
     /**
      * Notifies TSANet about a Case owner change, routing to the appropriate API based on direction.
      * @param inputs list of TSANetInput containing the case record
-     * @return list of TSANetChangeOwnerResult with success flag and message
+     * @return one result per input, in the same order
      */
     @InvocableMethod(label='TSANet Change Owner' description='Notifies TSANet when the Salesforce Case owner changes' category='TSANet')
     global static TSANetChangeOwnerResult[] changeOwner(TSANetInput[] inputs) {
-        TSANetChangeOwnerResult result = new TSANetChangeOwnerResult();
-        TSANetInput input = inputs[0];
-
-        try {
-            String direction = input.caseRecord.tsanetconnect__Direction__c;
-            if (String.isNotBlank(direction) && direction.equalsIgnoreCase('inbound')) {
-                TSANetService.changeTSANetResponse(input.caseRecord.Id, null);
-            } else {
-                TSANetService.changeTSANetOwner(input.caseRecord.Id, null);
-            }
-            result.isSuccess = true;
-            result.message = 'Owner change request submitted successfully';
-        } catch (Exception e) {
-            result.isSuccess = false;
-            result.message = e.getMessage();
+        TSANetChangeOwnerResult[] results = new TSANetChangeOwnerResult[]{};
+        if (inputs == null) {
+            return results;
         }
 
-        return new TSANetChangeOwnerResult[]{ result };
+        for (TSANetInput input : inputs) {
+            TSANetChangeOwnerResult result = new TSANetChangeOwnerResult();
+            try {
+                String direction = input.caseRecord.tsanetconnect__Direction__c;
+                if (String.isNotBlank(direction) && direction.equalsIgnoreCase('inbound')) {
+                    TSANetService.changeTSANetResponse(input.caseRecord.Id);
+                } else {
+                    TSANetService.changeTSANetOwner(input.caseRecord.Id);
+                }
+                result.isSuccess = true;
+                result.message = 'Owner change request submitted successfully';
+            } catch (Exception e) {
+                result.isSuccess = false;
+                result.message = e.getMessage();
+            }
+            results.add(result);
+        }
+        return results;
     }
 }

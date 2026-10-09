@@ -1,271 +1,153 @@
-/** Service layer for TSANet Connect API operations. */
+/**
+ * Service layer for TSANet Connect API operations.
+ *
+ * Remains the single entry point for every caller (LWC, Aura, invocables, jobs) and
+ * delegates each operation to TSANetAPIService, which calls the API through the
+ * Named Credential of the primary credential record.
+ */
 public with sharing class TSANetService {
 
     /** Custom exception for TSANetService errors. */
     public class TSANetServiceException extends Exception {}
 
     /**
+     * Single switch for the follow-up refresh that every action fires. On by default, so tests
+     * exercise the same refresh chain as production; the few tests that would exceed the
+     * queueable-depth limit turn it off explicitly.
+     */
+    @TestVisible
+    private static Boolean refreshAfterAction = true;
+
+    /**
+     * True when actions should queue a collaboration-case refresh after they succeed.
+     * @return whether the post-action refresh is enabled for this transaction
+     */
+    public static Boolean isRefreshEnabled(){
+        return refreshAfterAction;
+    }
+
+    /**
      * Retrieves the current company information from the TSANet API.
-     * @param token access token for authentication
      * @return deserialised TSANetCompanyInfo
      */
-    public static TSANetCompanyInfo getCompanyInformation(String token){
-        String endpoint = EndpointManager.getTSANetCompanyPath();
-        HttpResponse res = HttpClient.sendGet(endpoint, token);
-        return (TSANetCompanyInfo) System.JSON.deserialize(res.getBody(), TSANetCompanyInfo.class);
+    public static TSANetCompanyInfo getCompanyInformation(){
+        return TSANetAPIService.getCompanyInformation();
     }
 
     /**
      * Creates a note on a TSANet collaboration case via the API.
      * @param caseToken unique token of the TSANet case
      * @param json serialised note payload
-     * @param token access token for authentication
      * @return raw API response body
      */
     @AuraEnabled
-    public static String createTSANetNote(String caseToken, String json, String token){
-        tsanetconnect__TSANetCase__c caseRecord = TSANetCaseSelector.getByToken(caseToken);
-        String noteEndpoint = EndpointManager.getEndpointWithToken(EndpointManager.notes, caseToken);
-        HttpResponse res = HttpClient.sendPost(noteEndpoint, token, json);
-
-        try {
-            tsanetconnect__TSANetNote__c noteRecord = ParserManager.parseTSANetNote(res.getBody());
-            Database.upsert(noteRecord, tsanetconnect__TSANetNote__c.tsanetconnect__Token__c, false, AccessLevel.USER_MODE);
-        } catch(Exception e) {
-            ErrorLogger.logError(e, 'CREATE_TSANET_NOTE_UPSERT', new Map<String, String>{ 'caseToken' => caseToken, 'response' => res.getBody() });
-        }
-
-        if(!Test.isRunningTest()){
-            retrieveCollaborationCases(caseRecord.tsanetconnect__Case__c, token);
-        }
-
-        return res.getBody();
+    public static String createTSANetNote(String caseToken, String json){
+        return TSANetAPIService.createTSANetNote(caseToken, json);
     }
 
     /**
-     * Authenticates against the TSANet API and returns the login response.
-     * @return deserialised access token response, or null on failure
+     * Fetches a single collaboration request from the TSANet API.
+     * @param caseToken the collaboration request token
+     * @return raw API response body for the collaboration request
      */
-    public static AuthManager.AccessTokenResponse login() {
-        return login(CredentialManager.getCredentials());
-    }
-
-    /**
-     * Authenticates against the TSANet API using the given credentials.
-     * @param credential credentials record with username and password
-     * @return deserialised access token response, or null on failure
-     */
-    public static AuthManager.AccessTokenResponse login(tsanetconnect__TSANet_Credentials__c credential) {
-        String authEndpoint = EndpointManager.getAuthPath();
-
-        HttpRequest req = new HttpRequest();
-        req.setEndpoint(authEndpoint);
-        req.setMethod('POST');
-        req.setHeader('Content-Type', 'application/json');
-        req.setBody(JSON.serialize(new Map<String, String>{
-            'username' => credential.tsanetconnect__UserName__c,
-            'password' => credential.tsanetconnect__Password__c
-        }));
-
-        Http http = new Http();
-        HTTPResponse res = http.send(req);
-        if (res.getStatusCode() != TSANetConstants.SUCCESS_CODE) {
-            return null;
-        }
-
-        return (AuthManager.AccessTokenResponse) System.JSON.deserialize(
-            res.getBody(),
-            AuthManager.AccessTokenResponse.class
-        );
-    }
-
-    /**
-     * Authenticates against the TSANet API and returns an access token.
-     * @return JWT access token, or null on failure
-     */
-    @AuraEnabled
-    public static String getTSANetAccessToken(){
-        AuthManager.AccessTokenResponse response = login();
-        return response != null ? response.accessToken : null;
+    public static String getCollaborationCaseByToken(String caseToken){
+        return TSANetAPIService.getCollaborationCaseByToken(caseToken);
     }
 
     /**
      * Fetches collaboration cases from the TSANet API and upserts them locally.
      * @param caseId Salesforce Case Id to scope results (nullable for all)
-     * @param token access token for authentication
      * @return list of related TSANetCase__c records for the given Case
      */
     @AuraEnabled
-    public static tsanetconnect__TSANetCase__c[] getRelatedCollaborationCases(String caseId, String token){
-        String caseNumber = null;
-        if(caseId != null){
-            Case caseRecord = CaseSelector.getById(caseId);
-            caseNumber = caseRecord.CaseNumber;
-        }
-
-        String getCasesPath = EndpointManager.getCollaborationCasesPath(caseNumber);
-        HttpResponse res = HttpClient.sendGet(getCasesPath, token);
-
-        TSANetData data = ParserManager.parseTSANetCases(res.getBody(), caseId);
-        upsertTSANetData(data);
-
-        if(caseId != null){
-            return TSANetCaseSelector.getDetailWithResponsesByCaseId(caseId);
-        }
-        return new tsanetconnect__TSANetCase__c[]{};
+    public static tsanetconnect__TSANetCase__c[] getRelatedCollaborationCases(String caseId){
+        return TSANetAPIService.getRelatedCollaborationCases(caseId);
     }
 
     /**
      * Retrieves the collaboration form definition for a given company.
      * @param companyId TSANet company identifier
      * @param mode form mode (e.g. "company" or "department")
-     * @param token access token for authentication
      * @return raw API response body containing the form definition
      */
     @AuraEnabled
-    public static String getFormByCompanyId(String companyId, String mode, String token){
-        String companiesEndpoint = EndpointManager.getCompaniesPath(companyId, mode);
-        HttpResponse res = HttpClient.sendGet(companiesEndpoint, token);
-        return res.getBody();
+    public static String getFormByCompanyId(String companyId, String mode){
+        return TSANetAPIService.getFormByCompanyId(companyId, mode);
     }
 
     /**
      * Searches TSANet companies by name.
      * @param companyName search term for the company name
-     * @param token access token for authentication
      * @return raw API response body with matching companies
      */
     @AuraEnabled
-    public static String getCompaniesByName(String companyName, String token){
-        String companiesEndpoint = EndpointManager.getCompaniesPath(companyName);
-        HttpResponse res = HttpClient.sendGet(companiesEndpoint, token);
-        return res.getBody();
+    public static String getCompaniesByName(String companyName){
+        return TSANetAPIService.getCompaniesByName(companyName);
     }
 
     /**
      * Submits a new collaboration case to the TSANet API.
      * @param caseId Salesforce Case Id linked to the collaboration
      * @param json serialised case payload
-     * @param token access token for authentication
      * @return raw API response body
      */
     @AuraEnabled
-    public static String createCollaborationCase(Id caseId, String json, String token){
-        String casePath = EndpointManager.getCreateCollaborationCasePath();
-        HttpResponse res = HttpClient.sendPost(casePath, token, json);
-
-        if(!Test.isRunningTest()){
-            retrieveCollaborationCases(caseId, token);
-		}
-
-        try {
-            Map<String, Object> response = (Map<String, Object>) System.JSON.deserializeUntyped(res.getBody());
-            TSANetHelper.createCaseFeedItem(caseId, response);
-        } catch(Exception e){
-            ErrorLogger.logError(e, 'CREATE_COLLABORATION_CASE_FEED_ITEM');
-        }
-
-        return res.getBody();
+    public static String createCollaborationCase(Id caseId, String json){
+        return TSANetAPIService.createCollaborationCase(caseId, json);
     }
 
     /**
      * Approves an incoming TSANet collaboration request.
      * @param caseToken unique token of the TSANet case
      * @param json serialised approval payload with engineer details
-     * @param token access token for authentication
      * @return raw API response body
      */
     @AuraEnabled
-    public static String approveIncomingRequest(String caseToken, String json, String token){
-        tsanetconnect__TSANetCase__c tsaNetCase = TSANetCaseSelector.getByToken(caseToken);
-        String approvePath = EndpointManager.getEndpointWithToken(EndpointManager.approve, caseToken);
-        HttpResponse res = HttpClient.sendPost(approvePath, token, json);
-
-        if(!Test.isRunningTest()){
-            retrieveCollaborationCases(tsaNetCase.tsanetconnect__Case__c, token);
-        }
-        return res.getBody();
+    public static String approveIncomingRequest(String caseToken, String json){
+        return TSANetAPIService.approveIncomingRequest(caseToken, json);
     }
-
 
     /**
      * Rejects a TSANet collaboration case via the API.
      * @param tsaNetCaseId Id of the TSANetCase__c record
      * @param json serialised rejection payload
-     * @param token access token for authentication
      * @return raw API response body
      */
     @AuraEnabled
-    public static String rejectTSANetCase(String tsaNetCaseId, String json, String token){
-        tsanetconnect__TSANetCase__c tsaNetCase = TSANetCaseSelector.getById(tsaNetCaseId);
-        String rejectPath = EndpointManager.getEndpointWithToken(EndpointManager.reject, tsaNetCase.tsanetconnect__Token__c);
-        HttpResponse res = HttpClient.sendPost(rejectPath, token, json);
-
-        if(!Test.isRunningTest()){
-            retrieveCollaborationCases(tsaNetCase.tsanetconnect__Case__c, token);
-        }
-
-        return res.getBody();
+    public static String rejectTSANetCase(String tsaNetCaseId, String json){
+        return TSANetAPIService.rejectTSANetCase(tsaNetCaseId, json);
     }
-
 
     /**
      * Closes a TSANet collaboration case via the API.
      * @param tsaNetCaseId Id of the TSANetCase__c record
-     * @param token access token for authentication
      * @return raw API response body
      */
     @AuraEnabled
-    public static String closeTSANetCase(String tsaNetCaseId, String token){
-        tsanetconnect__TSANetCase__c tsaNetCase = TSANetCaseSelector.getById(tsaNetCaseId);
-        String closePath = EndpointManager.getEndpointWithToken(EndpointManager.close, tsaNetCase.tsanetconnect__Token__c);
-        HttpResponse res = HttpClient.sendPost(closePath, token, '');
-
-        if(!Test.isRunningTest()){
-            retrieveCollaborationCases(tsaNetCase.tsanetconnect__Case__c, token);
-        }
-
-        return res.getBody();
+    public static String closeTSANetCase(String tsaNetCaseId){
+        return TSANetAPIService.closeTSANetCase(tsaNetCaseId);
     }
 
     /**
      * Sends an additional-information request on a TSANet case.
      * @param tsaNetCaseId Id of the TSANetCase__c record
      * @param json serialised information-request payload
-     * @param token access token for authentication
      * @return raw API response body
      */
     @AuraEnabled
-    public static String requestAdditionalInformation(String tsaNetCaseId, String json, String token){
-        tsanetconnect__TSANetCase__c tsaNetCase = TSANetCaseSelector.getById(tsaNetCaseId);
-        String requestPath = EndpointManager.getEndpointWithToken(EndpointManager.informationRequest, tsaNetCase.tsanetconnect__Token__c);
-        HttpResponse res = HttpClient.sendPost(requestPath, token, json);
-
-        if(!Test.isRunningTest()){
-            retrieveCollaborationCases(tsaNetCase.tsanetconnect__Case__c, token);
-        }
-
-        return res.getBody();
+    public static String requestAdditionalInformation(String tsaNetCaseId, String json){
+        return TSANetAPIService.requestAdditionalInformation(tsaNetCaseId, json);
     }
 
     /**
      * Sends additional-information response on a TSANet case.
      * @param tsaNetCaseId Id of the TSANetCase__c record
      * @param json serialised information-response payload
-     * @param token access token for authentication
      * @return raw API response body
      */
     @AuraEnabled
-    public static String sendAdditionalInformation(String tsaNetCaseId, String json, String token){
-        tsanetconnect__TSANetCase__c tsaNetCase = TSANetCaseSelector.getById(tsaNetCaseId);
-        String sendPath = EndpointManager.getEndpointWithToken(EndpointManager.informationResponse, tsaNetCase.tsanetconnect__Token__c);
-        HttpResponse res = HttpClient.sendPost(sendPath, token, json);
-
-        if(!Test.isRunningTest()){
-            retrieveCollaborationCases(tsaNetCase.tsanetconnect__Case__c, token);
-        }
-
-        return res.getBody();
+    public static String sendAdditionalInformation(String tsaNetCaseId, String json){
+        return TSANetAPIService.sendAdditionalInformation(tsaNetCaseId, json);
     }
 
     /**
@@ -275,9 +157,7 @@ public with sharing class TSANetService {
      */
     @AuraEnabled
     public static String getAttachmentConfig(String token){
-        String path = EndpointManager.domain + EndpointManager.case_path + '/' + token + '/attachments/config';
-        HttpResponse res = HttpClient.sendGet(path, null);
-        return res.getBody();
+        return TSANetAPIService.getAttachmentConfig(token);
     }
 
     /**
@@ -288,202 +168,41 @@ public with sharing class TSANetService {
      */
     @AuraEnabled
     public static String sendAttachment(String token, List<Map<String, Object>> files){
-        if (!Schema.sObjectType.ContentVersion.isCreateable()
-            || !Schema.sObjectType.ContentDocumentLink.isCreateable()) {
-            throw new TSANetServiceException('Insufficient permissions to upload attachments.');
-        }
-
-        tsanetconnect__TSANetCase__c tsaNetCase = TSANetCaseSelector.getIdByToken(token);
-
-        Id[] contentVersionIds = new Id[]{};
-        for(Map<String, Object> fileData : files){
-            String base64String = (String) fileData.get('base64');
-            if(base64String == NULL){
-                String fileId = (String) fileData.get('fileId');
-                contentVersionIds.add(fileId);
-            }
-        }
-
-        ContentVersion[] selectedContentVersions = [SELECT Id, Title, FileType, VersionData FROM ContentVersion WHERE Id IN:contentVersionIds WITH USER_MODE ];
-
-        List<Map<String, Object>> newFiles = new List<Map<String, Object>>();
-        for(Map<String, Object> fileData : files){
-            String base64String = (String) fileData.get('base64');
-            if(base64String == NULL){
-                String fileId = (String) fileData.get('fileId');
-                for(ContentVersion cv : selectedContentVersions){
-                    if(cv.Id == fileId){
-                        Map<String, Object> newFileData = new Map<String, Object>();
-                        newFileData.put('fileId', fileId);
-                        newFileData.put('filename', cv.Title);
-                        newFileData.put('base64', EncodingUtil.base64Encode(cv.VersionData));
-                        newFileData.put('isCV', true);
-                        newFiles.add(newFileData);
-                    }
-                }
-            } else {
-                newFiles.add(fileData);
-            }
-        }
-
-        String boundary = 'EWG3x2i19rjSk310MA4YWxkTrZu0gW';
-        String lineBreak = '\r\n';
-
-        String body = '';
-
-        body += '--' + boundary + lineBreak;
-        body += 'Content-Disposition: form-data; name="description"' + lineBreak + lineBreak;
-        body += '' + lineBreak;
-
-        for(Map<String, Object> fileData : newFiles){
-            String base64String = (String) fileData.get('base64');
-            String fileName = (String) fileData.get('filename');
-
-            body += '--' + boundary + lineBreak;
-            body += 'Content-Disposition: form-data; name="files"; filename="' + fileName + '"' + lineBreak;
-            body += 'Content-Type: multipart/form-data' + lineBreak + lineBreak;
-            body += EncodingUtil.base64Decode(base64String) + lineBreak;
-        }
-
-        body += '--' + boundary + '--' + lineBreak;
-
-        String contentLength = String.valueOf(body.length());
-
-        HttpRequest req = new HttpRequest();
-        req.setEndpoint(EndpointManager.domain + EndpointManager.case_path + '/' + token + '/attachments');
-        req.setMethod('POST');
-        req.setHeader('Authorization', AuthManager.getBearerToken());
-        req.setHeader('Accept', 'application/problem+json');
-        req.setHeader('Content-Length', contentLength);
-        req.setHeader('Content-Type', 'multipart/form-data; boundary=' + boundary);
-        req.setHeader('boundary', boundary);
-        req.setHeader('Accept', '*/*');
-        req.setBody(body);
-        req.setTimeout(TSANetConstants.DEFAULT_TIMEOUT);
-
-        Http http = new Http();
-        HttpResponse res = http.send(req);
-
-        TSANetFileUploadResult[] results = TSANetFileUploadResult.parse(res.getBody());
-
-        ContentVersion[] versions = new ContentVersion[]{};
-        for(Map<String, Object> fileData : newFiles){
-            String fileName = (String) fileData.get('filename');
-            String base64String = (String) fileData.get('base64');
-            Boolean isCV = (Boolean) fileData.get('isCV');
-            if(isCV == NULL || !isCV){
-                for(TSANetFileUploadResult result : results){
-                    if(result.receiverStatus == TSANetConstants.UPLOAD_STATUS_SUCCESS && result.fileName == fileName){
-                        ContentVersion cv = new ContentVersion();
-                        cv.Title = fileName;
-                        cv.PathOnClient = fileName;
-                        cv.VersionData = EncodingUtil.base64Decode(base64String);
-                        versions.add(cv);
-                    }
-                }
-            }
-        }
-        Database.insert(versions, AccessLevel.USER_MODE);
-
-        Id[] versionIds = new Id[]{};
-        for(ContentVersion version : versions){
-			versionIds.add(version.Id);
-        }
-
-        ContentVersion[] contentVersions = [SELECT Id, ContentDocumentId FROM ContentVersion WHERE Id IN:versionIds WITH USER_MODE ];
-
-        ContentDocumentLink[] links = new ContentDocumentLink[]{};
-        for(ContentVersion cv : contentVersions){
-            ContentDocumentLink cdl = new ContentDocumentLink();
-            cdl.ContentDocumentId = cv.ContentDocumentId;
-            cdl.LinkedEntityId = tsaNetCase.Id;
-            cdl.ShareType = TSANetConstants.SHARE_TYPE_VIEWER;
-            cdl.Visibility = TSANetConstants.VISIBILITY_ALL;
-            links.add(cdl);
-        }
-
-        Database.insert(links, AccessLevel.USER_MODE);
-
-        return res.getBody();
+        return TSANetAPIService.sendAttachment(token, files);
     }
 
     /**
      * Sends an owner-change update to the TSANet API for an outbound case.
      * @param caseId Id of the TSANetCase__c record
-     * @param token access token for authentication (re-fetched inside)
      */
     @Future(callout=true)
-    public static void changeTSANetOwner(Id caseId, String token){
-        tsanetconnect__TSANetCase__c caseRecord = TSANetCaseSelector.getById(caseId);
-
-        token = TSANetService.getTSANetAccessToken();
-        Case sfCase = CaseSelector.getOwnerDetailById(caseRecord.tsanetconnect__Case__c);
-
-        Map<String, Object> payload = new Map<String, Object>{
-            'internalCaseNumber' => sfCase.CaseNumber,
-            'submitterContactDetails' => new Map<String, Object>{
-                'name' => sfCase.Owner.Name,
-                'email' => sfCase.Owner.Email,
-                'phone' => sfCase.Owner.Phone
-            }
-        };
-
-        String noteEndpoint = EndpointManager.getEndpointWithToken(EndpointManager.updateCase, caseRecord.tsanetconnect__Token__c);
-
-        try {
-            HttpClient.sendWithTimeout('PATCH', noteEndpoint, token, JSON.serialize(payload), TSANetConstants.SHORT_TIMEOUT);
-            if(!Test.isRunningTest()){
-                retrieveCollaborationCases(caseRecord.tsanetconnect__Case__c, token);
-            }
-        } catch(Exception e){
-            ErrorLogger.logError(e, 'CHANGE_TSANET_OWNER', new Map<String, String>{ 'caseId' => sfCase?.Id, 'tsaNetCaseId' => caseRecord?.Id });
-        }
+    public static void changeTSANetOwner(Id caseId){
+        TSANetAPIService.changeTSANetOwner(caseId);
     }
 
     /**
      * Updates an approved inbound collaboration request via PATCH /approval (engineer + case details).
      * @param tsaNetCaseId tsanetconnect__TSANetCase__c Id
-     * @param token access token for authentication (re-fetched inside)
      */
     @Future(callout=true)
-    public static void changeTSANetResponse(Id tsaNetCaseId, String token){
-        tsanetconnect__TSANetCase__c caseRecord = TSANetCaseSelector.getById(tsaNetCaseId);
-
-        token = TSANetService.getTSANetAccessToken();
-        Case sfCase = CaseSelector.getFullDetailById(caseRecord.tsanetconnect__Case__c);
-
-        Map<String, Object> payload = new Map<String, Object>{
-            'caseNumber' => sfCase.CaseNumber,
-            'engineerName' => sfCase.Owner != null ? sfCase.Owner.Name : '',
-            'engineerPhone' => sfCase.Owner != null ? sfCase.Owner.Phone : '',
-            'engineerEmail' => sfCase.Owner != null ? sfCase.Owner.Email : '',
-            'nextSteps' => ''
-        };
-
-        String approvalEndpoint = EndpointManager.getEndpointWithToken(EndpointManager.approve, caseRecord.tsanetconnect__Token__c);
-
-        try {
-            HttpClient.sendWithTimeout('PATCH', approvalEndpoint, token, JSON.serialize(payload), TSANetConstants.SHORT_TIMEOUT);
-            if(!Test.isRunningTest()){
-                retrieveCollaborationCases(caseRecord.tsanetconnect__Case__c, token);
-            }
-        } catch(Exception e){
-            ErrorLogger.logError(e, 'CHANGE_TSANET_RESPONSE', new Map<String, String>{ 'caseId' => sfCase?.Id, 'tsaNetCaseId' => caseRecord?.Id });
-        }
+    public static void changeTSANetResponse(Id tsaNetCaseId){
+        TSANetAPIService.changeTSANetResponse(tsaNetCaseId);
     }
 
     /**
      * Enqueues a background refresh of collaboration cases (optionally scoped by CaseNumber).
+     * No-op when the refresh is disabled for this transaction.
      * @param caseId Salesforce Case Id to scope the refresh (nullable)
-     * @param token access token (unused; refresh is queued)
      */
-    public static void retrieveCollaborationCases(Id caseId, String token){
+    public static void retrieveCollaborationCases(Id caseId){
+        if(!refreshAfterAction){ return; }
+
         String caseNumber = null;
         if(caseId != null){
             Case sfCase = CaseSelector.getById(caseId);
             caseNumber = sfCase.CaseNumber;
         }
-        System.enqueueJob(new TSANetQueueableJob(0, null, null, null, null, caseNumber));
+        TSANetQueueableJob.enqueueIfConnected(caseNumber);
     }
 
     /**

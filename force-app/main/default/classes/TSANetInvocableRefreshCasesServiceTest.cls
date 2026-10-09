@@ -18,7 +18,11 @@ public class TSANetInvocableRefreshCasesServiceTest {
         Test.setMock(HttpCalloutMock.class, new MockHttpResponseGenerator(200, body, null));
         Case sfCaseRecord = [SELECT Id FROM Case LIMIT 1];
         Test.startTest();
-        TSANetInvocableRefreshCasesService.refreshTSANetCases(new String[]{ sfCaseRecord.Id });
+        TSANetInvocableRefreshCasesService.TSANetRefreshResult[] results =
+            TSANetInvocableRefreshCasesService.refreshTSANetCases(new String[]{ sfCaseRecord.Id });
         Test.stopTest();
+
+        System.assertEquals(1, results.size(), 'Expected one result per input');
+        System.assertEquals(true, results[0].result, 'Refresh job should have been enqueued');
     }
 }

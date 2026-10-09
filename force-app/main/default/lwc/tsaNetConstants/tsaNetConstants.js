@@ -68,7 +68,7 @@ export const ACTION_CONFIG = Object.freeze({
     submitVariant: 'success',
     submitButtonLabel: 'Accept',
     requestParam: 'nextSteps',
-    requestParamLabel: 'Note',
+    requestParamLabel: 'Next Steps',
     resultMessage: 'The collaboration request has been accepted successfully'
   },
   [ACTIONS.CREATE_NOTE]: {
@@ -181,12 +181,26 @@ export const getStandardNoteConfig = (summary) => {
 
 export const TYPING_INTERVAL = 300
 
+// Toolbar formats for note editors: bold, italic, underline, strikethrough, lists, and link.
+export const RICH_TEXT_FORMATS = Object.freeze(['bold', 'italic', 'underline', 'strike', 'list', 'link'])
+
 export const PRIORITY_OPTIONS = [
     { label: 'Low', value: TSANET_CASE_PRIORITIES.LOW },
     { label: 'Medium', value: TSANET_CASE_PRIORITIES.MEDIUM },
     { label: 'High', value: TSANET_CASE_PRIORITIES.HIGH },
 ]
 
+export const TSANET_NOTE_TYPES = Object.freeze({
+    USER_PUBLIC: 'USER_PUBLIC',
+    USER_PARTNER: 'USER_PARTNER'
+})
+
+// Note type options for the Create Note form; empty value means the type is omitted from the request.
+export const NOTE_TYPE_OPTIONS = [
+    { label: 'None', value: '' },
+    { label: 'User Public', value: TSANET_NOTE_TYPES.USER_PUBLIC },
+    { label: 'User Partner', value: TSANET_NOTE_TYPES.USER_PARTNER },
+]
 export const TOAST_MODE = Object.freeze({
   SUCCESS : 'success',
   WARNING : 'warning',

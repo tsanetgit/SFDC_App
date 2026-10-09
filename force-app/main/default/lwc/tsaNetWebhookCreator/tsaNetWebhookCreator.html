@@ -1,0 +1,118 @@
+<template>
+    <div class="slds-container_medium slds-container_center slds-p-around_medium">
+        <article class="slds-card slds-card_boundary">
+
+            <div class="slds-card__header slds-grid slds-p-horizontal_medium slds-p-top_medium">
+                <header class="slds-media slds-media_center slds-has-flexi-truncate">
+                    <div class="slds-media__figure">
+                        <lightning-icon
+                            icon-name="standard:connected_apps"
+                            size="small"
+                            alternative-text="TSANet Webhook"
+                        ></lightning-icon>
+                    </div>
+                    <div class="slds-media__body">
+                        <h1 class="slds-card__header-title slds-text-heading_small">New TSANet Webhook</h1>
+                        <p class="slds-text-body_small slds-text-color_weak">
+                            Register a webhook on this org's My Domain. TSANet authenticates with Connected App Client Id and Secret before each delivery.
+                        </p>
+                    </div>
+                </header>
+            </div>
+
+            <div class="slds-card__body slds-card__body_inner slds-is-relative slds-p-vertical_medium">
+                <div class="slds-form slds-form_stacked">
+
+                    <div class="slds-grid slds-grid_vertical-align-end slds-gutters_x-small callback-url-row">
+                        <div class="slds-col slds-grow">
+                            <lightning-input
+                                class="callback-url-input"
+                                label="Callback URL"
+                                type="url"
+                                value={callbackUrl}
+                                required
+                                disabled={isCallbackUrlDisabled}
+                                field-level-help="Org Domain Apex REST webhook path. Enable Edit to change it by hand."
+                                onchange={handleCallbackUrlChange}
+                            ></lightning-input>
+                        </div>
+                        <div class="slds-col slds-grow-none">
+                            <lightning-input
+                                class="edit-callback-url"
+                                type="checkbox"
+                                label="Edit"
+                                checked={isCallbackUrlEditable}
+                                onchange={handleEditCallbackUrlChange}
+                            ></lightning-input>
+                        </div>
+                    </div>
+
+                    <lightning-checkbox-group
+                        class="slds-m-top_small"
+                        label="Event Types"
+                        options={eventTypeOptions}
+                        value={eventTypes}
+                        required
+                        onchange={handleEventTypesChange}
+                    ></lightning-checkbox-group>
+
+                    <div class="slds-m-top_small">
+                        <lightning-record-picker
+                            label="TSANet Credential"
+                            placeholder="Search credentials..."
+                            object-api-name={credentialsObjectApiName}
+                            value={credentialId}
+                            required
+                            onchange={handleCredentialChange}
+                        ></lightning-record-picker>
+                    </div>
+
+                    <hr class="slds-m-vertical_medium" />
+
+                    <h2 class="slds-text-title_caps slds-m-bottom_x-small">Webhook OAuth</h2>
+                    <p class="slds-text-body_small slds-text-color_weak slds-m-bottom_small">
+                        Connected App consumer key and secret. TSANet uses them to obtain a Salesforce token before each delivery. They are not stored in Salesforce.
+                    </p>
+                    <div class="slds-grid slds-wrap slds-gutters_x-small">
+                        <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+                            <lightning-input
+                                label="Client Id"
+                                value={clientId}
+                                required
+                                onchange={handleClientIdChange}
+                            ></lightning-input>
+                        </div>
+                        <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+                            <lightning-input
+                                label="Client Secret"
+                                type="password"
+                                value={clientSecret}
+                                required
+                                onchange={handleClientSecretChange}
+                            ></lightning-input>
+                        </div>
+                    </div>
+                </div>
+
+                <template lwc:if={isSaving}>
+                    <lightning-spinner
+                        variant="brand"
+                        size="medium"
+                        alternative-text="Saving"
+                    ></lightning-spinner>
+                </template>
+            </div>
+
+            <footer class="slds-card__footer slds-text-align_right">
+                <lightning-button label="Cancel" onclick={handleCancel}></lightning-button>
+                <lightning-button
+                    class="slds-m-left_x-small save-button"
+                    variant="brand"
+                    label="Save"
+                    disabled={isSaving}
+                    onclick={handleSave}
+                ></lightning-button>
+            </footer>
+        </article>
+    </div>
+</template>

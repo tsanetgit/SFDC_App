@@ -28,8 +28,8 @@ public with sharing class TSANetResponseTriggerHelper {
 
             if(tsaNetCases.isEmpty()){ return; }
 
-            // SYSTEM_MODE: trigger side-effect; inbound webhook runs as Site Guest User with Create but not Edit on TSANetCase__c.
-            Database.update(tsaNetCases, false, AccessLevel.SYSTEM_MODE);
+            // USER_MODE: Integration User permset includes TSANetCase engineer fields.
+            Database.update(tsaNetCases, false, AccessLevel.USER_MODE);
         } catch(Exception e){
             ErrorLogger.logError(e, 'TSANET_RESPONSE_ENGINEER_DATA_MAPPING_ERROR');
         }

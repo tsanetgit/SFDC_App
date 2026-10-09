@@ -49,38 +49,48 @@ public class TSANetDataFactory {
      * @param part1 first token part
      * @param part2 second token part
      */
-    public static void seedTokens(String part1, String part2) {
-        seedTokens(part1, part2, DateTime.now().addHours(1));
-    }
-
-    /** Seeds org-default TSANet token custom settings with expiry.
-     * @param part1 first token part
-     * @param part2 second token part
-     * @param expiresAt when the token expires
-     */
-    public static void seedTokens(String part1, String part2, DateTime expiresAt) {
-        tsanetconnect__TSANet_Tokens__c tokens = tsanetconnect__TSANet_Tokens__c.getOrgDefaults();
-        if (tokens == null) {
-            tokens = new tsanetconnect__TSANet_Tokens__c();
-        }
-        tokens.tsanetconnect__AccessTokenPart1__c = part1;
-        tokens.tsanetconnect__AccessTokenPart2__c = part2;
-        tokens.tsanetconnect__TokenExpiresAt__c = expiresAt;
-        upsert tokens;
-    }
-
-    /** Creates and inserts a default TSANet credentials record.
+    /** Creates and inserts a primary TSANet credentials record pointing at the packaged Named Credential.
      * @return the inserted credentials record
      */
     public static tsanetconnect__TSANet_Credentials__c createCredentials() {
         tsanetconnect__TSANet_Credentials__c credentials = new tsanetconnect__TSANet_Credentials__c();
-        credentials.tsanetconnect__UserName__c = 'username@gmail.com';
-        credentials.tsanetconnect__Password__c = 'password111';
-        credentials.tsanetconnect__Environment__c = 'dev';
+        credentials.tsanetconnect__NamedCredential__c = 'tsanetconnect__TSANetAPI';
         credentials.tsanetconnect__isPrimary__c = true;
+        credentials.tsanetconnect__IntegrationUser__c = UserInfo.getUserId();
+        suppressSetupInitialization();
         insert credentials;
-        seedTokens('token1', 'token2');
+        AuthModeManager.clearCache();
         return credentials;
+    }
+
+    /** Alias kept for tests that state the Named Credential intent explicitly.
+     * @return the inserted credentials record
+     */
+    public static tsanetconnect__TSANet_Credentials__c createOAuthCredentials() {
+        return createCredentials();
+    }
+
+    /** Creates and inserts a primary credentials record with no Named Credential, so callouts cannot run.
+     * @return the inserted credentials record
+     */
+    public static tsanetconnect__TSANet_Credentials__c createUnconfiguredCredentials() {
+        tsanetconnect__TSANet_Credentials__c credentials = new tsanetconnect__TSANet_Credentials__c();
+        credentials.tsanetconnect__isPrimary__c = true;
+        credentials.tsanetconnect__IntegrationUser__c = UserInfo.getUserId();
+        suppressSetupInitialization();
+        insert credentials;
+        AuthModeManager.clearCache();
+        return credentials;
+    }
+
+    /**
+     * Turns off the credential trigger's setup initialization for the current transaction.
+     * Credentials created here are fixture data; the initialization they would otherwise
+     * fan out to (a future callout, a queueable and four scheduled jobs) is covered by
+     * InternalProcessManagerTest and is illegal inside @TestSetup, which cannot make callouts.
+     */
+    public static void suppressSetupInitialization() {
+        TSANetCredentialsHelper.initializeOnPrimaryChange = false;
     }
 
     /** Creates and inserts a test Account.

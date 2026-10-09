@@ -21,20 +21,27 @@ global with sharing class TSANetInvocableCreateCollaborationCase {
     /**
      * Creates a collaboration case in TSANet for the given Salesforce Case and form data.
      * @param data list of TSANetInput containing the case and form
-     * @return list of TSANetCollaborationCaseResult with the created collaboration case
+     * @return one result per input, in the same order
      */
     @InvocableMethod(label='Create TSANet Collaboration Case' description='Returns collaboration case' category='TSANet')
     global static TSANetCollaborationCaseResult[] createCollaborationCase(TSANetInput[] data) {
-        TSANetInput input = data[0];
-        String json = JSON.serialize(input.form);
+        TSANetCollaborationCaseResult[] results = new TSANetCollaborationCaseResult[]{};
+        if (data == null) {
+            return results;
+        }
 
-        String body = TSANetService.createCollaborationCase(input.caseRecord.Id, json, null);
-
-        if(!Test.isRunningTest()){ TSANetUtils.futureRefresh(input.caseRecord.Id); }
-
-        TSANetCollaborationCaseResult result = new TSANetCollaborationCaseResult();
-        result.caseRecord = (TSANetCollaborationCase) System.JSON.deserialize(body, TSANetCollaborationCase.class);
-        return new TSANetCollaborationCaseResult[]{ result };
+        for (TSANetInput input : data) {
+            TSANetCollaborationCaseResult result = new TSANetCollaborationCaseResult();
+            try {
+                String body = TSANetService.createCollaborationCase(input.caseRecord.Id, JSON.serialize(input.form));
+                TSANetUtils.futureRefresh(input.caseRecord.Id);
+                result.caseRecord = (TSANetCollaborationCase) JSON.deserialize(body, TSANetCollaborationCase.class);
+            } catch (Exception e) {
+                // Leave caseRecord null so Flow can branch on it.
+            }
+            results.add(result);
+        }
+        return results;
     }
 
 }

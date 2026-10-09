@@ -1,4 +1,4 @@
-/** Tests for the Platform Event subscriber that creates Chatter FeedItems off-Guest. */
+/** Tests for the leftover TSANetNoteFeedItemRequested__e subscriber. FeedItem insert now runs in the note trigger. */
 @IsTest
 public class TSANetNoteFeedItemRequestedHandlerTest {
 
@@ -14,59 +14,39 @@ public class TSANetNoteFeedItemRequestedHandlerTest {
         }
     }
 
-    /**
-     * Inserts a note, simulates a Guest publish (so the trigger publishes the PE
-     * instead of inserting the FeedItem inline), and asserts that the subscriber
-     * created a FeedItem on the parent Case after Test.stopTest.
-     */
+    /** Publishing the leftover PE must not create FeedItems; the note trigger owns that DML. */
     @IsTest
-    static void publishAndSubscribe_createsFeedItemOnParentCase(){
+    static void publishEvent_isNoOp(){
         tsanetconnect__TSANetCase__c tsaNetCase = [
             SELECT Id, tsanetconnect__Case__c
             FROM tsanetconnect__TSANetCase__c
             LIMIT 1
         ];
-        tsanetconnect__TSANetNote__c note = new tsanetconnect__TSANetNote__c(
-            tsanetconnect__TSANetCase__c = tsaNetCase.Id,
-            tsanetconnect__Token__c = 'pe-handler-token',
-            tsanetconnect__Summary__c = 'Summary',
-            tsanetconnect__Description__c = '<strong>Body</strong>',
-            tsanetconnect__CreatorName__c = 'Tester',
-            tsanetconnect__CreatedAt__c = DateTime.now(),
-            tsanetconnect__Priority__c = 'LOW',
-            tsanetconnect__Status__c = 'OPEN'
-        );
 
         Test.startTest();
-        TSANetNoteTriggerHelper.treatAsGuestForTest = true;
-        insert note;
-        TSANetNoteTriggerHelper.treatAsGuestForTest = false;
+        EventBus.publish(new tsanetconnect__TSANetNoteFeedItemRequested__e(
+            tsanetconnect__NoteId__c = tsaNetCase.Id
+        ));
         Test.stopTest();
 
-        tsanetconnect__TSANetNote__c reloaded = [
-            SELECT Id, tsanetconnect__FeedItemId__c
-            FROM tsanetconnect__TSANetNote__c
-            WHERE Id = :note.Id
-        ];
-        System.assertNotEquals(null, reloaded.tsanetconnect__FeedItemId__c,
-            'Subscriber should have back-stamped FeedItemId__c on the note');
-
-        FeedItem feedItem = [
-            SELECT Id, Title
-            FROM FeedItem
-            WHERE Id = :reloaded.tsanetconnect__FeedItemId__c
-        ];
-        System.assertEquals('TSANet Note - pe-handler-token', feedItem.Title,
-            'Subscriber should have inserted exactly one FeedItem on the parent Case');
+        System.assertEquals(0, [SELECT COUNT() FROM FeedItem], 'PE subscriber must not insert FeedItems');
     }
 
     /** Empty event payload should be a safe no-op (no DML, no errors). */
     @IsTest
     static void emptyPayload_isNoOp(){
+        TSANetNoteFeedItemRequestedHandler handler = new TSANetNoteFeedItemRequestedHandler();
         Test.startTest();
-        new TSANetNoteFeedItemRequestedHandler().afterInsert(new Map<Id, SObject>());
+        handler.beforeInsert(new List<SObject>());
+        handler.beforeUpdate(new Map<Id, SObject>(), new Map<Id, SObject>());
+        handler.beforeDelete(new Map<Id, SObject>());
+        handler.afterInsert(new Map<Id, SObject>());
+        handler.afterUpdate(new Map<Id, SObject>(), new Map<Id, SObject>());
+        handler.afterDelete(new Map<Id, SObject>());
+        handler.afterUndelete(new Map<Id, SObject>());
         Test.stopTest();
 
+        System.assertEquals(false, handler.isDisabled(), 'Handler stays enabled for the packaged trigger');
         System.assertEquals(0, [SELECT COUNT() FROM FeedItem], 'No FeedItems should have been created');
     }
 }

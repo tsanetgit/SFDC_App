@@ -1,6 +1,6 @@
 import { LightningElement, api, track } from 'lwc';
 
-import { TYPING_INTERVAL } from 'c/tsaNetConstants'
+import { TYPING_INTERVAL, RICH_TEXT_FORMATS } from 'c/tsaNetConstants'
 
 import { getActionRequestParamLabel } from 'c/tsaNetHelper'
 
@@ -10,6 +10,10 @@ export default class TsaNetActionModalFormField extends LightningElement {
 
     get label(){
         return getActionRequestParamLabel(this.mode)
+    }
+
+    get richTextFormats() {
+        return RICH_TEXT_FORMATS
     }
 
     @track value

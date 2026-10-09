@@ -1,7 +1,7 @@
 import { LightningElement, api, track } from 'lwc'
 
-import { TSANET_CASE_PRIORITIES } from 'c/tsaNetConstants'
-import { createTSANetCaseNote, toast } from 'c/tsaNetHelper'
+import { TSANET_CASE_PRIORITIES, RICH_TEXT_FORMATS } from 'c/tsaNetConstants'
+import { createTSANetCaseNote, toast, stripRichText } from 'c/tsaNetHelper'
 
 // Collapsible, Messenger-style notes panel for a single TSANet case card.
 // Shows a bell with a red count badge; expands to a conversation thread and a composer.
@@ -217,12 +217,13 @@ export default class TsaNetCaseNotes extends LightningElement {
         return this.isOpen ? 'Hide notes' : 'Show notes'
     }
 
+    get richTextFormats(){
+        return RICH_TEXT_FORMATS
+    }
+
     // Rich text returns HTML; strip tags/entities to detect an effectively empty message.
     get plainMessage(){
-        return (this.message || '')
-            .replace(/<[^>]*>/g, '')
-            .replace(/&nbsp;/g, ' ')
-            .trim()
+        return stripRichText(this.message)
     }
 
     get isSendDisabled(){

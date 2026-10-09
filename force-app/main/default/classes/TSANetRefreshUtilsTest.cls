@@ -21,24 +21,24 @@ public class TSANetRefreshUtilsTest {
 
         Test.startTest();
         	TSANetRefreshUtils controller = new TSANetRefreshUtils(new ApexPages.StandardController(new tsanetconnect__TSANetCase__c()));
-    		controller.refresh();
+    		PageReference result = controller.refresh();
         Test.stopTest();
+
+        System.assertNotEquals(null, result, 'Refresh should redirect back to the list view');
+        System.assertEquals('/lightning/o/tsanetconnect__TSANetCase__c/list', result.getUrl(),
+            'Refresh should return to the TSANetCase list view');
     }
 
     @IsTest
     public static void testCatch(){
-        String body = '{ "accessToken": "test.eyJpc3MiOiJodHRwOi8vY29ubmVjdDEucmVub2xhYi51cy9hcGkvYXV0aC9sb2dpbiIsImlhdCI6MTcyMDc3ODk0MiwiZXhwIjoxNzIwNzgyNTQyLCJuYmYiOjE3MjA3Nzg5NDIsImp0aSI6ImJrcDBGZ0k4T2ViNXdxU28iLCJzdWIiOiI4NzA1IiwicHJ2IjoiODdlMGFmMWVmOWZkMTU4MTJmZGVjOTcxNTNhMTRlMGIwNDc1NDZhYSJ9.YbmRLRwdzcua0lh3mCawfb7dvx5LQqJwrboZG4wGFEo", "tokenType": "bearer", "expiresIn": 3600 }';
-        Test.setMock(HttpCalloutMock.class, new MockHttpResponseGenerator(500, body, null));
+        Case staleCase = [SELECT Id FROM Case LIMIT 1];
+        delete staleCase;
 
         Test.startTest();
-        try	{
-            delete [SELECT Id FROM tsanetconnect__TSANet_Credentials__c];
-            TSANetRefreshUtils controller = new TSANetRefreshUtils(new ApexPages.StandardController(new tsanetconnect__TSANetCase__c()));
-    		controller.refresh();
-        } catch(Exception e){
-            System.assertEquals(true, e.getMessage() != NULL);
-        }
+            Boolean enqueued = TSANetRefreshUtils.refreshOnCase(staleCase.Id);
         Test.stopTest();
+
+        System.assertEquals(true, enqueued, 'A missing Case should be swallowed and still return true');
     }
 
     @IsTest
@@ -47,7 +47,9 @@ public class TSANetRefreshUtilsTest {
         Test.setMock(HttpCalloutMock.class, new MockHttpResponseGenerator(200, body, null));
 
         Test.startTest();
-        	TSANetRefreshUtils.refreshOnCase(null);
+        	Boolean enqueued = TSANetRefreshUtils.refreshOnCase(null);
         Test.stopTest();
+
+        System.assertEquals(true, enqueued, 'A null Case Id should still enqueue an org-wide refresh');
     }
 }

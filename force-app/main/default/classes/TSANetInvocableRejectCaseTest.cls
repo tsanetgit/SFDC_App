@@ -22,9 +22,12 @@ public class TSANetInvocableRejectCaseTest {
             TSANetInvocableRejectCollaborationCase.TSANetInput input = new TSANetInvocableRejectCollaborationCase.TSANetInput();
             input.caseRecord = caseRecord;
             input.form = new TSANetRejectForm();
-            //TSANetInvocableRejectCollaborationCase.rejectCollaborationCase(new TSANetInvocableRejectCollaborationCase.TSANetInput[]{ input });
-            TSANetInvocableRejectCollaborationCase.rejectCollaborationCase(new TSANetInvocableRejectCollaborationCase.TSANetInput[]{ input });
+            TSANetInvocableRejectCollaborationCase.TSANetRejectResult[] results =
+                TSANetInvocableRejectCollaborationCase.rejectCollaborationCase(new TSANetInvocableRejectCollaborationCase.TSANetInput[]{ input });
         Test.stopTest();
+
+        System.assertEquals(1, results.size(), 'Expected one result per input');
+        System.assertEquals(true, results[0].isSuccess, 'Rejection should succeed: ' + results[0].message);
 
     }
 }

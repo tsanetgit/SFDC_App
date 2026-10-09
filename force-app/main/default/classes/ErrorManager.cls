@@ -17,7 +17,6 @@ public with sharing class ErrorManager {
     public static void handleResponseErrors(HTTPResponse response){
         if(response.getStatusCode() != TSANetConstants.SUCCESS_CODE){
             if(response.getBody().contains('The authorization token provided was invalid.')){
-                TokenManager.clearToken();
                 throw new ErrorManagerException('Unauthorized');
             } else {
                 TSANetError parsedError = (TSANetError) System.JSON.deserialize(response.getBody(), TSANetError.class);
@@ -93,7 +92,6 @@ public with sharing class ErrorManager {
             Object value = record.get(fieldName);
             return value == null ? null : String.valueOf(value);
         } catch (Exception ex) {
-            System.debug(LoggingLevel.WARN, 'ErrorManager.readExternalId: ' + ex.getMessage());
             return null;
         }
     }

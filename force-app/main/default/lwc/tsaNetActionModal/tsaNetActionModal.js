@@ -17,7 +17,8 @@ import {
     getActionResultMessage,
 
     logError,
-    toast
+    toast,
+    isRichTextEmpty
 } from 'c/tsaNetHelper'
 
 export default class TsaNetActionModal extends LightningModal {
@@ -158,11 +159,11 @@ export default class TsaNetActionModal extends LightningModal {
 
     get isInvalid(){
         switch (this.mode) {
-            case ACTIONS.ACCEPT: return !this.form?.nextSteps
-            case ACTIONS.CREATE_NOTE: return !this.form?.summary || !this.form?.description
-            case ACTIONS.REJECT: return !this.form?.engineerName && !this.form?.reason
-            case ACTIONS.REQUEST_INFO:  return !this.form?.engineerName && !this.form?.requestedInformation
-            case ACTIONS.SEND_INFO: return !this.form?.engineerName && !this.form?.requestedInformation
+            case ACTIONS.ACCEPT: return isRichTextEmpty(this.form?.nextSteps)
+            case ACTIONS.CREATE_NOTE: return !this.form?.summary || isRichTextEmpty(this.form?.description)
+            case ACTIONS.REJECT: return !this.form?.engineerName && isRichTextEmpty(this.form?.reason)
+            case ACTIONS.REQUEST_INFO:  return !this.form?.engineerName && isRichTextEmpty(this.form?.requestedInformation)
+            case ACTIONS.SEND_INFO: return !this.form?.engineerName && isRichTextEmpty(this.form?.requestedInformation)
             default: return true
         }
     }

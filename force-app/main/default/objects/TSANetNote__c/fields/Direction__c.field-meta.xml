@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Direction__c</fullName>
+    <deprecated>false</deprecated>
+    <description>Relative to the current company: OUTBOUND when the note was authored by us, INBOUND when authored by the partner.</description>
+    <label>Direction</label>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>INBOUND</fullName>
+                <default>false</default>
+                <label>Inbound</label>
+            </value>
+            <value>
+                <fullName>OUTBOUND</fullName>
+                <default>false</default>
+                <label>Outbound</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

@@ -15,11 +15,13 @@ public class TSANetServiceTest {
 
     @IsTest
     public static void updateAccessTokenTest(){
-        String body = '{ "accessToken": "test.eyJpc3MiOiJodHRwOi8vY29ubmVjdDEucmVub2xhYi51cy9hcGkvYXV0aC9sb2dpbiIsImlhdCI6MTcyMDc3ODk0MiwiZXhwIjoxNzIwNzgyNTQyLCJuYmYiOjE3MjA3Nzg5NDIsImp0aSI6ImJrcDBGZ0k4T2ViNXdxU28iLCJzdWIiOiI4NzA1IiwicHJ2IjoiODdlMGFmMWVmOWZkMTU4MTJmZGVjOTcxNTNhMTRlMGIwNDc1NDZhYSJ9.YbmRLRwdzcua0lh3mCawfb7dvx5LQqJwrboZG4wGFEo", "tokenType": "bearer", "expiresIn": 3600 }';
+        String body = '{ "company": { "id": 1071, "name": "Demo - Cisco" } }';
         Test.setMock(HttpCalloutMock.class, new MockHttpResponseGenerator(200, body, null));
         Test.startTest();
-        	AuthManager.updateAccessToken();
+        	Boolean reconnected = AuthManager.updateAccessToken();
         Test.stopTest();
+
+        System.assertEquals(true, reconnected, 'A configured Named Credential should start the reconnect');
     }
 
     @IsTest
@@ -28,8 +30,14 @@ public class TSANetServiceTest {
         Test.setMock(HttpCalloutMock.class, new MockHttpResponseGenerator(200, body, null));
 
         Test.startTest();
-            TSANetService.getRelatedCollaborationCases(null, null);
+            tsanetconnect__TSANetCase__c[] cases = TSANetService.getRelatedCollaborationCases(null);
         Test.stopTest();
+
+        System.assertEquals(0, cases.size(), 'A null Case Id returns no scoped records');
+        System.assertEquals(1, [
+            SELECT COUNT() FROM tsanetconnect__TSANetCase__c
+            WHERE tsanetconnect__Token__c = 'Pp8DCQVVHkkVvd0rpn'
+        ], 'The API case should have been upserted locally');
     }
 
     @IsTest
@@ -37,8 +45,11 @@ public class TSANetServiceTest {
         String body2 = '{ "company": { "id": 1071, "name": "Demo - Cisco", "description": null }, "user": { "id": 8705, "username": null, "firstName": "John", "lastName": "Smith", "email": "John.Smith@cisco.com", "phone": "4155551212", "phoneCountryCode": "VG", "city": "Baton Rouge" }, "encodedCredentials": "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vY29ubmVjdDEucmVub2xhYi51cy9hcGkvYXV0aC9sb2dpbiIsImlhdCI6MTcyMDc3ODk0MiwiZXhwIjoxNzIwNzgyNTQyLCJuYmYiOjE3MjA3Nzg5NDIsImp0aSI6ImJrcDBGZ0k4T2ViNXdxU28iLCJzdWIiOiI4NzA1IiwicHJ2IjoiODdlMGFmMWVmOWZkMTU4MTJmZGVjOTcxNTNhMTRlMGIwNDc1NDZhYSJ9.YbmRLRwdzcua0lh3mCawfb7dvx5LQqJwrboZG4wGFEo" }';
         Test.setMock(HttpCalloutMock.class, new MockHttpResponseGenerator(200, body2, null));
         Test.startTest();
-        	TSANetService.getCompanyInformation(null);
+        	TSANetCompanyInfo info = TSANetService.getCompanyInformation();
         Test.stopTest();
+
+        System.assertEquals('Demo - Cisco', info.company.name, 'Expected the company name from the API');
+        System.assertEquals('1071', info.company.id, 'Expected the company id from the API');
     }
 
     @IsTest
@@ -46,9 +57,12 @@ public class TSANetServiceTest {
         String body = '{ "documentId": 2115, "internalCaseNumber": "", "optionalRecieverInternalCaseNumber": "", "problemSummary": "", "problemDescription": "", "casePriority": "", "readonlyAdminNote": "<p>test admin note (description)</p>", "readonlyEscalationInstructions": "<p>test escalation instructions</p>", "testSubmission": false, "customerData": [ { "id": 5558, "section": "COMMON_CUSTOMER_SECTION", "fieldName": "Customer Company", "value": null }, { "id": 5559, "section": "COMMON_CUSTOMER_SECTION", "fieldName": "Customer Name", "value": null }, { "id": 5560, "section": "COMMON_CUSTOMER_SECTION", "fieldName": "Customer Email", "value": null }, { "id": 5561, "section": "COMMON_CUSTOMER_SECTION", "fieldName": "Customer Phone Including Country Code", "value": null }, { "id": 5562, "section": "COMMON_CUSTOMER_SECTION", "fieldName": "Customer Case # with Connect2 Test 01 (Optional)", "value": null } ] }';
     	Test.setMock(HttpCalloutMock.class, new MockHttpResponseGenerator(200, body, null));
         Test.startTest();
-        	TSANetService.getFormByCompanyId('1069', 'company', null);
-        	TSANetService.getFormByCompanyId('1070', 'department', null);
+        	String companyForm = TSANetService.getFormByCompanyId('1069', 'company');
+        	String departmentForm = TSANetService.getFormByCompanyId('1070', 'department');
         Test.stopTest();
+
+        System.assertEquals(true, companyForm.contains('2115'), 'Expected the company form payload');
+        System.assertEquals(companyForm, departmentForm, 'Both modes return the mocked form payload');
     }
 
     @IsTest
@@ -56,8 +70,10 @@ public class TSANetServiceTest {
         String body = '[ { "label": "Demo - VMware", "companyId": 1072, "departmentId": null } ]';
         Test.setMock(HttpCalloutMock.class, new MockHttpResponseGenerator(200, body, null));
         Test.startTest();
-        	TSANetService.getCompaniesByName('Demo', null);
+        	String companies = TSANetService.getCompaniesByName('Demo');
         Test.stopTest();
+
+        System.assertEquals(true, companies.contains('Demo - VMware'), 'Expected the matching company in the response');
     }
 
     @IsTest
@@ -68,8 +84,13 @@ public class TSANetServiceTest {
         Test.startTest();
         	Case caseRecord = [SELECT Id FROM Case WITH USER_MODE LIMIT 1];
 
-        	TSANetService.createCollaborationCase(caseRecord.Id, json, null);
+        	String response = TSANetService.createCollaborationCase(caseRecord.Id, json);
         Test.stopTest();
+
+        System.assertEquals(true, response.contains('"token":"UNHd8HyqFB1cADcwOj"'),
+            'Expected the created collaboration case token in the response');
+        System.assertEquals(1, [SELECT COUNT() FROM FeedItem WHERE ParentId = :caseRecord.Id],
+            'Creating a collaboration case should post a Chatter feed item on the Case');
     }
 
     @IsTest
@@ -78,8 +99,11 @@ public class TSANetServiceTest {
         String json = '{ "caseNumber":"2673", "engineerName":"Sue Test", "engineerEmail":"tsanetdev2@appko.com", "engineerPhone":"+1412848124824", "nextSteps":"Our assigned engineer will contact you." }';
         Test.setMock(HttpCalloutMock.class, new MockHttpResponseGenerator(200, body, null));
         Test.startTest();
-        	TSANetService.approveIncomingRequest('test-token', json, null);
+        	String response = TSANetService.approveIncomingRequest('test-token', json);
         Test.stopTest();
+
+        System.assertEquals(true, response.contains('"status":"ACCEPTED"'),
+            'Approving a request should return the accepted case');
     }
 
     /** Mock HTTP callout handler for TSANetService tests. */
@@ -231,7 +255,7 @@ public class TSANetServiceTest {
             tsanetconnect__TSANetCase__c tcase = createTSANetCase('tok-1');
 
             Test.startTest();
-	            TSANetService.changeTSANetOwner(tcase.Id, 'tok-1');
+	            TSANetService.changeTSANetOwner(tcase.Id);
             Test.stopTest();
 
             System.assert(true);
@@ -249,10 +273,64 @@ public class TSANetServiceTest {
             update tcase;
 
             Test.startTest();
-            TSANetService.changeTSANetResponse(tcase.Id, 'tok-inbound');
+            TSANetService.changeTSANetResponse(tcase.Id);
             Test.stopTest();
 
             System.assert(true);
+        }
+    }
+
+    @IsTest
+    static void test_credentialsWithoutNamedCredentialRaiseAConfigurationError() {
+        tsanetconnect__TSANet_Credentials__c credentials = [SELECT Id FROM tsanetconnect__TSANet_Credentials__c LIMIT 1];
+        credentials.tsanetconnect__NamedCredential__c = null;
+        TSANetDataFactory.suppressSetupInitialization();
+        update credentials;
+        AuthModeManager.clearCache();
+
+        Test.startTest();
+        try {
+            TSANetService.getCompaniesByName('Demo');
+            System.assert(false, 'A credential without a Named Credential must not attempt a callout');
+        } catch (TSANetHttpRouter.TSANetHttpRouterException e) {
+            System.assertEquals(TSANetConstants.NOT_CONFIGURED_ERROR, e.getMessage(), 'The error must tell the admin what to configure');
+        }
+        Test.stopTest();
+    }
+
+    @IsTest
+    static void test_credentialsCallTheNamedCredential() {
+        AuthModeManager.clearCache();
+
+        EndpointCapturingMock mock = new EndpointCapturingMock('[]');
+        Test.setMock(HttpCalloutMock.class, mock);
+
+        Test.startTest();
+            TSANetService.getCompaniesByName('Demo');
+        Test.stopTest();
+
+        System.assertEquals(true, mock.endpoint.startsWith('callout:tsanetconnect__TSANetAPI'), 'Callouts must route through the Named Credential, found: ' + mock.endpoint);
+        System.assertEquals(null, mock.authorization, 'Named Credential callouts must not send a bearer token');
+    }
+
+    /** Captures the endpoint and Authorization header of the last callout. */
+    private class EndpointCapturingMock implements HttpCalloutMock {
+        private String body;
+        public String endpoint;
+        public String authorization;
+
+        public EndpointCapturingMock(String body){
+            this.body = body;
+        }
+
+        public HTTPResponse respond(HTTPRequest req) {
+            endpoint = req.getEndpoint();
+            authorization = req.getHeader('Authorization');
+
+            HttpResponse res = new HttpResponse();
+            res.setStatusCode(200);
+            res.setBody(body);
+            return res;
         }
     }
 }

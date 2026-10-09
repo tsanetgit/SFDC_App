@@ -14,7 +14,7 @@ public class TSANetWebhookTriggerHandlerTest {
     }
 
     @IsTest
-    static void testAfterInsertTriggersRegistration() {
+    static void testAfterInsertDoesNotRegisterWithoutOAuth() {
         Test.setMock(HttpCalloutMock.class, new WebhookTriggerMock());
 
         Test.startTest();
@@ -28,7 +28,7 @@ public class TSANetWebhookTriggerHandlerTest {
         tsanetconnect__TSANetWebhook__c result = [
             SELECT tsanetconnect__WebhookId__c FROM tsanetconnect__TSANetWebhook__c WHERE Id = :wh.Id
         ];
-        System.assertNotEquals(null, result.tsanetconnect__WebhookId__c, 'WebhookId should be populated after registration');
+        System.assertEquals(null, result.tsanetconnect__WebhookId__c, 'Insert must not register without Client Id/Secret');
     }
 
     @IsTest

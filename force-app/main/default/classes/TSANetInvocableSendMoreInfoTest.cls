@@ -21,8 +21,12 @@ public class TSANetInvocableSendMoreInfoTest {
             TSANetInvocableSendMoreInformation.TSANetInput input = new TSANetInvocableSendMoreInformation.TSANetInput();
             input.caseRecord = caseRecord;
             input.form = new TSANetRequestInfoForm();
-            TSANetInvocableSendMoreInformation.sendMoreInformation(new TSANetInvocableSendMoreInformation.TSANetInput[]{ input });
+            TSANetInvocableSendMoreInformation.TSANetSendInfoResult[] results =
+                TSANetInvocableSendMoreInformation.sendMoreInformation(new TSANetInvocableSendMoreInformation.TSANetInput[]{ input });
         Test.stopTest();
+
+        System.assertEquals(1, results.size(), 'Expected one result per input');
+        System.assertEquals(true, results[0].isSuccess, 'Sending information should succeed: ' + results[0].message);
 
     }
 }

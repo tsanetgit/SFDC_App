@@ -347,6 +347,16 @@ export const getActionRequestParamLabel = (action) => ACTION_CONFIG[action]?.req
 export const getActionResultMessage = (action) => ACTION_CONFIG[action]?.resultMessage ?? '';
 
 
+// Strips HTML tags/entities so empty rich text (<p></p>, &nbsp;) is treated as blank.
+export const stripRichText = (html) => {
+    return (html || '')
+        .replace(/<[^>]*>/g, '')
+        .replace(/&nbsp;/g, ' ')
+        .trim()
+}
+
+export const isRichTextEmpty = (html) => !stripRichText(html)
+
 export const toast = (self, title, variant, message) => {
     self.dispatchEvent(new ShowToastEvent({ title, variant, message }))
 }

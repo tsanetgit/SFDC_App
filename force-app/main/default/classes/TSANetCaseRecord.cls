@@ -45,6 +45,10 @@ public inherited sharing class TSANetCaseRecord {
     public String priorityNote;
     /** Instructions for escalation. */
     public String escalationInstructions;
+    /** Contact document identifier from TSANet. */
+    public Integer contactDocumentId;
+    /** Contact document name from TSANet. */
+    public String contactDocumentName;
     /** Whether this is a test case. */
     public Boolean testCase;
     /** Custom fields attached to the case. */
@@ -102,6 +106,8 @@ public inherited sharing class TSANetCaseRecord {
         public String creatorEmail;
         /** Display name of the note creator. */
         public String creatorName;
+        /** Id of the company that authored the note. */
+        public Integer companyId;
         /** Company name of the note creator. */
         public String companyName;
         /** Brief summary of the note. */
@@ -110,6 +116,10 @@ public inherited sharing class TSANetCaseRecord {
         public String description;
         /** Priority level of the note. */
         public String priority;
+        /** Sender intent: USER_PUBLIC, USER_PARTNER or SYSTEM. */
+        public String type;
+        /** Note direction relative to the reader: INBOUND or OUTBOUND. */
+        public String direction;
         /** Status of the note. */
         public String status;
         /** Security token for the note. */

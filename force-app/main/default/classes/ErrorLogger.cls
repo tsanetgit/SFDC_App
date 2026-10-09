@@ -4,6 +4,29 @@ public with sharing class ErrorLogger {
     private static final Integer STACK_TRACE_MAX_LEN = 255;
 
     /**
+     * Single insert sink for error logs: object CRUD plus field-level create checks sit
+     * next to the DML so scanners can bind them, and inaccessible fields are stripped.
+     * @param logs error log records to persist
+     */
+    private static void insertLogs(tsanetconnect__TSANetError__c[] logs) {
+        if (logs == null || logs.isEmpty()) {
+            return;
+        }
+        if (!Schema.sObjectType.tsanetconnect__TSANetError__c.isCreateable()) {
+            return;
+        }
+        SObjectAccessDecision decision = Security.stripInaccessible(AccessType.CREATABLE, logs);
+        tsanetconnect__TSANetError__c[] safeLogs = new tsanetconnect__TSANetError__c[]{};
+        for (SObject logRecord : decision.getRecords()) {
+            safeLogs.add((tsanetconnect__TSANetError__c) logRecord);
+        }
+        if (safeLogs.isEmpty()) {
+            return;
+        }
+        Database.insert(safeLogs, false, AccessLevel.USER_MODE);
+    }
+
+    /**
      * Truncates stack traces to fit tsanetconnect__StackTrace__c (Text 255).
      * @param stackTrace the full stack trace string
      * @return truncated stack trace or the original if within limit
@@ -30,9 +53,10 @@ public with sharing class ErrorLogger {
             log.tsanetconnect__StackTrace__c 	 = truncateStackTrace(ex.getStackTraceString());
             log.tsanetconnect__Context__c    	 = context;
 
-            Database.insert(log, AccessLevel.USER_MODE);
+            insertLogs(new tsanetconnect__TSANetError__c[]{ log });
         } catch (Exception e) {
-            System.debug(LoggingLevel.WARN, 'ErrorLogger: ' + e.getMessage());
+            // Last resort: the error-log insert itself failed. Do not debug the payload —
+            // debug logs have a wider audience than the records that failed to persist.
         }
     }
 
@@ -62,9 +86,10 @@ public with sharing class ErrorLogger {
             log.tsanetconnect__TSANetCase__c 	 = tsaNetId;
             log.tsanetconnect__TSANetNote__c 	 = tsaNetNoteId;
             log.tsanetconnect__Context__c    	 = context;
-            Database.insert(log, AccessLevel.USER_MODE);
+            insertLogs(new tsanetconnect__TSANetError__c[]{ log });
         } catch (Exception e) {
-            System.debug(LoggingLevel.WARN, 'ErrorLogger: ' + e.getMessage());
+            // Last resort: the error-log insert itself failed. Do not debug the payload —
+            // debug logs have a wider audience than the records that failed to persist.
         }
     }
 
@@ -75,23 +100,43 @@ public with sharing class ErrorLogger {
      * @param relations map with optional caseId, tsaNetCaseId, and tsaNetNoteId
      */
     public static void logError(Exception ex, String context, Map<String, String> relations) {
-        String caseId = relations.get('caseId');
-        String tsaNetId = relations.get('tsaNetCaseId');
-        String tsaNetNoteId = relations.get('tsaNetNoteId');
+        Map<String, String> safeRelations = relations == null ? new Map<String, String>() : relations;
+        String caseId = safeRelations.get('caseId');
+        String tsaNetId = safeRelations.get('tsaNetCaseId');
+        String tsaNetNoteId = safeRelations.get('tsaNetNoteId');
         try {
             tsanetconnect__TSANetError__c  log = new tsanetconnect__TSANetError__c();
             log.Name = context + ' - ' + System.now().format();
-            log.tsanetconnect__ErrorMessage__c  = ex.getMessage();
+            log.tsanetconnect__ErrorMessage__c  = withRelations(ex.getMessage(), safeRelations);
             log.tsanetconnect__Type__c       	 = ex.getTypeName();
             log.tsanetconnect__StackTrace__c 	 = truncateStackTrace(ex.getStackTraceString());
             log.tsanetconnect__Case__c 	     = caseId;
             log.tsanetconnect__TSANetCase__c 	 = tsaNetId;
             log.tsanetconnect__TSANetNote__c 	 = tsaNetNoteId;
             log.tsanetconnect__Context__c    	 = context;
-            Database.insert(log, AccessLevel.USER_MODE);
+            insertLogs(new tsanetconnect__TSANetError__c[]{ log });
         } catch (Exception e) {
-            System.debug(LoggingLevel.WARN, 'ErrorLogger: ' + e.getMessage());
+            // Last resort: the error-log insert itself failed. Do not debug the payload —
+            // debug logs have a wider audience than the records that failed to persist.
         }
+    }
+
+    /** Appends non-blank relation keys to the error message so the log is searchable without lookups. */
+    private static String withRelations(String message, Map<String, String> relations) {
+        if (relations == null || relations.isEmpty()) {
+            return message;
+        }
+        String[] details = new String[]{};
+        for (String key : relations.keySet()) {
+            String value = relations.get(key);
+            if (String.isNotBlank(value)) {
+                details.add(key + '=' + value);
+            }
+        }
+        if (details.isEmpty()) {
+            return message;
+        }
+        return (message == null ? '' : message) + ' | ' + String.join(details, ' | ');
     }
 
     /**
@@ -104,9 +149,10 @@ public with sharing class ErrorLogger {
             tsanetconnect__TSANetError__c log = new tsanetconnect__TSANetError__c();
             log.tsanetconnect__ErrorMessage__c = message;
             log.tsanetconnect__Context__c = context;
-            Database.insert(log, AccessLevel.USER_MODE);
+            insertLogs(new tsanetconnect__TSANetError__c[]{ log });
         } catch (Exception e) {
-            System.debug(LoggingLevel.WARN, 'ErrorLogger: ' + e.getMessage());
+            // Last resort: the error-log insert itself failed. Do not debug the payload —
+            // debug logs have a wider audience than the records that failed to persist.
         }
     }
 
@@ -129,9 +175,10 @@ public with sharing class ErrorLogger {
      */
     public static void logErrors(tsanetconnect__TSANetError__c[] errors) {
         try {
-            Database.insert(errors, AccessLevel.USER_MODE);
+            insertLogs(errors);
         } catch (Exception e) {
-            System.debug(LoggingLevel.WARN, 'ErrorLogger: ' + e.getMessage());
+            // Last resort: the error-log insert itself failed. Do not debug the payload —
+            // debug logs have a wider audience than the records that failed to persist.
         }
     }
 }

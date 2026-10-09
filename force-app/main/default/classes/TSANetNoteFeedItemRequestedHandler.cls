@@ -1,9 +1,10 @@
 /**
  * Trigger handler for the TSANetNoteFeedItemRequested__e Platform Event.
- * Runs as the Run-As User (Automated Process by default), which has Chatter access,
- * so it can perform the FeedItem insert that the original Site Guest User context cannot.
+ * FeedItems are inserted from the TSANetNote trigger as the end user or External
+ * Client App Run As user. This subscriber is a no-op so Automated Process
+ * does not perform SOQL or DML. The PE object is kept for managed-package safety.
  */
-public without sharing class TSANetNoteFeedItemRequestedHandler implements ITriggerHandler {
+public with sharing class TSANetNoteFeedItemRequestedHandler implements ITriggerHandler {
 
     public void beforeInsert(List<SObject> newItems){
         // Not implemented — Platform Events don't fire before-insert.
@@ -18,18 +19,11 @@ public without sharing class TSANetNoteFeedItemRequestedHandler implements ITrig
     }
 
     /**
-     * Re-queries the requested notes in SYSTEM_MODE and delegates back to the
-     * shared FeedItem-creation logic, which now runs in a non-Guest context.
+     * No-op. Note trigger creates FeedItems in USER_MODE.
      * @param newItems map of newly published Platform Event records by replay Id
      */
     public void afterInsert(Map<Id, SObject> newItems){
-        Set<Id> noteIds = collectNoteIds(newItems.values());
-        if (noteIds.isEmpty()) { return; }
-
-        tsanetconnect__TSANetNote__c[] notes = TSANetNoteSelector.getForFeedItemBuild(noteIds);
-        if (notes.isEmpty()) { return; }
-
-        TSANetNoteTriggerHelper.createFeedItems(notes);
+        // Guest PE hop removed. Keep the handler so the packaged trigger still compiles.
     }
 
     public void afterUpdate(Map<Id, SObject> newItems, Map<Id, SObject> oldItems){
@@ -49,20 +43,5 @@ public without sharing class TSANetNoteFeedItemRequestedHandler implements ITrig
      */
     public Boolean isDisabled(){
         return false;
-    }
-
-    /** Extracts note Ids from the published events, ignoring blanks/duplicates. */
-    private static Set<Id> collectNoteIds(List<SObject> events){
-        Set<Id> ids = new Set<Id>();
-        for (SObject evt : events){
-            String raw = (String) evt.get('tsanetconnect__NoteId__c');
-            if (String.isBlank(raw)) { continue; }
-            try {
-                ids.add((Id) raw);
-            } catch (System.StringException e){
-                ErrorLogger.logError(e, 'TSANET_NOTE_FEED_ITEM_PE_INVALID_ID');
-            }
-        }
-        return ids;
     }
 }

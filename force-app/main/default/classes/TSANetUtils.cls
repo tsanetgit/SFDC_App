@@ -42,6 +42,9 @@ public with sharing class TSANetUtils {
      */
     @AuraEnabled
     public static tsanetconnect__TSANetCase__c[] getTSANetCasesByCaseId(Id caseId){
+        if(caseId == null){
+            return new tsanetconnect__TSANetCase__c[]{};
+        }
         return TSANetCaseSelector.getDetailWithResponsesByCaseId(caseId);
     }
 
@@ -52,7 +55,7 @@ public with sharing class TSANetUtils {
      */
     @AuraEnabled
     public static tsanetconnect__TSANetCase__c[] getTSANetCases(Id caseId){
-        return TSANetService.getRelatedCollaborationCases(caseId, null);
+        return TSANetService.getRelatedCollaborationCases(caseId);
     }
 
     /**
@@ -61,26 +64,14 @@ public with sharing class TSANetUtils {
      */
     @Future(callout=true)
     public static void futureRefresh(Id caseId){
+        if(!TSANetService.isRefreshEnabled()){ return; }
+
         String caseNumber = null;
         if(caseId != null){
             Case sfCase = CaseSelector.getById(caseId);
             caseNumber = sfCase.CaseNumber;
         }
-        System.enqueueJob(new TSANetQueueableJob(0, null, null, null, null, caseNumber));
-    }
-
-    /**
-     * Updates the stored TSANet API credentials.
-     * @param username new TSANet username
-     * @param password new TSANet password
-     * @return true if the update succeeded
-     */
-    @AuraEnabled
-    public static Boolean updateUserCredentials(String username, String password){
-        tsanetconnect__TSANet_Credentials__c credential = CredentialManager.getCredentials();
-        credential.tsanetconnect__UserName__c = username;
-        credential.tsanetconnect__Password__c = password;
-        return Database.update(credential, AccessLevel.USER_MODE).isSuccess();
+        TSANetQueueableJob.enqueueIfConnected(caseNumber);
     }
 
     /** Wrapper holding a TSANetCase__c, its linked Case, and the current user. */
@@ -122,6 +113,9 @@ public with sharing class TSANetUtils {
      */
     @AuraEnabled
     public static TSANetCaseInfo getTSANetInfo(Id recordId){
+        if(recordId == null){
+            return null;
+        }
         tsanetconnect__TSANetCase__c[] tsaNetCase = TSANetCaseSelector.getInfoById(recordId);
     	Case caseRecord;
         if(tsaNetCase.size() > 0 && tsaNetCase[0].tsanetconnect__Case__c != NULL){
@@ -132,8 +126,8 @@ public with sharing class TSANetUtils {
     }
 
     /**
-     * Refreshes and stores a new TSANet access token.
-     * @return true if the token was successfully refreshed
+     * Reconnects the TSANet integration by re-running the setup sync.
+     * @return true if the reconnect was started
      */
     @AuraEnabled
     public static Boolean getNewAccessToken(){
@@ -147,6 +141,9 @@ public with sharing class TSANetUtils {
      */
     @AuraEnabled
     public static tsanetconnect__TSANetCase__c getTSANetRecordPageInfo(Id caseId){
+        if(caseId == null){
+            return null;
+        }
         return TSANetCaseSelector.getRecordPageInfo(caseId);
     }
 
@@ -155,56 +152,12 @@ public with sharing class TSANetUtils {
      * @param searchText search term (nullable for recent cases)
      * @return matching Case records
      */
-    @AuraEnabled
+    @AuraEnabled(cacheable=true)
     public static Case[] getCases(String searchText){
         if(searchText == NULL || searchText == ''){
             return CaseSelector.getRecent();
         }
         return CaseSelector.search(searchText);
-    }
-
-    /**
-     * Updates the Case lookup on a TSANetCase record after server-side access validation.
-     * @param tsaNetCaseId TSANetCase record Id to update
-     * @param caseId Salesforce Case Id to link (nullable to clear the link)
-     * @return true if the update succeeded
-     */
-    @AuraEnabled
-    public static Boolean updateTSANetCase(Id tsaNetCaseId, Id caseId){
-        if (tsaNetCaseId == null || !Schema.sObjectType.tsanetconnect__TSANetCase__c.isUpdateable()) {
-            return false;
-        }
-
-        UserRecordAccess[] access = [
-            SELECT RecordId, HasEditAccess
-            FROM UserRecordAccess
-            WHERE UserId = :UserInfo.getUserId()
-            AND RecordId = :tsaNetCaseId
-            WITH USER_MODE
-            LIMIT 1
-        ];
-        if (access.isEmpty() || !access[0].HasEditAccess) {
-            return false;
-        }
-
-        if (caseId != null) {
-            Case[] linkedCases = [
-                SELECT Id
-                FROM Case
-                WHERE Id = :caseId
-                WITH USER_MODE
-                LIMIT 1
-            ];
-            if (linkedCases.isEmpty()) {
-                return false;
-            }
-        }
-
-        tsanetconnect__TSANetCase__c rec = new tsanetconnect__TSANetCase__c(
-            Id = tsaNetCaseId,
-            tsanetconnect__Case__c = caseId
-        );
-        return Database.update(rec, AccessLevel.USER_MODE).isSuccess();
     }
 
     /**
@@ -214,6 +167,9 @@ public with sharing class TSANetUtils {
      */
     @AuraEnabled
     public static tsanetconnect__TSANetCase__c getOneTSANetCase(Id caseId){
+        if(caseId == null){
+            return null;
+        }
         return TSANetCaseSelector.getMinimalById(caseId);
     }
 

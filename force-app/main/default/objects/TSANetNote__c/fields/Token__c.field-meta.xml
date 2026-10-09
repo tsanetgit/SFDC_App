@@ -3,8 +3,10 @@
     <fullName>Token__c</fullName>
     <caseSensitive>false</caseSensitive>
     <deprecated>false</deprecated>
+    <description>External ID. TSANet-issued token that uniquely identifies the note in the TSANet API and is used as the upsert key when notes are synced.</description>
     <externalId>true</externalId>
-    <label>Token</label>
+    <inlineHelpText>External ID issued by TSANet that uniquely identifies this note.</inlineHelpText>
+    <label>External ID</label>
     <length>255</length>
     <required>false</required>
     <trackTrending>false</trackTrending>

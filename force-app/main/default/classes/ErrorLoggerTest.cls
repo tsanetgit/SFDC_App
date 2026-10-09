@@ -51,6 +51,13 @@ public class ErrorLoggerTest {
         System.assertEquals(1, rows.size(), 'Expected an error log record to be created');
         System.assertEquals(c.Id, rows[0].tsanetconnect__Case__c, 'Case lookup should be set when provided');
         System.assert(rows[0].Name != null, 'Name should be set (context + timestamp)');
+        tsanetconnect__TSANetError__c withMessage = [
+            SELECT tsanetconnect__ErrorMessage__c
+            FROM tsanetconnect__TSANetError__c
+            WHERE Id = :rows[0].Id
+        ];
+        System.assertEquals(true, withMessage.tsanetconnect__ErrorMessage__c.contains('caseId=' + c.Id),
+            'Error message should include the related Case Id');
     }
 
     @IsTest

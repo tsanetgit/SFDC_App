@@ -16,10 +16,10 @@ public class UpsertExecutorTest {
         Test.startTest();
         UpsertExecutor.execute(null,
             tsanetconnect__TSANetCase__c.tsanetconnect__Token__c,
-            AccessLevel.SYSTEM_MODE);
+            AccessLevel.USER_MODE);
         UpsertExecutor.execute(new List<tsanetconnect__TSANetCase__c>(),
             tsanetconnect__TSANetCase__c.tsanetconnect__Token__c,
-            AccessLevel.SYSTEM_MODE);
+            AccessLevel.USER_MODE);
         Test.stopTest();
 
         System.assertEquals(0, [SELECT COUNT() FROM tsanetconnect__TSANetCase__c],
@@ -39,7 +39,7 @@ public class UpsertExecutorTest {
         Test.startTest();
         UpsertExecutor.execute(cases,
             tsanetconnect__TSANetCase__c.tsanetconnect__Token__c,
-            AccessLevel.SYSTEM_MODE);
+            AccessLevel.USER_MODE);
         Test.stopTest();
 
         Integer inserted = [
@@ -75,7 +75,7 @@ public class UpsertExecutorTest {
         Test.startTest();
         UpsertExecutor.execute(cases,
             tsanetconnect__TSANetCase__c.tsanetconnect__Token__c,
-            AccessLevel.SYSTEM_MODE);
+            AccessLevel.USER_MODE);
         Test.stopTest();
 
         List<tsanetconnect__TSANetCase__c> persisted = [
@@ -117,7 +117,7 @@ public class UpsertExecutorTest {
         Test.startTest();
         UpsertExecutor.execute(cases,
             tsanetconnect__TSANetCase__c.tsanetconnect__Token__c,
-            AccessLevel.SYSTEM_MODE);
+            AccessLevel.USER_MODE);
         Test.stopTest();
 
         Integer total = [SELECT COUNT() FROM tsanetconnect__TSANetCase__c];

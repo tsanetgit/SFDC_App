@@ -20,8 +20,10 @@ public class TSANetInvocableGetCompanyServiceTest {
         String body = '[ { "label": "Demo - VMware", "companyId": 1072, "departmentId": null } ]';
         Test.setMock(HttpCalloutMock.class, new MockHttpResponseGenerator(200, body, null));
         Test.startTest();
-        	TSANetInvocableGetCompanyService.TSANetCompanyResult[] data = TSANetInvocableGetCompanyService.getCompanies(new String[]{ 'Demo' });
+        	TSANetInvocableGetCompanyService.TSANetCompanyResult[] data = TSANetInvocableGetCompanyService.getCompanies(new String[]{ 'Demo', 'Acme' });
+        	System.assertEquals(2, data.size(), 'Expected one result per input');
         	System.assertEquals(true, data[0].companies.size() == 1);
+        	System.assertEquals(true, data[1].companies.size() == 1);
         Test.stopTest();
     }
 }

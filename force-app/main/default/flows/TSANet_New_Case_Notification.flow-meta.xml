@@ -2,7 +2,7 @@
 <Flow xmlns="http://soap.sforce.com/2006/04/metadata">
     <apiVersion>61.0</apiVersion>
     <areMetricsLoggedToDataCloud>false</areMetricsLoggedToDataCloud>
-    <description>Template (System Context Without Sharing) record-triggered flow that sends a custom notification to the case owner when a new TSANet collaboration case is created — inbound via webhook or outbound/manual from Salesforce. Subscribers can deactivate or clone this template to customize.</description>
+    <description>Template record-triggered flow that sends a custom notification to the case owner when a new TSANet collaboration case is created — inbound via webhook or outbound/manual from Salesforce. Subscribers can deactivate or clone this template to customize.</description>
     <environments>Default</environments>
     <formulas>
         <name>Body</name>
@@ -31,7 +31,6 @@
         </value>
     </processMetadataValues>
     <processType>AutoLaunchedFlow</processType>
-    <runInMode>SystemModeWithoutSharing</runInMode>
     <start>
         <locationX>530</locationX>
         <locationY>48</locationY>
@@ -68,4 +67,5 @@
             </value>
         </inputAssignments>
     </subflows>
+    <triggerOrder>30</triggerOrder>
 </Flow>

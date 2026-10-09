@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>NoteToken__c</fullName>
+    <description>Note token of the inbound webhook event, when the event refers to a note.</description>
+    <isFilteringDisabled>false</isFilteringDisabled>
+    <isNameField>false</isNameField>
+    <isSortingDisabled>false</isSortingDisabled>
+    <label>Note Token</label>
+    <length>255</length>
+    <required>false</required>
+    <type>Text</type>
+</CustomField>

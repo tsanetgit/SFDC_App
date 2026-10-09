@@ -22,8 +22,12 @@ public class TSANetInvocableApproveRequestServiceTest {
             TSANetInvocableApproveRequestService.TSANetInput input = new TSANetInvocableApproveRequestService.TSANetInput();
             input.caseRecord = caseRecord;
             input.request = new TSANetApprovalForm();
-            TSANetInvocableApproveRequestService.approveCollaborationRequest(new TSANetInvocableApproveRequestService.TSANetInput[]{ input });
+            TSANetInvocableApproveRequestService.TSANetAcceptRequestResult[] results =
+                TSANetInvocableApproveRequestService.approveCollaborationRequest(new TSANetInvocableApproveRequestService.TSANetInput[]{ input });
         Test.stopTest();
+
+        System.assertEquals(1, results.size(), 'Expected one result per input');
+        System.assertEquals(true, results[0].isSuccess, 'Approval should succeed: ' + results[0].message);
 
     }
 }

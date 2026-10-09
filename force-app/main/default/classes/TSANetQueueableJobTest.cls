@@ -23,5 +23,52 @@ public class TSANetQueueableJobTest {
         	System.enqueueJob(new TSANetQueueableJob(0, null, null, null, null, null));
         Test.stopTest();
 
+        System.assertEquals(1, [
+            SELECT COUNT() FROM AsyncApexJob WHERE JobType = 'Queueable' AND Status = 'Completed'
+        ], 'The queueable should run to completion');
+        System.assertEquals(2, [
+            SELECT COUNT() FROM tsanetconnect__TSANetCase__c
+            WHERE tsanetconnect__Token__c IN ('vTLnUw4rUhHqiLo5vY4k', 'SrExIERGZeOmknYx0w')
+        ], 'Both cases from the paged API response should have been upserted');
+
+    }
+
+    @IsTest
+    static void test_enqueueIfConnected_skipsWhenDisconnected() {
+        tsanetconnect__TSANet_Credentials__c cred = [
+            SELECT Id FROM tsanetconnect__TSANet_Credentials__c WITH USER_MODE LIMIT 1
+        ];
+        cred.tsanetconnect__isConnected__c = false;
+        update cred;
+
+        Test.startTest();
+            Boolean enqueued = TSANetQueueableJob.enqueueIfConnected(null);
+        Test.stopTest();
+
+        System.assertEquals(false, enqueued, 'Disconnected credentials must not enqueue a sync job');
+        System.assertEquals(0, [
+            SELECT COUNT() FROM AsyncApexJob WHERE ApexClass.Name = 'TSANetQueueableJob'
+        ], 'No TSANetQueueableJob should be created when disconnected');
+    }
+
+    @IsTest
+    static void test_isAuthenticationFailure() {
+        System.assertEquals(true, TSANetQueueableJob.isAuthenticationFailure(new CalloutException('Unauthorized')));
+        System.assertEquals(true, TSANetQueueableJob.isAuthenticationFailure(new CalloutException('Unable to fetch the OAuth token.')));
+        System.assertEquals(false, TSANetQueueableJob.isAuthenticationFailure(new CalloutException('timeout')));
+        System.assertEquals(false, TSANetQueueableJob.isAuthenticationFailure(null));
+    }
+
+    @IsTest
+    static void test_execute_authFailure_marksDisconnected() {
+        Test.setMock(HttpCalloutMock.class, new MockHttpResponseGenerator(401, '{"message":"Unauthorized"}', null));
+
+        Test.startTest();
+            System.enqueueJob(new TSANetQueueableJob(0, null, null, null, null, null));
+        Test.stopTest();
+
+        System.assertEquals(false, [
+            SELECT tsanetconnect__isConnected__c FROM tsanetconnect__TSANet_Credentials__c LIMIT 1
+        ].tsanetconnect__isConnected__c, 'A catchable auth failure should disconnect the primary credential');
     }
 }

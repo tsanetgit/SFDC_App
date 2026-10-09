@@ -144,4 +144,5 @@
         <triggerType>RecordAfterSave</triggerType>
     </start>
     <status>Active</status>
+    <triggerOrder>20</triggerOrder>
 </Flow>

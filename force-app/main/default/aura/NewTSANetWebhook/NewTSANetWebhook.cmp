@@ -1,0 +1,4 @@
+<aura:component implements="lightning:actionOverride" access="global">
+
+    <c:tsaNetWebhookCreator></c:tsaNetWebhookCreator>
+</aura:component>

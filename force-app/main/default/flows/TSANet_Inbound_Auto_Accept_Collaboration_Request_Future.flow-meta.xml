@@ -61,7 +61,7 @@
         </scheduledPaths>
         <triggerType>RecordAfterSave</triggerType>
     </start>
-    <status>Obsolete</status>
+    <status>Draft</status>
     <subflows>
         <name>TSANet_Accept</name>
         <label>TSANet Accept</label>

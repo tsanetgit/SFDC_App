@@ -31,42 +31,50 @@ global with sharing class TSANetInvocableApproveRequestService {
     /**
      * Approves an incoming TSANet collaboration request.
      * @param inputs list of TSANetInput containing the case and approval form
-     * @return list of TSANetAcceptRequestResult with success flag and message
+     * @return one result per input, in the same order
      */
     @InvocableMethod(label='TSANet Accept Collaboration Request' description='Returns: isSuccess: boolean, message: string' category='TSANet')
     global static TSANetAcceptRequestResult[] approveCollaborationRequest(TSANetInput[] inputs) {
-
-        TSANetAcceptRequestResult result = new TSANetAcceptRequestResult();
-
-        TSANetInput input = inputs[0];
-
-        String json = System.JSON.serialize(input.request);
-        String caseToken = input.caseRecord.tsanetconnect__Token__c;
-
-        if (input.runAsync == true) {
-            approveAsync(caseToken, json);
-            result.message = 'The collaboration request approval has been queued';
-            result.isSuccess = true;
-            return new TSANetAcceptRequestResult[]{ result };
+        TSANetAcceptRequestResult[] results = new TSANetAcceptRequestResult[]{};
+        if (inputs == null) {
+            return results;
         }
 
+        for (TSANetInput input : inputs) {
+            results.add(approveOne(input));
+        }
+        return results;
+    }
+
+    /** Approves one request, optionally via @Future. */
+    private static TSANetAcceptRequestResult approveOne(TSANetInput input) {
+        TSANetAcceptRequestResult result = new TSANetAcceptRequestResult();
         try {
-            TSANetService.approveIncomingRequest(caseToken, json, null);
+            String json = JSON.serialize(input.request);
+            String caseToken = input.caseRecord.tsanetconnect__Token__c;
+
+            if (input.runAsync == true) {
+                approveAsync(caseToken, json);
+                result.message = 'The collaboration request approval has been queued';
+                result.isSuccess = true;
+                return result;
+            }
+
+            TSANetService.approveIncomingRequest(caseToken, json);
             result.message = 'The collaboration request has been accepted successfully';
             result.isSuccess = true;
-            return new TSANetAcceptRequestResult[]{ result };
-        } catch(Exception e){
+        } catch (Exception e) {
             result.message = e.getMessage();
             result.isSuccess = false;
-            return new TSANetAcceptRequestResult[]{ result };
         }
+        return result;
     }
 
     /** Runs the approval callout asynchronously. */
     @Future(callout=true)
     public static void approveAsync(String caseToken, String json) {
         try {
-            TSANetService.approveIncomingRequest(caseToken, json, null);
+            TSANetService.approveIncomingRequest(caseToken, json);
         } catch(Exception e) {
             ErrorLogger.logError(e, 'TSANET_APPROVE_ASYNC');
         }
