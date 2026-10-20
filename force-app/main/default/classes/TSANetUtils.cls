@@ -117,8 +117,12 @@ public with sharing class TSANetUtils {
             return null;
         }
         tsanetconnect__TSANetCase__c[] tsaNetCase = TSANetCaseSelector.getInfoById(recordId);
+        // Not a TSANet Case Id (or no access): return null so the caller can show a message instead of failing.
+        if(tsaNetCase.isEmpty()){
+            return null;
+        }
     	Case caseRecord;
-        if(tsaNetCase.size() > 0 && tsaNetCase[0].tsanetconnect__Case__c != NULL){
+        if(tsaNetCase[0].tsanetconnect__Case__c != NULL){
              caseRecord = CaseSelector.getFullDetailById(tsaNetCase[0].tsanetconnect__Case__c);
         }
 

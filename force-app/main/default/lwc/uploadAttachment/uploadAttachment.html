@@ -10,7 +10,10 @@
           <div class="slds-modal__content slds-p-around_medium">
             <lightning-card title="File Uploader" icon-name="doctype:attachment">
 
-              <lightning-input slot="actions" type="file" label="Choose File" multiple onchange={handleFileChange}></lightning-input>
+              <!-- File picker only makes sense when an upload config exists for the partner. -->
+              <template if:true={hasConfig}>
+                <lightning-input slot="actions" type="file" label="Choose File" multiple onchange={handleFileChange}></lightning-input>
+              </template>
 
               <template if:true={isLoading}>
                 <div class="slds-is-relative">

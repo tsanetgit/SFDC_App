@@ -4,7 +4,6 @@ public class TSANetWebhookServiceTest {
 
     private static final String REGISTER_RESPONSE = '{"id":42,"callbackUrl":"https://example.com/webhook","eventTypes":["collaboration-request.created","note.created"],"active":true,"secret":"whsec_test123","createdAt":"2024-07-01T10:00:00.000Z"}';
     private static final String LIST_RESPONSE = '[{"id":42,"callbackUrl":"https://example.com/webhook","eventTypes":["collaboration-request.created"],"active":true}]';
-    private static final String DELIVERY_RESPONSE = '[{"id":1,"webhookId":42,"statusCode":200,"createdAt":"2024-07-01T12:00:00Z"}]';
     private static final String LOGIN_RESPONSE = '{"accessToken":"mock-token","tokenType":"bearer","expiresIn":3600}';
     private static final String CLIENT_ID = 'connected-app-id';
     private static final String CLIENT_SECRET = 'connected-app-secret';
@@ -136,17 +135,6 @@ public class TSANetWebhookServiceTest {
         Test.stopTest();
 
         System.assert(true, 'Async delete should complete without exception');
-    }
-
-    @IsTest
-    static void testGetDeliveryLog() {
-        Test.setMock(HttpCalloutMock.class, new MockHttpResponseGenerator(200, DELIVERY_RESPONSE, null));
-
-        Test.startTest();
-            String result = TSANetWebhookService.getDeliveryLog(42);
-        Test.stopTest();
-
-        System.assertNotEquals(null, result, 'Expected delivery log response');
     }
 
     @IsTest

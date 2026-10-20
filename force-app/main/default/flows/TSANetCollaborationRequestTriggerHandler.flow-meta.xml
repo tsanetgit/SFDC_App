@@ -158,6 +158,12 @@
                 <elementReference>$Record.Id</elementReference>
             </value>
         </inputAssignments>
+        <inputAssignments>
+            <name>runAsync</name>
+            <value>
+                <booleanValue>true</booleanValue>
+            </value>
+        </inputAssignments>
         <storeOutputAutomatically>true</storeOutputAutomatically>
     </subflows>
 </Flow>

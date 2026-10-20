@@ -190,17 +190,15 @@ export const PRIORITY_OPTIONS = [
     { label: 'High', value: TSANET_CASE_PRIORITIES.HIGH },
 ]
 
-export const TSANET_NOTE_TYPES = Object.freeze({
-    USER_PUBLIC: 'USER_PUBLIC',
-    USER_PARTNER: 'USER_PARTNER'
-})
+// Note type options come from the TSANetNote__c.Type__c picklist (API name = TSANet type code).
+// "None" is the only static option; empty value means "type": null is sent (note stored without a type).
+export const NOTE_TYPE_NONE_OPTION = Object.freeze({ label: 'None', value: '' })
 
-// Note type options for the Create Note form; empty value means the type is omitted from the request.
-export const NOTE_TYPE_OPTIONS = [
-    { label: 'None', value: '' },
-    { label: 'User Public', value: TSANET_NOTE_TYPES.USER_PUBLIC },
-    { label: 'User Partner', value: TSANET_NOTE_TYPES.USER_PARTNER },
-]
+// Platform-only type code: TSANet generates system notes itself, so users must not pick it manually.
+export const NOTE_TYPE_SYSTEM_CODE = 'system'
+
+// Builds the NoteTypeReferenceDTO sent to TSANet on note create; null when no type is selected.
+export const buildNoteTypeReference = (code) => (code ? { code } : null)
 export const TOAST_MODE = Object.freeze({
   SUCCESS : 'success',
   WARNING : 'warning',

@@ -10,7 +10,7 @@
         <faultConnector>
             <targetReference>HandleActionFault</targetReference>
         </faultConnector>
-        <flowTransactionModel>NewTransaction</flowTransactionModel>
+        <flowTransactionModel>CurrentTransaction</flowTransactionModel>
         <inputParameters>
             <name>caseRecord</name>
             <value>
@@ -21,6 +21,12 @@
             <name>form</name>
             <value>
                 <elementReference>GetRequestInformationForm.RequestInformationForm</elementReference>
+            </value>
+        </inputParameters>
+        <inputParameters>
+            <name>runAsync</name>
+            <value>
+                <elementReference>runAsync</elementReference>
             </value>
         </inputParameters>
         <nameSegment>TSANetInvocableRequestMoreInformation</nameSegment>
@@ -57,7 +63,7 @@
             </value>
         </assignmentItems>
     </assignments>
-    <description>Reusable subflow that executes the &quot;request information&quot; action on a TSANet collaboration case. A fault in the Apex action is returned to the caller as isSuccess = false with the fault message.</description>
+    <description>Reusable subflow that executes the &quot;request information&quot; action on a TSANet collaboration case. Runs the Apex action in the current transaction; record-triggered callers must pass runAsync = true so the TSANet callout runs in a @Future (a subflow of a record-triggered flow cannot pause for a new transaction). A fault in the Apex action is returned to the caller as isSuccess = false with the fault message.</description>
     <environments>Default</environments>
     <interviewLabel>TSANet Request Info ( Automation ) {!$Flow.CurrentDateTime}</interviewLabel>
     <isTemplate>true</isTemplate>
@@ -160,5 +166,16 @@
         <isCollection>false</isCollection>
         <isInput>true</isInput>
         <isOutput>false</isOutput>
+    </variables>
+    <variables>
+        <description>Set to true from record-triggered flows: the TSANet callout then runs asynchronously after the transaction commits.</description>
+        <name>runAsync</name>
+        <dataType>Boolean</dataType>
+        <isCollection>false</isCollection>
+        <isInput>true</isInput>
+        <isOutput>false</isOutput>
+        <value>
+            <booleanValue>false</booleanValue>
+        </value>
     </variables>
 </Flow>

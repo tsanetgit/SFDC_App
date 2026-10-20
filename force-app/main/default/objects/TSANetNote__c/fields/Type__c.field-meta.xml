@@ -2,7 +2,7 @@
 <CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>Type__c</fullName>
     <deprecated>false</deprecated>
-    <description>Sender intent: USER_PUBLIC may be shown to the partner&apos;s end customer, USER_PARTNER is for the partner&apos;s engineers, SYSTEM is an author-less platform note.</description>
+    <description>Note type code from TSANet (NoteTypeSelectionDTO.code). API names are the stable lowercase codes: public may be shown to the partner&apos;s end customer, partner is for the partner&apos;s engineers, system is an author-less platform note, escalation marks an escalation request, status reports a case status update.</description>
     <label>Type</label>
     <required>false</required>
     <trackTrending>false</trackTrending>
@@ -11,19 +11,29 @@
         <valueSetDefinition>
             <sorted>false</sorted>
             <value>
-                <fullName>USER_PUBLIC</fullName>
+                <fullName>public</fullName>
                 <default>false</default>
-                <label>User Public</label>
+                <label>Public</label>
             </value>
             <value>
-                <fullName>USER_PARTNER</fullName>
+                <fullName>partner</fullName>
                 <default>false</default>
-                <label>User Partner</label>
+                <label>Partner</label>
             </value>
             <value>
-                <fullName>SYSTEM</fullName>
+                <fullName>system</fullName>
                 <default>false</default>
                 <label>System</label>
+            </value>
+            <value>
+                <fullName>escalation</fullName>
+                <default>false</default>
+                <label>Escalation</label>
+            </value>
+            <value>
+                <fullName>status</fullName>
+                <default>false</default>
+                <label>Status</label>
             </value>
         </valueSetDefinition>
     </valueSet>

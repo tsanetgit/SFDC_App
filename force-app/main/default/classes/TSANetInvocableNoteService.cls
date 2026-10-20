@@ -43,7 +43,7 @@ global with sharing class TSANetInvocableNoteService {
             try {
                 String caseToken = input.caseRecord.tsanetconnect__Token__c;
                 applyCurrentUserAsSubmitter(input.note);
-                tsanetconnect__TSANetNote__c note = TSANetService.sendTSANetNote(caseToken, JSON.serialize(input.note, true));
+                tsanetconnect__TSANetNote__c note = TSANetService.sendTSANetNote(caseToken, input.note.toRequestBody());
                 if (note != null) {
                     notes.add(note);
                 }

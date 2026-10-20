@@ -91,17 +91,10 @@ public with sharing class TSANetWebhookService {
      */
     private static String registerWebhookInternal(String callbackUrl, String[] eventTypes, String clientId, String clientSecret, Id credentialId){
         String endpoint = TSANetHttpRouter.getEndpoint(EndpointManager.webhooks_path);
-        System.debug(LoggingLevel.INFO, 'TSANet webhook register start endpoint=' + endpoint);
-
-        Map<String, Object> payload = buildRegisterPayload(callbackUrl, eventTypes, clientId, clientSecret);
-
-        String requestBody = JSON.serialize(payload);
-        System.debug(LoggingLevel.INFO, 'TSANet webhook register request body=' + requestBody);
+        String requestBody = JSON.serialize(buildRegisterPayload(callbackUrl, eventTypes, clientId, clientSecret));
 
         try {
             HttpResponse res = TSANetHttpRouter.sendPost(endpoint, requestBody);
-            System.debug(LoggingLevel.INFO, 'TSANet webhook register status=' + res.getStatusCode() + ' body=' + res.getBody());
-
             WebhookResponse webhook = (WebhookResponse) JSON.deserialize(res.getBody(), WebhookResponse.class);
 
             tsanetconnect__TSANetWebhook__c record = new tsanetconnect__TSANetWebhook__c();
@@ -117,7 +110,6 @@ public with sharing class TSANetWebhookService {
             }
 
             Database.upsert(record, tsanetconnect__TSANetWebhook__c.tsanetconnect__WebhookId__c, false, AccessLevel.USER_MODE);
-            System.debug(LoggingLevel.INFO, 'TSANet webhook register saved recordId=' + record.Id + ' webhookId=' + webhook.id);
             return record.Id;
         } catch(Exception e){
             throwRegisterError(e);
@@ -125,12 +117,10 @@ public with sharing class TSANetWebhookService {
         }
     }
 
-    /** Writes debug + TSANetError__c, then rethrows so the New form shows the API message. */
+    /** Writes TSANetError__c, then rethrows so the New form shows the API message. */
     private static void throwRegisterError(Exception cause){
         String message = cause != null ? cause.getMessage() : 'Unable to register the webhook.';
-        System.debug(LoggingLevel.ERROR, 'TSANet webhook register error: ' + message);
         if(cause != null){
-            System.debug(LoggingLevel.ERROR, cause.getStackTraceString());
             ErrorLogger.logError(cause, 'TSANET_WEBHOOK_REGISTER');
         }
         throwAura(message);
@@ -236,18 +226,6 @@ public with sharing class TSANetWebhookService {
                 });
             }
         }
-    }
-
-    /**
-     * Retrieves the delivery log for a webhook subscription.
-     * @param webhookId external webhook ID
-     * @return raw API response body
-     */
-    @AuraEnabled
-    public static String getDeliveryLog(Integer webhookId){
-        String endpoint = getWebhookEndpointById(EndpointManager.webhook_deliveries, webhookId);
-        HttpResponse res = TSANetHttpRouter.sendGet(endpoint);
-        return res.getBody();
     }
 
     /** Resolves a webhook endpoint template for the active auth mode and substitutes {id}. */

@@ -1,4 +1,8 @@
-import { LightningElement, api, track } from 'lwc';
+import { LightningElement, api, track, wire } from 'lwc';
+import { getObjectInfo, getPicklistValues } from 'lightning/uiObjectInfoApi';
+
+import TSANET_NOTE_OBJECT from '@salesforce/schema/TSANetNote__c';
+import TSANET_NOTE_TYPE_FIELD from '@salesforce/schema/TSANetNote__c.Type__c';
 
 import {
     CASE_SUBJECT_FIELD,
@@ -12,8 +16,10 @@ import {
 
     ACTIONS,
     NOTE_STATE,
-    NOTE_TYPE_OPTIONS,
-    RICH_TEXT_FORMATS
+    NOTE_TYPE_NONE_OPTION,
+    NOTE_TYPE_SYSTEM_CODE,
+    RICH_TEXT_FORMATS,
+    buildNoteTypeReference
 } from 'c/tsaNetConstants'
 
 import {
@@ -31,11 +37,37 @@ export default class TsaNetActionModalForm extends LightningElement {
     @track summary
     @track description
     noteType = ''
-    noteTypeOptions = NOTE_TYPE_OPTIONS
+    // Only "None" until TSANetNote__c.Type__c picklist values are loaded.
+    noteTypeOptions = [NOTE_TYPE_NONE_OPTION]
     // Accept, Reject, Request Info, Send Info
     @track form
 
     @track value
+
+    @wire(getObjectInfo, { objectApiName: TSANET_NOTE_OBJECT })
+    noteObjectInfo
+
+    // Loads TSANetNote__c.Type__c picklist values for the default record type.
+    @wire(getPicklistValues, {
+        recordTypeId: '$noteObjectInfo.data.defaultRecordTypeId',
+        fieldApiName: TSANET_NOTE_TYPE_FIELD
+    })
+    wiredNoteTypes({ data, error }){
+        if(error){
+            console.error('Failed to load note type picklist values', error)
+            return
+        }
+        if(!data){ return }
+        this.noteTypeOptions = this.buildNoteTypeOptions(data.values)
+    }
+
+    // Maps active Type__c picklist values to combobox options, hiding the platform-only "system" type, with "None" first.
+    buildNoteTypeOptions(values = []){
+        const options = values
+            .filter(item => item.value !== NOTE_TYPE_SYSTEM_CODE)
+            .map(({ label, value }) => ({ label, value }))
+        return [NOTE_TYPE_NONE_OPTION, ...options]
+    }
 
     handleChangeSummary(event){
         this.summary = event?.target?.value
@@ -64,12 +96,8 @@ export default class TsaNetActionModalForm extends LightningElement {
         this.note.description = this.description
         this.note.submittedBy.firstName = this.userFirstName
         this.note.submittedBy.lastName = this.userLastName
-        // "None" omits the type so TSANet applies its default.
-        if(this.noteType){
-            this.note.type = this.noteType
-        } else {
-            delete this.note.type
-        }
+        // API expects type as { code }; "None" sends an explicit null so the note is stored without a type.
+        this.note.type = buildNoteTypeReference(this.noteType)
     }
 
     handleChangeField(event){

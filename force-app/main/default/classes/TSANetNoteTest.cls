@@ -33,4 +33,35 @@ public class TSANetNoteTest {
                            );
     }
 
+    /** The request body must send the type as NoteTypeReferenceDTO ({ "code": ... }). */
+    @IsTest
+    public static void toRequestBodyWrapsTypeCodeInObject(){
+        TSANetNoteForm form = new TSANetNoteForm();
+        form.summary = 'subject';
+        form.description = 'body';
+        form.priority = 'LOW';
+        form.type = 'public';
+
+        Map<String, Object> payload = (Map<String, Object>) System.JSON.deserializeUntyped(form.toRequestBody());
+
+        Map<String, Object> type = (Map<String, Object>) payload.get('type');
+        System.assertEquals('public', type.get('code'), 'Type must be sent as { code }');
+        System.assertEquals('subject', payload.get('summary'));
+        System.assertEquals('LOW', payload.get('priority'));
+    }
+
+    /** A blank type is sent as an explicit null so TSANet stores the note without a type. */
+    @IsTest
+    public static void toRequestBodySendsNullForBlankType(){
+        TSANetNoteForm form = new TSANetNoteForm();
+        form.summary = 'subject';
+        form.type = '';
+
+        String body = form.toRequestBody();
+        Map<String, Object> payload = (Map<String, Object>) System.JSON.deserializeUntyped(body);
+
+        System.assertEquals(true, payload.containsKey('type'), 'The type key must be present: ' + body);
+        System.assertEquals(null, payload.get('type'), 'Blank type must be sent as null');
+    }
+
 }

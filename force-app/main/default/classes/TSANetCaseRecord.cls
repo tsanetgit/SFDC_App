@@ -116,8 +116,8 @@ public inherited sharing class TSANetCaseRecord {
         public String description;
         /** Priority level of the note. */
         public String priority;
-        /** Sender intent: USER_PUBLIC, USER_PARTNER or SYSTEM. */
-        public String type;
+        /** Note type (NoteTypeSelectionDTO); null when the sender set no type. */
+        public NoteTypeWrapper type;
         /** Note direction relative to the reader: INBOUND or OUTBOUND. */
         public String direction;
         /** Status of the note. */
@@ -128,6 +128,14 @@ public inherited sharing class TSANetCaseRecord {
         public Datetime createdAt;
         /** Timestamp when the note was last updated. */
         public Datetime updatedAt;
+    }
+
+    /** Wrapper for a note type (NoteTypeSelectionDTO): stable lowercase code plus display label. */
+    public class NoteTypeWrapper {
+        /** Stable lowercase type code, e.g. public, partner, system. */
+        public String code;
+        /** Human-readable label; not an identifier. */
+        public String displayName;
     }
 
     /** Wrapper for a response to a TSANet case. */

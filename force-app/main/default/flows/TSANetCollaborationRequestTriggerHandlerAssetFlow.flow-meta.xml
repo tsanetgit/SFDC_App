@@ -210,6 +210,12 @@
                 <elementReference>$Record.Id</elementReference>
             </value>
         </inputAssignments>
+        <inputAssignments>
+            <name>runAsync</name>
+            <value>
+                <booleanValue>true</booleanValue>
+            </value>
+        </inputAssignments>
         <storeOutputAutomatically>true</storeOutputAutomatically>
     </subflows>
     <subflows>
@@ -228,6 +234,12 @@
             <name>RequestedInformation</name>
             <value>
                 <stringValue>Please provide asset number!</stringValue>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
+            <name>runAsync</name>
+            <value>
+                <booleanValue>true</booleanValue>
             </value>
         </inputAssignments>
         <storeOutputAutomatically>true</storeOutputAutomatically>

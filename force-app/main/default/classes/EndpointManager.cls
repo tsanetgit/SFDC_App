@@ -42,6 +42,4 @@ public with sharing class EndpointManager {
     public static String webhooks_path = '/v2/webhooks';
     /** Webhook by ID template. */
     public static String webhook_by_id = '/v1/webhooks/{id}';
-    /** Webhook delivery log template. */
-    public static String webhook_deliveries = '/v1/webhooks/{id}/deliveries';
 }

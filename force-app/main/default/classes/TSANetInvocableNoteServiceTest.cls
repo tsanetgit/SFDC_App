@@ -22,6 +22,7 @@ public class TSANetInvocableNoteServiceTest {
             tsanetconnect__TSANetCase__c caseRecord = [SELECT Id, tsanetconnect__tsaNetCaseId__c, tsanetconnect__Token__c FROM tsanetconnect__TSANetCase__c WITH USER_MODE LIMIT 1];
             TSANetInvocableNoteService.TSANetInput input = new TSANetInvocableNoteService.TSANetInput();
             TSANetNoteForm note = new TSANetNoteForm();
+            note.type = 'partner';
             note.submittedBy = new TSANetSubmittedBy();
             note.submittedBy.firstName = 'Case';
             note.submittedBy.lastName = 'Owner';
@@ -39,6 +40,8 @@ public class TSANetInvocableNoteServiceTest {
         Map<String, Object> submittedBy = (Map<String, Object>) payload.get('submittedBy');
         System.assertEquals(UserInfo.getFirstName(), submittedBy.get('firstName'), 'Note must be sent as the current user');
         System.assertEquals(UserInfo.getLastName(), submittedBy.get('lastName'), 'Note must be sent as the current user');
+        Map<String, Object> type = (Map<String, Object>) payload.get('type');
+        System.assertEquals('partner', type.get('code'), 'Type must be sent as NoteTypeReferenceDTO { code }');
     }
 
     @IsTest

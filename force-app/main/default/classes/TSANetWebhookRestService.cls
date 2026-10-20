@@ -27,7 +27,8 @@ global with sharing class TSANetWebhookRestService {
     }
 
     /**
-     * Health check endpoint for webhook availability monitoring.
+     * Health check endpoint. Kept only because global identifiers released in a managed
+     * package cannot be removed; not used by the integration.
      * @return JSON payload with status and current UTC timestamp
      */
     @HttpGet

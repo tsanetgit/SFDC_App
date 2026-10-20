@@ -29,4 +29,29 @@ public class TSANetInvocableRequestMoreInfoTest {
         System.assertEquals(true, results[0].isSuccess, 'Information request should succeed: ' + results[0].message);
 
     }
+
+    /** runAsync = true queues the callout in a @Future and reports success immediately. */
+    @IsTest
+    public static void requestMoreInformationAsyncTest(){
+        Test.setMock(HttpCalloutMock.class, new MockHttpResponseGenerator(200, '{}', null));
+        tsanetconnect__TSANetCase__c caseRecord = [SELECT Id, tsanetconnect__Token__c FROM tsanetconnect__TSANetCase__c LIMIT 1];
+        TSANetInvocableRequestMoreInformation.TSANetInput input = new TSANetInvocableRequestMoreInformation.TSANetInput();
+        input.caseRecord = caseRecord;
+        input.form = new TSANetRequestInfoForm();
+        input.runAsync = true;
+
+        Test.startTest();
+            TSANetInvocableRequestMoreInformation.TSANetRequestResult[] results =
+                TSANetInvocableRequestMoreInformation.requestMoreInformation(new TSANetInvocableRequestMoreInformation.TSANetInput[]{ input });
+        Test.stopTest();
+
+        System.assertEquals(true, results[0].isSuccess, 'Async request should be queued: ' + results[0].message);
+        System.assert(results[0].message.contains('queued'), 'Message should indicate the request was queued');
+    }
+
+    /** Null input list returns an empty result list. */
+    @IsTest
+    public static void requestMoreInformationNullInputTest(){
+        System.assertEquals(0, TSANetInvocableRequestMoreInformation.requestMoreInformation(null).size(), 'Null input should yield no results');
+    }
 }

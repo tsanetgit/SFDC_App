@@ -92,7 +92,7 @@ public class TSANetNoteTriggerHelperTest {
                 tsanetconnect__CreatorName__c = 'Tester',
                 tsanetconnect__CompanyName__c = 'Test Company 3',
                 tsanetconnect__CreatedAt__c = DateTime.now(),
-                tsanetconnect__Type__c = 'USER_PUBLIC',
+                tsanetconnect__Type__c = 'public',
                 tsanetconnect__Direction__c = 'OUTBOUND',
                 tsanetconnect__isCaseFeed__c = true
             );

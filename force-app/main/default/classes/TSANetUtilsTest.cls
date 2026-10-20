@@ -46,6 +46,20 @@ public class TSANetUtilsTest {
         System.assertEquals(tsaNetCase.Id, pageInfo.Id, 'Record-page info should return the same record');
     }
 
+    /** New Note opened without a TSANet Case (null or a non-TSANetCase Id) must return null, not throw. */
+    @IsTest
+    public static void getTSANetInfoReturnsNullWithoutTsaNetCase(){
+        Case caseRecord = [SELECT Id FROM Case WITH USER_MODE LIMIT 1];
+
+        Test.startTest();
+            TSANetUtils.TSANetCaseInfo forNull = TSANetUtils.getTSANetInfo(null);
+            TSANetUtils.TSANetCaseInfo forCase = TSANetUtils.getTSANetInfo(caseRecord.Id);
+        Test.stopTest();
+
+        System.assertEquals(null, forNull, 'Null Id must yield null');
+        System.assertEquals(null, forCase, 'An Id that is not a TSANet Case must yield null');
+    }
+
 
     @IsTest
     public static void getCasesTest(){

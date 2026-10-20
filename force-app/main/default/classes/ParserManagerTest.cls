@@ -47,42 +47,54 @@ public class ParserManagerTest {
             'The log should name the TSANet case id: ' + errors[0].tsanetconnect__ErrorMessage__c);
     }
 
-    /** Verifies note type, direction and companyId are mapped during collaboration sync. */
+    /** Verifies note type code, direction and companyId are mapped during collaboration sync. */
     @IsTest
     static void testParseCaseNotesMapsTypeDirectionAndCompanyId() {
         String json = '[{ "id": 2718, "token": "case-token", "summary": "Case", "customFields": [], "caseResponses": [],'
             + ' "caseNotes": ['
             + '   { "id": 1, "caseId": 2718, "companyId": 1100, "companyName": "Demo", "summary": "Public",'
-            + '     "priority": "LOW", "type": "USER_PUBLIC", "direction": "OUTBOUND", "status": "ENTERED", "token": "note-1" },'
+            + '     "priority": "LOW", "type": { "code": "public", "displayName": "Public" },'
+            + '     "direction": "OUTBOUND", "status": "ENTERED", "token": "note-1" },'
             + '   { "id": 2, "caseId": 2718, "creatorName": "SYSTEM", "summary": "System",'
-            + '     "priority": "LOW", "type": "SYSTEM", "status": "ENTERED", "token": "note-2" }'
+            + '     "priority": "LOW", "type": { "code": "system", "displayName": "System" }, "status": "ENTERED", "token": "note-2" },'
+            + '   { "id": 3, "caseId": 2718, "summary": "Untyped", "priority": "LOW", "type": null, "status": "ENTERED", "token": "note-3" }'
             + ' ] }]';
 
         Test.startTest();
             TSANetData data = ParserManager.parseTSANetCases(json, null);
         Test.stopTest();
 
-        System.assertEquals(2, data.notes.size(), 'Both notes should be parsed');
-        System.assertEquals('USER_PUBLIC', data.notes[0].tsanetconnect__Type__c);
+        System.assertEquals(3, data.notes.size(), 'All notes should be parsed');
+        System.assertEquals('public', data.notes[0].tsanetconnect__Type__c, 'Type__c must hold the stable type code');
         System.assertEquals('OUTBOUND', data.notes[0].tsanetconnect__Direction__c);
         System.assertEquals('1100', data.notes[0].tsanetconnect__CompanyId__c);
-        System.assertEquals('SYSTEM', data.notes[1].tsanetconnect__Type__c);
+        System.assertEquals('system', data.notes[1].tsanetconnect__Type__c);
         System.assertEquals(null, data.notes[1].tsanetconnect__Direction__c, 'Platform notes have no direction');
         System.assertEquals(null, data.notes[1].tsanetconnect__CompanyId__c, 'Platform notes have no company');
+        System.assertEquals(null, data.notes[2].tsanetconnect__Type__c, 'A null type must stay empty, not be treated as public');
     }
 
-    /** Verifies the created-note API response maps the new note fields. */
+    /** Verifies the created-note API response maps the type code and the new note fields. */
     @IsTest
     static void testParseSingleNoteMapsTypeDirectionAndCompanyId() {
         String json = '{ "id": 5, "caseId": 2718, "companyId": 1099, "summary": "Partner note", "priority": "LOW",'
-            + ' "type": "USER_PARTNER", "direction": "OUTBOUND", "status": "ENTERED", "token": "note-5" }';
+            + ' "type": { "code": "partner", "displayName": "Partner" }, "direction": "OUTBOUND", "status": "ENTERED", "token": "note-5" }';
 
         Test.startTest();
             tsanetconnect__TSANetNote__c note = ParserManager.parseTSANetNote(json);
         Test.stopTest();
 
-        System.assertEquals('USER_PARTNER', note.tsanetconnect__Type__c);
+        System.assertEquals('partner', note.tsanetconnect__Type__c);
         System.assertEquals('OUTBOUND', note.tsanetconnect__Direction__c);
         System.assertEquals('1099', note.tsanetconnect__CompanyId__c);
+    }
+
+    /** Verifies the type code extractor supports the object shape, the legacy string, and null. */
+    @IsTest
+    static void testGetNoteTypeCodeHandlesObjectStringAndNull() {
+        System.assertEquals('escalation', ParserManager.getNoteTypeCode(new Map<String, Object>{ 'code' => 'escalation', 'displayName' => 'Escalation' }));
+        System.assertEquals('status', ParserManager.getNoteTypeCode('status'), 'Legacy plain-string type must still map');
+        System.assertEquals(null, ParserManager.getNoteTypeCode(new Map<String, Object>{ 'code' => null }));
+        System.assertEquals(null, ParserManager.getNoteTypeCode(null));
     }
 }

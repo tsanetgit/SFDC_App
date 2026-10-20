@@ -50,9 +50,13 @@ public with sharing class ParserManager {
         'creatorName'    => tsanetconnect__TSANetNote__c.tsanetconnect__CreatorName__c,
         'companyName'    => tsanetconnect__TSANetNote__c.tsanetconnect__CompanyName__c,
         'creatorEmail'   => tsanetconnect__TSANetNote__c.tsanetconnect__CreatorEmail__c,
-        'type'           => tsanetconnect__TSANetNote__c.tsanetconnect__Type__c,
         'direction'      => tsanetconnect__TSANetNote__c.tsanetconnect__Direction__c
     };
+
+    /** JSON key of the note type object ({ code, displayName }); mapped separately from plain text fields. */
+    private static final String NOTE_TYPE_FIELD = 'type';
+    /** Key of the stable type code inside the note type object. */
+    private static final String NOTE_TYPE_CODE_KEY = 'code';
 
     /** Maps JSON field names to TSANetNote numeric fields. */
     public static final Map<String, SObjectField> TSANET_NOTE_NUMBER_FIELD_MAP = new Map<String, SObjectField>{
@@ -206,26 +210,7 @@ public with sharing class ParserManager {
                     Map<String, Object> noteRecordFieldMap = ( Map<String, Object> ) note;
 
                     for(String noteField : noteRecordFieldMap.keySet()){
-                        if(TSANET_NOTE_TEXT_FIELD_MAP.containsKey(noteField)){
-                            SObjectField field = TSANET_NOTE_TEXT_FIELD_MAP.get(noteField);
-                            String value = (String) noteRecordFieldMap.get(noteField);
-                            if(noteField == 'description'){
-                                String plainText = TSANetUtils.stripHtml(value);
-                                sfNote.put(tsanetconnect__TSANetNote__c.tsanetconnect__DescriptionPlainText__c, plainText);
-                            }
-                            sfNote.put(field, value);
-                        }
-
-                        if(TSANET_NOTE_NUMBER_FIELD_MAP.containsKey(noteField)){
-                            SObjectField field = TSANET_NOTE_NUMBER_FIELD_MAP.get(noteField);
-                            sfNote.put(field, toText(noteRecordFieldMap.get(noteField)));
-                        }
-
-                        if(TSANET_NOTE_DATETIME_FIELD_MAP.containsKey(noteField)){
-                            SObjectField field = TSANET_NOTE_DATETIME_FIELD_MAP.get(noteField);
-                            DateTime dt = getDateTimeValue((String) noteRecordFieldMap.get(noteField));
-                            sfNote.put(field, dt);
-                        }
+                        applyNoteField(sfNote, noteField, noteRecordFieldMap.get(noteField));
                     }
 
                     sfNotes.add(sfNote);
@@ -441,28 +426,7 @@ public with sharing class ParserManager {
             Map<String, Object> noteFieldMap = (Map<String, Object>) System.JSON.deserializeUntyped(json);
 
             for(String fieldName : noteFieldMap.keySet()){
-
-                if(TSANET_NOTE_TEXT_FIELD_MAP.containsKey(fieldName)){
-                    SObjectField field = TSANET_NOTE_TEXT_FIELD_MAP.get(fieldName);
-                    String value = (String) noteFieldMap.get(fieldName);
-                    sfNote.put(field, value);
-
-                    if(fieldName == 'description'){
-                        String plainText = TSANetUtils.stripHtml(value);
-                        sfNote.put(tsanetconnect__TSANetNote__c.tsanetconnect__DescriptionPlainText__c, plainText);
-                    }
-                }
-
-                if(TSANET_NOTE_NUMBER_FIELD_MAP.containsKey(fieldName)){
-                    SObjectField field = TSANET_NOTE_NUMBER_FIELD_MAP.get(fieldName);
-                    sfNote.put(field, toText(noteFieldMap.get(fieldName)));
-                }
-
-                if(TSANET_NOTE_DATETIME_FIELD_MAP.containsKey(fieldName)){
-                    SObjectField field = TSANET_NOTE_DATETIME_FIELD_MAP.get(fieldName);
-                    DateTime dt = getDateTimeValue((String) noteFieldMap.get(fieldName));
-                    sfNote.put(field, dt);
-                }
+                applyNoteField(sfNote, fieldName, noteFieldMap.get(fieldName));
             }
 
             return sfNote;
@@ -470,5 +434,49 @@ public with sharing class ParserManager {
             ErrorLogger.logError(e, 'TSANET_NOTE_JSON_PARSING_ERROR');
             return null;
         }
+    }
+
+    /**
+     * Maps one deserialized note JSON field onto the TSANetNote SObject.
+     * Shared by the nested caseNotes parser and the single create-note response parser.
+     * @param sfNote the note record to populate
+     * @param fieldName the JSON key
+     * @param value the untyped JSON value
+     */
+    private static void applyNoteField(tsanetconnect__TSANetNote__c sfNote, String fieldName, Object value){
+        if(fieldName == NOTE_TYPE_FIELD){
+            sfNote.put(tsanetconnect__TSANetNote__c.tsanetconnect__Type__c, getNoteTypeCode(value));
+            return;
+        }
+
+        if(TSANET_NOTE_TEXT_FIELD_MAP.containsKey(fieldName)){
+            String text = (String) value;
+            sfNote.put(TSANET_NOTE_TEXT_FIELD_MAP.get(fieldName), text);
+            if(fieldName == 'description'){
+                sfNote.put(tsanetconnect__TSANetNote__c.tsanetconnect__DescriptionPlainText__c, TSANetUtils.stripHtml(text));
+            }
+        }
+
+        if(TSANET_NOTE_NUMBER_FIELD_MAP.containsKey(fieldName)){
+            sfNote.put(TSANET_NOTE_NUMBER_FIELD_MAP.get(fieldName), toText(value));
+        }
+
+        if(TSANET_NOTE_DATETIME_FIELD_MAP.containsKey(fieldName)){
+            sfNote.put(TSANET_NOTE_DATETIME_FIELD_MAP.get(fieldName), getDateTimeValue((String) value));
+        }
+    }
+
+    /**
+     * Extracts the stable type code from a note type value.
+     * Accepts the current object shape ({ code, displayName }) and the legacy plain string.
+     * @param value the untyped JSON value of the note "type" key
+     * @return the type code, or null when no type was set
+     */
+    @TestVisible
+    private static String getNoteTypeCode(Object value){
+        if(value instanceof Map<String, Object>){
+            return toText(((Map<String, Object>) value).get(NOTE_TYPE_CODE_KEY));
+        }
+        return toText(value);
     }
 }

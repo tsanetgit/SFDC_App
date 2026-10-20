@@ -186,7 +186,6 @@ export default class TsaNetActionModal extends LightningModal {
     get submitButtonLabel(){
         return getActionSubmitButtonLabel(this.mode)
     }
-
     get isDisabled(){
         return true
     }
