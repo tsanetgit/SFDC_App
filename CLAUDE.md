@@ -10,14 +10,14 @@ Install the [Salesforce CLI](https://developer.salesforce.com/tools/salesforcecl
 npm test                    # LWC Jest unit tests (sfdx-lwc-jest)
 npx eslint <changed .js files under aura/ or lwc/>
 
-# Apex tests run in an org, not locally. Authenticate a DEV org first.
-sf apex run test --target-org <dev-alias> --code-coverage --result-format human --wait 30
+# Apex tests run in a Salesforce org, not locally: your own development org (see Environments)
+sf apex run test --target-org tsanet_dev --code-coverage --result-format human --wait 30
 
 # Deploy force-app to the org authenticated as alias tsanet_dev
 npm run deploy:dev
 ```
 
-No hook or CI runs these, so run them yourself before committing. `npm run lint` already reports errors on `main`, so lint the files you change and add no new errors. Don't run `npm run prettier` or `prettier:verify`: no Prettier config loads the Apex and XML plugins, so they fail on most files, and `prettier` would rewrite thousands of them. Ask TSANet for access to a DEV org.
+No hook or CI runs these, so run them yourself before committing. `npm run lint` already reports errors on `main`, so lint the files you change and add no new errors. Don't run `npm run prettier` or `prettier:verify`: no Prettier config loads the Apex and XML plugins, so they fail on most files, and `prettier` would rewrite thousands of them.
 
 ## Layout
 
@@ -38,7 +38,8 @@ No hook or CI runs these, so run them yourself before committing. `npm run lint`
 
 ## Environments
 
-- Work against DEV or BETA with test cases only. No production credentials on this machine.
+- **Salesforce org:** each developer deploys to and tests in their own development org, authenticated as `tsanet_dev` (`sf org login web --alias tsanet_dev`). Never deploy to the packaging org that owns the `tsanetconnect` namespace, or to a member's org.
+- **Connect API:** work against the Dev or Beta environment (named credentials `TSANetAPIDev` and `TSANetAPIBeta`) with test cases only, never `TSANetAPI`, which is Prod. No production credentials on this machine.
 - Never put hostnames, org IDs, credentials or real member or case data in code, tests, docs, commit messages or PR text.
 
 ## Off-limits
