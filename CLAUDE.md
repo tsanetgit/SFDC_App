@@ -8,7 +8,7 @@ Install the [Salesforce CLI](https://developer.salesforce.com/tools/salesforcecl
 
 ```bash
 npm test                    # LWC Jest unit tests (sfdx-lwc-jest)
-npx eslint <changed .js files under aura/ or lwc/>
+npx eslint <changed .js files under force-app/main/default/aura or force-app/main/default/lwc>
 
 # Apex tests run in a Salesforce org, not locally: your own development org (see Environments)
 sf apex run test --target-org tsanet_dev --code-coverage --result-format human --wait 30
@@ -25,7 +25,7 @@ No hook or CI runs these, so run them yourself before committing. `npm run lint`
 - `force-app/main/default/lwc`: Lightning web components; Jest tests live in each component's `__tests__`
 - `force-app/main/default/aura`: Aura components, most of them behind the quick actions in `quickActions/`
 - `force-app/main/default/flows`, `triggers`, `objects`, `layouts`, `flexipages`, `permissionsets`: the rest of the packaged metadata
-- `force-app/main/default/namedCredentials`, `externalCredentials`: one pair per Connect environment (Dev, Beta, Test, and Prod as `TSANetAPI` with `TSANetExternalCredentialProd`)
+- `force-app/main/default/namedCredentials`, `externalCredentials`: one named credential and its external credential per Connect environment: Dev is `TSANetAPIDev` with `TSANetExternalCredentialDev`, Beta is `TSANetAPIBeta` with `TSANetExternalCredentialBeta`, Test is `TSANetAPITest` with `TSANetExternalCredential`, and Prod is `TSANetAPI` with `TSANetExternalCredentialProd`
 - `sfdx-project.json`: package definition, version number and package version aliases
 - `scripts/`, `config/`: Salesforce DX scaffolding
 
