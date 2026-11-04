@@ -1,0 +1,15 @@
+{
+  "extraKnownMarketplaces": {
+    "ai-devkit": {
+      "source": {
+        "source": "github",
+        "repo": "tsanetgit/ai-devkit"
+      },
+      "autoUpdate": true
+    }
+  },
+  "enabledPlugins": {
+    "tsanet@ai-devkit": true
+  },
+  "advisorModel": "opus"
+}
